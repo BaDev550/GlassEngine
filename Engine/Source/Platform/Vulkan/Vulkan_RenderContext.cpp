@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <exception>
+#include <set>
 
 namespace ge::renderer {
 #define VULKAN_ALLOCATOR_CALLBACKS &mem::Vulkan_AllocatorCallbacks::GetCallbacks()
@@ -36,9 +37,6 @@ namespace ge::renderer {
 	Vulkan_RenderContext::~Vulkan_RenderContext() {
 		delete _allocator;
 		_allocator = nullptr;
-
-		vkDestroyInstance(_instance, VULKAN_ALLOCATOR_CALLBACKS);
-		DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, VULKAN_ALLOCATOR_CALLBACKS);
 	}
 
 	void Vulkan_RenderContext::Init()
@@ -46,8 +44,8 @@ namespace ge::renderer {
 		try {
 			CreateVulkanAllocator();
 			CreateInstance();
-			PickPhysicalDevice();
 			CreateSurface();
+			PickPhysicalDevice();
 			CreateLogicalDevice();
 		}
 		catch (const std::exception& e) {
@@ -99,16 +97,62 @@ namespace ge::renderer {
 		}
 	}
 
-	void Vulkan_RenderContext::PickPhysicalDevice()
-	{
+	void Vulkan_RenderContext::PickPhysicalDevice() {
+		uint32_t physicalDeviceCount;
+		vkEnumeratePhysicalDevices(_instance, &physicalDeviceCount, nullptr);
+		GEVector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+		vkEnumeratePhysicalDevices(_instance, &physicalDeviceCount, physicalDevices.data());
+
+		for (const auto& pdevice : physicalDevices) {
+			if (IsPhysicalDeviceSuitable(pdevice)) {
+				_physicalDevice = pdevice;
+				break;
+			}
+		}
+		vkGetPhysicalDeviceProperties(_physicalDevice, &_physicalDeviceProperties);
+		GE_GRAPCHICS_INFO("GPU Selected: ");
+		GE_GRAPCHICS_INFO("	GPU Name: {}", _physicalDeviceProperties.deviceName);
 	}
 
 	void Vulkan_RenderContext::CreateSurface()
 	{
+		if (glfwCreateWindowSurface(_instance, _window, VULKAN_ALLOCATOR_CALLBACKS, &_surface) != VK_SUCCESS)
+			throw std::runtime_error("Failed to create window surface");
 	}
 
-	void Vulkan_RenderContext::CreateLogicalDevice()
-	{
+	void Vulkan_RenderContext::CreateLogicalDevice() {
+		QueueFamilyIndices indices = FindQueueFamilies(_physicalDevice);
+		float queuePriority = 1.0f;
+		GEVector<VkDeviceQueueCreateInfo> queueCreateInfos;
+		std::set<uint32_t> uniqeQueueFamilies = { indices.graphicsIndex.value(), indices.presentIndex.value() };
+		for (uint32_t queueFamily : uniqeQueueFamilies) {
+			VkDeviceQueueCreateInfo queueCreateInfo{};
+			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			queueCreateInfo.queueFamilyIndex = queueFamily;
+			queueCreateInfo.queueCount = 1;
+			queueCreateInfo.pQueuePriorities = &queuePriority;
+			queueCreateInfos.push_back(queueCreateInfo);
+		}
+
+		VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures{};
+		dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+		dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
+
+		VkDeviceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+		createInfo.pQueueCreateInfos = queueCreateInfos.data();
+		createInfo.enabledLayerCount = static_cast<uint32_t>(_layers.size());
+		createInfo.ppEnabledLayerNames = _layers.data();
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(_deviceExtensions.size());
+		createInfo.ppEnabledExtensionNames = _deviceExtensions.data();
+		if (vkCreateDevice(_physicalDevice, &createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_device) != VK_SUCCESS)
+			throw std::runtime_error("Failed to create logical device");
+
+		vkGetDeviceQueue(_device, indices.graphicsIndex.value(), 0, &_graphicsQueue);
+		vkGetDeviceQueue(_device, indices.presentIndex.value(), 0, &_presentQueue);
+
+		_allocator->CreateAllocator(_instance, _physicalDevice, _device);
 	}
 
 	bool Vulkan_RenderContext::CheckEnabledLayersSupport() {
@@ -130,6 +174,35 @@ namespace ge::renderer {
 			}
 		}
 		return true;
+	}
+
+	bool Vulkan_RenderContext::IsPhysicalDeviceSuitable(VkPhysicalDevice device) {
+		QueueFamilyIndices indices = FindQueueFamilies(device);
+		return indices.IsValid();
+	}
+
+	QueueFamilyIndices Vulkan_RenderContext::FindQueueFamilies(VkPhysicalDevice device)
+	{
+		QueueFamilyIndices indices;
+		uint32_t queueFamiliesCount;
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamiliesCount, nullptr);
+		GEVector<VkQueueFamilyProperties> queueFamilies(queueFamiliesCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamiliesCount, queueFamilies.data());
+
+		for (uint32_t i = 0; i < queueFamiliesCount; i++) {
+			const auto& queueFamily = queueFamilies[i];
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+				indices.graphicsIndex = i;
+
+			VkBool32 presentSupport;
+			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface, &presentSupport);
+			if (presentSupport)
+				indices.presentIndex = i;
+
+			if (indices.IsValid())
+				break;
+		}
+		return indices;
 	}
 
 	GEVector<const char*> Vulkan_RenderContext::GetRequiredInstanceExtensions() {

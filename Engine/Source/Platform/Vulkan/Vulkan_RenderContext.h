@@ -6,7 +6,7 @@
 #include <optional>
 
 namespace ge::renderer {
-	struct QueueFamilies {
+	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsIndex;
 		std::optional<uint32_t> presentIndex;
 
@@ -26,6 +26,8 @@ namespace ge::renderer {
 		void CreateSurface();
 		void CreateLogicalDevice();
 		bool CheckEnabledLayersSupport();
+		bool IsPhysicalDeviceSuitable(VkPhysicalDevice device);
+		QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 		GEVector<const char*> GetRequiredInstanceExtensions();
 	private:
 		VkInstance _instance = VK_NULL_HANDLE;
@@ -38,7 +40,7 @@ namespace ge::renderer {
 		VkQueue _graphicsQueue;
 		VkQueue _presentQueue;
 
-		GLFWwindow*& _window;
+		GLFWwindow* _window;
 		mem::Vulkan_Allocator* _allocator = nullptr;
 
 		GEVector<const char*> _layers;
