@@ -9,10 +9,10 @@ namespace ge {
 		if (_instance)
 			throw std::runtime_error("Application already exists!");
 		_instance = this;
-		GE_CORE_INFO("Application created with title: {}, width: {}, height: ", createInfo.title, createInfo.width, createInfo.height);
 
 		Logger::Init();
-		_window = std::make_unique<Window>(WindowSpecification({ createInfo.title, createInfo.width, createInfo.height }));
+		GE_CORE_INFO("Application created with title: {}, width: {}, height: ", createInfo.title, createInfo.width, createInfo.height);
+		_window = mem::CreateScope<Window>(WindowSpecification({ createInfo.title, createInfo.width, createInfo.height }));
 	}
 
 	Application::~Application() {

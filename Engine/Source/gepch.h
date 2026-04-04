@@ -7,3 +7,4 @@
 
 #include "GlassEngine/Utilities/Logger.h"
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Core/Memory.h"

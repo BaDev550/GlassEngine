@@ -1,10 +1,11 @@
 #pragma once
 #include <cstdint>
+#include "GlassEngine/Core/Core.h"
 
 struct GLFWwindow;
 namespace ge {
 	struct WindowSpecification {
-		std::string title;
+		GEString title;
 		uint32_t width;
 		uint32_t height; // TODO (0x): add func callback for events
 	};

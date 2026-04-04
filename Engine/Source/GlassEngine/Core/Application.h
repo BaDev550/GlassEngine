@@ -5,10 +5,11 @@
 #include "GlassEngine/Layers/LayerStack.h"
 #include "GlassEngine/Utilities/Logger.h"
 #include "GlassEngine/Core/Window.h"
+#include "GlassEngine/Core/Core.h"
 
 namespace ge {
 	struct ApplicationCreateInfo {
-		std::string title = "Glass Engine";
+		GEString title = "Glass Engine";
 		uint32_t width = 1280;
 		uint32_t height = 720;
 	};
@@ -25,7 +26,7 @@ namespace ge {
 		void PushOverlay(Layer* overlay) { _layerStack.PushOverlay(overlay); }
 	private:
 		static Application* _instance;
-		std::unique_ptr<Window> _window;
+		mem::Scope<Window> _window;
 		LayerStack _layerStack;
 
 		bool _forceClose = false;

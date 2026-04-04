@@ -2,6 +2,8 @@
 #include <GlassEngine/Core/EntryPoint.h>
 #include <GlassEngine/Core/Application.h>
 #include <GlassEngine/Layers/Layer.h>
+#include <GlassEngine/Core/Memory.h>
+#include <GlassEngine/Core/Core.h>
 
 class EditorLayer : public ge::Layer {
 public:
