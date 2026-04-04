@@ -4,6 +4,7 @@
 
 #include "GlassEngine/Layers/LayerStack.h"
 #include "GlassEngine/Utilities/Logger.h"
+#include "GlassEngine/Core/Window.h"
 
 namespace ge {
 	struct ApplicationCreateInfo {
@@ -24,6 +25,7 @@ namespace ge {
 		void PushOverlay(Layer* overlay) { _layerStack.PushOverlay(overlay); }
 	private:
 		static Application* _instance;
+		std::unique_ptr<Window> _window;
 		LayerStack _layerStack;
 
 		bool _forceClose = false;

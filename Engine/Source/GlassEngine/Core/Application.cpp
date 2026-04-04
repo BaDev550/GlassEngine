@@ -1,3 +1,4 @@
+#include "gepch.h"
 #include "Application.h"
 #include <stdexcept>
 #include <iostream>
@@ -8,9 +9,10 @@ namespace ge {
 		if (_instance)
 			throw std::runtime_error("Application already exists!");
 		_instance = this;
+		GE_CORE_INFO("Application created with title: {}, width: {}, height: ", createInfo.title, createInfo.width, createInfo.height);
 
 		Logger::Init();
-		GE_CORE_INFO("Application created with title: {}, width: {}, height: ", createInfo.title, createInfo.width, createInfo.height);
+		_window = std::make_unique<Window>(WindowSpecification({ createInfo.title, createInfo.width, createInfo.height }));
 	}
 
 	Application::~Application() {
@@ -18,7 +20,8 @@ namespace ge {
 	}
 
 	void Application::Run() {
-		while (!_forceClose) {
+		while (!_window->ShoudClose() && !_forceClose) {
+			_window->PollEvents();
 
 			for (auto& layer : _layerStack)
 				layer->OnUpdate(0.0f);
