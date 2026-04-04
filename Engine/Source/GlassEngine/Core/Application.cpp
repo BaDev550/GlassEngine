@@ -8,12 +8,20 @@ namespace ge {
 		if (_instance)
 			throw std::runtime_error("Application already exists!");
 		_instance = this;
-		std::cout << "Application created with title: " << createInfo.title << ", width: " << createInfo.width << ", height: " << createInfo.height << std::endl;
+
+		Logger::Init();
+		GE_CORE_INFO("Application created with title: {}, width: {}, height: ", createInfo.title, createInfo.width, createInfo.height);
+	}
+
+	Application::~Application() {
+		Logger::Destroy();
 	}
 
 	void Application::Run() {
 		while (!_forceClose) {
 
+			for (auto& layer : _layerStack)
+				layer->OnUpdate(0.0f);
 		}
 	}
 }

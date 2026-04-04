@@ -1,11 +1,27 @@
 #include <iostream>
 #include <GlassEngine/Core/EntryPoint.h>
 #include <GlassEngine/Core/Application.h>
+#include <GlassEngine/Layers/Layer.h>
+
+class EditorLayer : public ge::Layer {
+public:
+	EditorLayer() : ge::Layer("EditorLayer") {
+		GE_APPLICATOIN_INFO("EditorLayer created!");
+	}
+	virtual void OnAttach() override {
+		GE_APPLICATOIN_INFO("EditorLayer attached!");
+	}
+	virtual void OnDetach() override {
+		GE_APPLICATOIN_INFO("EditorLayer detached!");
+	}
+	virtual void OnUpdate(float deltaTime) override {}
+};
 
 class EditorApp : public ge::Application {
 public:
 	EditorApp(const ge::ApplicationCreateInfo& createInfo) : ge::Application(createInfo) {
-		std::cout << "EditorApp created!" << std::endl;
+		GE_APPLICATOIN_INFO("EditorApp created!");
+		PushLayer(new EditorLayer());
 	}
 };
 
