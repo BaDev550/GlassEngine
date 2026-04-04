@@ -8,7 +8,7 @@
 #include "GlassEngine/Core/Core.h"
 
 namespace ge {
-	struct ApplicationCreateInfo {
+	struct ApplicationSpecification {
 		GEString title = "Glass Engine";
 		uint32_t width = 1280;
 		uint32_t height = 720;
@@ -16,21 +16,25 @@ namespace ge {
 
 	class Application {
 	public:
-		Application(const ApplicationCreateInfo& createInfo);
+		Application(const ApplicationSpecification& specs);
 		virtual ~Application();
 
 		void Run();
 		void Close() { _forceClose = true; }
+
+		static Application* Get() { return _instance; }
+		ApplicationSpecification GetSpecs() const { return _specs; }
 	protected:
 		void PushLayer(Layer* layer) { _layerStack.PushLayer(layer); }
 		void PushOverlay(Layer* overlay) { _layerStack.PushOverlay(overlay); }
 	private:
 		static Application* _instance;
+		ApplicationSpecification _specs;
 		mem::Scope<Window> _window;
 		LayerStack _layerStack;
 
 		bool _forceClose = false;
 	};
 
-	Application* CreateApplication(const ApplicationCreateInfo& createInfo);
+	Application* CreateApplication(const ApplicationSpecification& createInfo);
 }

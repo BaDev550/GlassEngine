@@ -13,6 +13,9 @@ namespace ge {
 		glfwMakeContextCurrent(_handle);
 		glfwSetWindowUserPointer(_handle, &_specs);
 		GE_CORE_INFO("Window created!");
+
+		_renderContext = renderer::RenderContext::Create(_handle);
+		_renderContext->Init();
 	}
 
 	Window::~Window() {

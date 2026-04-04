@@ -21,14 +21,14 @@ public:
 
 class EditorApp : public ge::Application {
 public:
-	EditorApp(const ge::ApplicationCreateInfo& createInfo) : ge::Application(createInfo) {
+	EditorApp(const ge::ApplicationSpecification& createInfo) : ge::Application(createInfo) {
 		GE_APPLICATOIN_INFO("EditorApp created!");
 		PushLayer(new EditorLayer());
 	}
 };
 
 namespace ge {
-	Application* CreateApplication(const ApplicationCreateInfo& createInfo) {
+	Application* CreateApplication(const ApplicationSpecification& createInfo) {
 		return new EditorApp(createInfo);
 	}
 }

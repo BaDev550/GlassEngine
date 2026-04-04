@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Renderer/RenderContext.h"
 
 struct GLFWwindow;
 namespace ge {
@@ -24,5 +25,7 @@ namespace ge {
 	private:
 		WindowSpecification _specs;
 		GLFWwindow* _handle;
+
+		mem::Scope<renderer::RenderContext> _renderContext = nullptr;
 	};
 }

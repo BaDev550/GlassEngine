@@ -13,10 +13,35 @@ namespace ge::mem {
 
 	static void* GE_Allocate(size_t size) {
 		s_allocationMetrics.totalAllocated += size;
-#if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
-		std::cout << "[MEMORY] Allocated: " << size << std::endl;
-#endif
+		#if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
+				std::cout << "[MEMORY] Allocated: " << size << std::endl;
+		#endif
 		return malloc(size);
+	}
+	static void* GE_AllocateAligned(size_t size, size_t alignment) {
+		s_allocationMetrics.totalAllocated += size;
+		#if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
+			std::cout << "[MEMORY] Allocated with aligment: " << size << " " << alignment << std::endl;
+		#endif
+		return _aligned_malloc(size, alignment);
+	}
+	static void* GE_ReallocateAligned(void* orginalBlock, size_t size, size_t alignment) {
+		s_allocationMetrics.totalAllocated += size;
+		#if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
+				std::cout << "[MEMORY] Reallocated: " << orginalBlock << " " << size << std::endl;
+		#endif
+		return _aligned_realloc(orginalBlock, size, alignment);
+	}
+	static void GE_FreeAligned(void* block, size_t size, size_t aligment) {
+		if (block == nullptr) {
+			std::cout << "[MEMORY] \"Free\" Tried to free up uninitialized or freed memory" << std::endl;
+			return;
+		}
+		s_allocationMetrics.totalFreed += size;
+#if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
+		std::cout << "[MEMORY] Freed: " << size << std::endl;
+#endif
+		return _aligned_free(block);
 	}
 	static void GE_Free(void* block, size_t size) {
 		if (block == nullptr) {
@@ -29,6 +54,7 @@ namespace ge::mem {
 #endif
 		free(block);
 	}
+	// TODO (badev): make a macro or a function to remove copied code
 
 	template<typename T>
 	class GE_Allocator {

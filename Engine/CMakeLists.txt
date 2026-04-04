@@ -53,6 +53,14 @@ if(NOT TARGET imgui)
     )
     target_link_libraries(imgui PRIVATE glfw Vulkan::Vulkan)
 endif()
+# Spdlog
+FetchContent_Declare(
+    vma
+    GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+    GIT_TAG v3.3.0
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/vma
+)
+FetchContent_MakeAvailable(vma)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
@@ -68,4 +76,5 @@ target_link_libraries(Engine
 		glfw
         spdlog
 		Vulkan::Vulkan
+        GPUOpen::VulkanMemoryAllocator
 )

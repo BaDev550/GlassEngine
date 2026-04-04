@@ -5,14 +5,14 @@
 
 namespace ge {
 	Application* Application::_instance = nullptr;
-	Application::Application(const ApplicationCreateInfo& createInfo) {
+	Application::Application(const ApplicationSpecification& specs) : _specs(specs) {
 		if (_instance)
 			throw std::runtime_error("Application already exists!");
 		_instance = this;
 
 		Logger::Init();
-		GE_CORE_INFO("Application created with title: {}, width: {}, height: ", createInfo.title, createInfo.width, createInfo.height);
-		_window = mem::CreateScope<Window>(WindowSpecification({ createInfo.title, createInfo.width, createInfo.height }));
+		GE_CORE_INFO("Application created with title: {}, width: {}, height: ", _specs.title, _specs.width, _specs.height);
+		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 	}
 
 	Application::~Application() {
