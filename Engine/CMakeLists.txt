@@ -34,6 +34,7 @@ target_include_directories(Engine
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}/Source
 )
+target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:Source/gepch.h>")
 
 target_link_libraries(Engine
 	PUBLIC
