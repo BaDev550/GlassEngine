@@ -53,7 +53,7 @@ if(NOT TARGET imgui)
     )
     target_link_libraries(imgui PRIVATE glfw Vulkan::Vulkan)
 endif()
-# Spdlog
+# vma
 FetchContent_Declare(
     vma
     GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git

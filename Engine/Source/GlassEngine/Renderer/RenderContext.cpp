@@ -14,5 +14,6 @@ namespace ge::renderer {
 			GE_CORE_ERROR("Failed to select api");
 			break;
 		}
+		return nullptr;
 	}
 }
