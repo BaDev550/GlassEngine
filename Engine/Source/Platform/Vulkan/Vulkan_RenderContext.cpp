@@ -53,6 +53,44 @@ namespace ge::renderer {
 		}
 	}
 
+	void Vulkan_RenderContext::Wait() {
+		vkDeviceWaitIdle(_device);
+	}
+	
+	void Vulkan_RenderContext::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& buffer, VmaAllocation& alloc)
+	{
+		VkBufferCreateInfo createInfo{};
+		createInfo.size = size;
+		createInfo.usage = usage;
+		createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		_allocator->AllocateBuffer(buffer, alloc, createInfo, memoryUsage);
+	}
+
+	void Vulkan_RenderContext::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& image, VmaAllocation& alloc)
+	{
+		VkImageCreateInfo createInfo{};
+		createInfo.imageType = VK_IMAGE_TYPE_2D;
+		createInfo.extent.width = width;
+		createInfo.extent.height = height;
+		createInfo.extent.depth = 1;
+		createInfo.mipLevels = 1;
+		createInfo.tiling = tiling;
+		createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		createInfo.format = format;
+		createInfo.usage = usage;
+		createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		_allocator->AllocateImage(image, alloc, createInfo, memoryUsage);
+	}
+
+	void Vulkan_RenderContext::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+	{
+	}
+
+	void Vulkan_RenderContext::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+	{
+	}
+
 	void Vulkan_RenderContext::CreateVulkanAllocator() { 
 		mem::Vulkan_AllocatorCallbacks::InitCallbacks();
 		_allocator = new mem::Vulkan_Allocator(); 
@@ -155,6 +193,15 @@ namespace ge::renderer {
 		_allocator->CreateAllocator(_instance, _physicalDevice, _device);
 	}
 
+	void Vulkan_RenderContext::CreateContextCommandPool() {
+		QueueFamilyIndices indices = FindQueueFamilies(_physicalDevice);
+		VkCommandPoolCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		createInfo.queueFamilyIndex = indices.graphicsIndex.value();
+		vkCreateCommandPool(_device, &createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_commandPool);
+	}
+
 	bool Vulkan_RenderContext::CheckEnabledLayersSupport() {
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -214,5 +261,32 @@ namespace ge::renderer {
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 		return extensions;
+	}
+
+	VkCommandBuffer Vulkan_RenderContext::BeginSingleTimeCommand()
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = _commandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = 1;
+		VkCommandBuffer cmd;
+		vkAllocateCommandBuffers(_device, &allocInfo, &cmd);
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		vkBeginCommandBuffer(cmd, &beginInfo);
+		return cmd;
+	}
+
+	void Vulkan_RenderContext::EndSingleTimeCommand(VkCommandBuffer cmd)
+	{
+		vkEndCommandBuffer(cmd);
+		VkSubmitInfo subInfo{};
+		subInfo.commandBufferCount = 1;
+		subInfo.pCommandBuffers = &cmd;
+		vkQueueSubmit(_graphicsQueue, 1, &subInfo, VK_NULL_HANDLE);
+		vkQueueWaitIdle(_graphicsQueue);
+		vkFreeCommandBuffers(_device, _commandPool, 1, &cmd);
 	}
 }

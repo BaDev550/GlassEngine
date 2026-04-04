@@ -22,6 +22,8 @@ namespace ge {
 		uint32_t GetHeight() const { return _specs.height; }
 		void PollEvents() const;
 		bool ShoudClose() const;
+
+		renderer::RenderContext& GetRenderContext() { return *_renderContext; }
 	private:
 		WindowSpecification _specs;
 		GLFWwindow* _handle;

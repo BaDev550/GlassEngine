@@ -26,5 +26,6 @@ namespace ge {
 			for (auto& layer : _layerStack)
 				layer->OnUpdate(0.0f);
 		}
+		_window->GetRenderContext().Wait();
 	}
 }

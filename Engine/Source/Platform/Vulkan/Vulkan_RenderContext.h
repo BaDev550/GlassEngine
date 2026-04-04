@@ -18,6 +18,19 @@ namespace ge::renderer {
 		Vulkan_RenderContext(GLFWwindow* window);
 		~Vulkan_RenderContext();
 		virtual void Init() override;
+		virtual void Wait() override;
+
+		void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& buffer, VmaAllocation& alloc);
+		void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& image, VmaAllocation& alloc);
+		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+		//void TransitionImageLayout(); later
+
+		mem::Vulkan_Allocator& GetAllocator() { return *_allocator; }
+		VkInstance GetInstance() const { return _instance; }
+		VkDevice GetDevice() const { return _device; }
+		VkPhysicalDevice GetPhysicalDevice() const { return _physicalDevice; }
+		VkPhysicalDeviceProperties GetPhysicalDeviceProperties() const { return _physicalDeviceProperties; }
 	private:
 		void CreateVulkanAllocator();
 		void CreateInstance();
@@ -25,17 +38,22 @@ namespace ge::renderer {
 		void PickPhysicalDevice();
 		void CreateSurface();
 		void CreateLogicalDevice();
+		void CreateContextCommandPool();
 		bool CheckEnabledLayersSupport();
 		bool IsPhysicalDeviceSuitable(VkPhysicalDevice device);
 		QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 		GEVector<const char*> GetRequiredInstanceExtensions();
+
+		VkCommandBuffer BeginSingleTimeCommand();
+		void EndSingleTimeCommand(VkCommandBuffer cmd);
 	private:
 		VkInstance _instance = VK_NULL_HANDLE;
 		VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
 		VkPhysicalDeviceProperties _physicalDeviceProperties;
-		VkDevice _device;
-		VkSurfaceKHR _surface;
-		VkDebugUtilsMessengerEXT _debugMessenger;
+		VkDevice _device = VK_NULL_HANDLE;
+		VkSurfaceKHR _surface = VK_NULL_HANDLE;
+		VkCommandPool _commandPool = VK_NULL_HANDLE;
+		VkDebugUtilsMessengerEXT _debugMessenger = VK_NULL_HANDLE;
 
 		VkQueue _graphicsQueue;
 		VkQueue _presentQueue;
