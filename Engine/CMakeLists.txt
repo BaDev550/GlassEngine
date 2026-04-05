@@ -70,6 +70,7 @@ target_sources(Engine PRIVATE ${ENGINE_SOURCES})
 target_include_directories(Engine 
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}/Source
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SPIRV-Reflect
 )
 target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Source/gepch.h>")
