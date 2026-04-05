@@ -153,10 +153,9 @@ namespace ge::renderer {
 
 		FindQueueFamilies();
 
-		VkPhysicalDeviceProperties features{};
-		vkGetPhysicalDeviceProperties(_physicalDevice, &features);
+		vkGetPhysicalDeviceProperties(_physicalDevice, &_physicalDeviceProperties);
 		GE_GRAPCHICS_INFO("GPU Selected: ");
-		GE_GRAPCHICS_INFO("	GPU Name: {}", features.deviceName);
+		GE_GRAPCHICS_INFO("	GPU Name: {}", _physicalDeviceProperties.deviceName);
 	}
 
 	void Vulkan_RenderContext::CreateSurface()

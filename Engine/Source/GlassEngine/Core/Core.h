@@ -17,7 +17,7 @@ using GEString = std::basic_string<char, std::char_traits<char>, ge::mem::GE_All
 
 template<typename T>
 static T* CastChecked(void* ptr) {
-	T* result = dynamic_cast<T*>(ptr);
+	T* result = static_cast<T*>(ptr);
 	GE_ASSERT(result, "Cast failed");
 	return result;
 }
