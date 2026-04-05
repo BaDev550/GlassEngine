@@ -8,7 +8,8 @@ namespace ge::renderer {
 	enum class GraphicsAPI {
 		Vulkan,
 		OpenGL,
-		DirectX11
+		DirectX11,
+		DirectX12
 	};
 
 	class RenderAPI {
