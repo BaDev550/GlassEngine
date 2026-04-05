@@ -14,9 +14,7 @@ namespace ge::renderer {
 		_usage(utils::EngineBufferUsageFlags(usage)),
 		_memoryUsage(utils::EngineMemoryUsageToVMA(memoryProperties))
 	{
-		// CastChecked gets C2681 build error
-		// _context = CastChecked<Vulkan_RenderContext>(&Application::Get()->GetWindow().GetRenderContext());
-		_context = static_cast<Vulkan_RenderContext *>(&Application::Get()->GetWindow().GetRenderContext());
+		_context = CastChecked<Vulkan_RenderContext>(&Application::Get()->GetWindow().GetRenderContext());
 		
 		_alignmentSize = GetAlignment(size, 1);
 		_bufferSize = _alignmentSize * _instanceCount;

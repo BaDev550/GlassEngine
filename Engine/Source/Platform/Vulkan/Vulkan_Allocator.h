@@ -20,13 +20,13 @@ namespace ge::renderer::mem {
 		}
 	private:
 		static void* VKAPI_CALL Allocator(void* pUserData, size_t size, size_t aligment, VkSystemAllocationScope allocationScope) {
-			return ge::mem::GE_AllocateAligned(size, aligment);
+			return ge::mem::allocFuncs::GE_AllocateAligned(size, aligment);
 		}
 		static void* VKAPI_CALL Reallocation(void* pUserData, void* pOriginal, size_t size, size_t aligment, VkSystemAllocationScope allocationScope) {
-			return ge::mem::GE_ReallocateAligned(pOriginal, size, aligment);
+			return ge::mem::allocFuncs::GE_ReallocateAligned(pOriginal, size, aligment);
 		}
 		static void  VKAPI_CALL Free(void* pUserData, void* pBlock) {
-			ge::mem::GE_FreeAligned(pBlock, 0, 0);
+			ge::mem::allocFuncs::GE_FreeAligned(pBlock, 0, 0);
 		}
 		static inline VkAllocationCallbacks _allocationCallbacks;
 		static inline VmaDeviceMemoryCallbacks _deviceMemoryCallbacks;
