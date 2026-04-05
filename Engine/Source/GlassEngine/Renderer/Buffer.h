@@ -4,7 +4,7 @@
 #include "GlassEngine/Utilities/Flags.h"
 
 namespace ge::renderer {
-	enum class BufferUsageFlagsBit {
+	enum class BufferUsageFlagsBit : uint8_t {
 		None		= 0,
 		Uniform		= BIT(0),
 		Storage		= BIT(1),
@@ -13,7 +13,7 @@ namespace ge::renderer {
 	};
 	using BufferUsageFlags = ge::Flags<BufferUsageFlagsBit>;
 
-	enum class MemoryPropertiesFlagsBit {
+	enum class MemoryPropertiesFlagsBit : uint8_t {
 		None			= 0,
 		Host_visible	= BIT(0),
 		Host_cohreant	= BIT(1),
