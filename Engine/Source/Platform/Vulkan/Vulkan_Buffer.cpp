@@ -2,57 +2,69 @@
 #include "Vulkan_Buffer.h"
 
 namespace ge::renderer {
-	static const VkDeviceSize GetAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) {
+	[[nodiscard]] constexpr VkDeviceSize GetAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) {
 		if (minOffsetAlignment > 0)
 			return (instanceSize + minOffsetAlignment - 1) & ~(minOffsetAlignment - 1);
 		return instanceSize;
 	}
 
-	Vulkan_Buffer::Vulkan_Buffer(uint64_t size, BufferUsageFlags usage, MemoryPropertiesFlags memoryProperties) 
-		: _instanceSize(size),
-		_instanceCount(1),
-		_usage(utils::EngineBufferUsageFlags(usage)),
-		_memoryUsage(utils::EngineMemoryUsageToVMA(memoryProperties))
-	{
-		// CastChecked gets C2681 build error
-		// _context = CastChecked<Vulkan_RenderContext>(&Application::Get()->GetWindow().GetRenderContext());
-		_context = static_cast<Vulkan_RenderContext *>(&Application::Get()->GetWindow().GetRenderContext());
-		
-		_alignmentSize = GetAlignment(size, 1);
-		_bufferSize = _alignmentSize * _instanceCount;
-		_context->CreateBuffer(_bufferSize, _usage, _memoryUsage, _buffer, _allocation);
+	[[nodiscard]] constexpr VkBufferUsageFlags GetBufferUsageFlags(BufferUsageFlags bufferUsageFlags) {
+		VkBufferUsageFlags out{};
+		if (bufferUsageFlags.Has(BufferUsageFlagsBits::Readonly_storage)) out |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Writable_storage)) out |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Transfer_dst)) out |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Transfer_src)) out |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Vertex)) out |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Index)) out |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Indirect)) out |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+		return out;
+	}
 
-		_descriptorInfo.buffer = _buffer;
-		_descriptorInfo.offset = 0;
-		_descriptorInfo.range = _bufferSize;
+	[[nodiscard]] constexpr VmaAllocationCreateFlags GetVMAAllocFlags(BufferCpuAccess hostAccess) noexcept {
+		VmaAllocationCreateFlags alloc_flags{};
+
+		if (hostAccess != BufferCpuAccess::None)
+			alloc_flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+		if (hostAccess == BufferCpuAccess::Write)
+			alloc_flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+
+		else if (hostAccess == BufferCpuAccess::ReadWrite)
+			alloc_flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+
+		return alloc_flags;
+	}
+
+	[[nodiscard]] constexpr VmaMemoryUsage GetVMAMemoryUsage(BufferMemoryType memoryType) noexcept {
+		switch (memoryType) {
+			case BufferMemoryType::Auto: return VMA_MEMORY_USAGE_AUTO;
+			case BufferMemoryType::DeviceMemory: return VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+			case BufferMemoryType::SystemMemory: return VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+		}
+	}
+
+	Vulkan_Buffer::Vulkan_Buffer(const BufferCreateDesc& desc)
+		: Buffer(desc)
+	{
+		VkBufferCreateInfo bufferCreateInfo{};
+		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		bufferCreateInfo.size = GetAlighnedElementSize() * desc.elementCount;
+		bufferCreateInfo.usage = GetBufferUsageFlags(_desc.usageFlags);
+		bufferCreateInfo.flags = {};
+		
+		VmaAllocationCreateInfo allocCreateInfo{};
+		allocCreateInfo.usage = GetVMAMemoryUsage(_desc.memoryType);
+		allocCreateInfo.flags = GetVMAAllocFlags(_desc.cpuAccess);
+		allocCreateInfo.requiredFlags = (_desc.cpuAccess != BufferCpuAccess::None) ? VK_MEMORY_PROPERTY_HOST_COHERENT_BIT : VkMemoryPropertyFlags{};
+
+		VmaAllocationInfo allocInfo{};
+
+		static_cast<Vulkan_RenderContext&>(_renderContext).GetAllocator().AllocateBuffer(bufferCreateInfo, allocCreateInfo, _buffer, _allocation, allocInfo);
+
+		_mappedPtr = allocInfo.pMappedData;
 	}
 
 	Vulkan_Buffer::~Vulkan_Buffer() {
-		Unmap();
 	}
-
-	void Vulkan_Buffer::Map(uint64_t size, uint64_t offset) {
-		GE_ASSERT(_buffer, "Called memory before buffer was created");
-		vmaMapMemory(_context->GetAllocator().GetAllocator(), _allocation, &_data);
-	}
-
-	void Vulkan_Buffer::Unmap() {
-		GE_ASSERT(_data, "Called unmap to not mapped data");
-		vmaUnmapMemory(_context->GetAllocator().GetAllocator(), _allocation);
-	}
-
-	void Vulkan_Buffer::Write(void* data, uint64_t size, uint64_t offset) {
-		GE_ASSERT(_data, "Cannot write unmapped buffer");
-		GE_ASSERT(size < _bufferSize, "Outof range");
-		if (size == VK_WHOLE_SIZE) {
-			memcpy(_data, data, _bufferSize);
-		}
-		else {
-			char* memOffset = (char*)_data;
-			memOffset += offset;
-			memcpy(memOffset, data, size);
-		}
-	}
-
-	void* Vulkan_Buffer::GetData() { return _data; }
 }

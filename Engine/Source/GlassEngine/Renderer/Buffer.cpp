@@ -4,11 +4,11 @@
 #include "Platform/Vulkan/Vulkan_Buffer.h"
 
 namespace ge::renderer {
-	ge::mem::Ref<Buffer> Buffer::Create(uint64_t size, BufferUsageFlags usage, MemoryPropertiesFlags memoryProperties)
+	ge::mem::Ref<Buffer> Buffer::Create(const BufferCreateDesc& desc)
 	{
 		switch (RenderAPI::GetAPI())
 		{
-		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Buffer>::Create(size, usage, memoryProperties);
+		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Buffer>::Create(desc);
 		case GraphicsAPI::DirectX11: return nullptr;
 		case GraphicsAPI::OpenGL: return nullptr;
 		default:

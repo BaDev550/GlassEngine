@@ -57,15 +57,6 @@ namespace ge::renderer {
 		vkDeviceWaitIdle(_device);
 	}
 
-	void Vulkan_RenderContext::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& buffer, VmaAllocation& alloc)
-	{
-		VkBufferCreateInfo createInfo{};
-		createInfo.size = size;
-		createInfo.usage = usage;
-		createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		_allocator->AllocateBuffer(buffer, alloc, createInfo, memoryUsage);
-	}
-
 	void Vulkan_RenderContext::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& image, VmaAllocation& alloc)
 	{
 		VkImageCreateInfo createInfo{};
@@ -80,7 +71,7 @@ namespace ge::renderer {
 		createInfo.usage = usage;
 		createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		_allocator->AllocateImage(image, alloc, createInfo, memoryUsage);
+		// _allocator->AllocateImage(image, alloc, createInfo, memoryUsage);
 	}
 
 	void Vulkan_RenderContext::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)

@@ -53,16 +53,12 @@ namespace ge::renderer::mem {
 			vmaCreateAllocator(&createInfo, &_allocator);
 		}
 
-		void AllocateBuffer(VkBuffer& buffer, VmaAllocation& allocation, VkBufferCreateInfo& createInfo, VmaMemoryUsage usage) {
-			VmaAllocationCreateInfo allocInfo = {};
-			allocInfo.usage = usage;
-			vmaCreateBuffer(_allocator, &createInfo, &allocInfo, &buffer, &allocation, nullptr);
+		void AllocateBuffer(const VkBufferCreateInfo& createInfo, const VmaAllocationCreateInfo& allocCreateInfo, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo& allocInfo) {
+			vmaCreateBuffer(_allocator, &createInfo, &allocCreateInfo, &buffer, &allocation, &allocInfo);
 		}
 
-		void AllocateImage(VkImage& buffer, VmaAllocation& allocation, VkImageCreateInfo& createInfo, VmaMemoryUsage usage) {
-			VmaAllocationCreateInfo allocInfo = {};
-			allocInfo.usage = usage;
-			vmaCreateImage(_allocator, &createInfo, &allocInfo, &buffer, &allocation, nullptr);
+		void AllocateImage(const VkImageCreateInfo& createInfo, const VmaAllocationCreateInfo& allocCreateInfo, VkImage& image, VmaAllocation& allocation, VmaAllocationInfo& allocInfo) {
+			vmaCreateImage(_allocator, &createInfo, &allocCreateInfo, &image, &allocation, &allocInfo);
 		}
 		VmaAllocator GetAllocator() const { return _allocator; }
 	private:

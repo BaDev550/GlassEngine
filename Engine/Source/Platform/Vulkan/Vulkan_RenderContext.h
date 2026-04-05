@@ -14,14 +14,13 @@ namespace ge::renderer {
 		bool memoryBudget;
 	};
 
-	class Vulkan_RenderContext : public RenderContext {
+	class Vulkan_RenderContext final : public RenderContext {
 	public:
 		Vulkan_RenderContext(GLFWwindow* window);
 		~Vulkan_RenderContext();
 		virtual void Init() override;
 		virtual void Wait() override;
 
-		void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& buffer, VmaAllocation& alloc);
 		void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& image, VmaAllocation& alloc);
 		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 		void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
