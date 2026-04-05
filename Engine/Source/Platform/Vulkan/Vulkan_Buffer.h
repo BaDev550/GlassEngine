@@ -4,13 +4,13 @@
 
 namespace ge::renderer {
 	namespace utils {
-		static VmaMemoryUsage EngineMemoryUsageToVMA(const MemoryPropertiesFlags& memoryFlags) {
+		static VmaMemoryUsage EngineMemoryUsageToVMA(const MemoryPropertiesFlags memoryFlags) {
 			if (memoryFlags.Has(MemoryPropertiesFlagsBit::Device)) return VmaMemoryUsage::VMA_MEMORY_USAGE_GPU_ONLY;
 			if (memoryFlags.Has(MemoryPropertiesFlagsBit::Host_visible)) return VmaMemoryUsage::VMA_MEMORY_USAGE_CPU_ONLY;
 			if (memoryFlags.Has(MemoryPropertiesFlagsBit::Host_cohreant)) return VmaMemoryUsage::VMA_MEMORY_USAGE_CPU_TO_GPU;
 		}
 
-		static VkBufferUsageFlags EngineBufferUsageFlags(const BufferUsageFlags& usageFlags) {
+		static VkBufferUsageFlags EngineBufferUsageFlags(const BufferUsageFlags usageFlags) {
 			VkBufferUsageFlags usage;
 			if (usageFlags.Has(BufferUsageFlagsBit::Uniform)) usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 			if (usageFlags.Has(BufferUsageFlagsBit::Transfer_src)) usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
