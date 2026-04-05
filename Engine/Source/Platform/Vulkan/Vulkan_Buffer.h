@@ -16,6 +16,7 @@ namespace ge::renderer {
 			if (usageFlags.Has(BufferUsageFlagsBit::Transfer_src)) usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 			if (usageFlags.Has(BufferUsageFlagsBit::Transfer_dst)) usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 			if (usageFlags.Has(BufferUsageFlagsBit::Storage)) usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+			return usage;
 		}
 	}
 

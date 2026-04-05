@@ -33,7 +33,7 @@ namespace ge::renderer {
 		}
 	}
 
-	Vulkan_RenderContext::Vulkan_RenderContext(GLFWwindow* window) : _window(window) { }
+	Vulkan_RenderContext::Vulkan_RenderContext(GLFWwindow* window) : _window(window) {}
 	Vulkan_RenderContext::~Vulkan_RenderContext() {
 		delete _allocator;
 		_allocator = nullptr;
@@ -56,7 +56,7 @@ namespace ge::renderer {
 	void Vulkan_RenderContext::Wait() {
 		vkDeviceWaitIdle(_device);
 	}
-	
+
 	void Vulkan_RenderContext::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& buffer, VmaAllocation& alloc)
 	{
 		VkBufferCreateInfo createInfo{};
@@ -85,15 +85,16 @@ namespace ge::renderer {
 
 	void Vulkan_RenderContext::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 	{
+
 	}
 
 	void Vulkan_RenderContext::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
 	{
 	}
 
-	void Vulkan_RenderContext::CreateVulkanAllocator() { 
+	void Vulkan_RenderContext::CreateVulkanAllocator() {
 		mem::Vulkan_AllocatorCallbacks::InitCallbacks();
-		_allocator = new mem::Vulkan_Allocator(); 
+		_allocator = new mem::Vulkan_Allocator();
 	}
 
 	void Vulkan_RenderContext::CreateInstance()
@@ -103,9 +104,12 @@ namespace ge::renderer {
 		appInfo.pApplicationName = Application::Get()->GetSpecs().title.c_str();
 		appInfo.pEngineName = "GlassEngine";
 		appInfo.apiVersion = VK_API_VERSION_1_3;
-		
+
 		GEVector<const char*> instanceExtensions = GetRequiredInstanceExtensions();
-		if (_useValidationLayer) { _layers.push_back("VK_LAYER_KHRONOS_validation"); }
+		if (_useValidationLayer) {
+			_layers.push_back("VK_LAYER_KHRONOS_validation");
+			_layers.push_back("VK_LAYER_KHRONOS_synchronization2");
+		}
 		if (!CheckEnabledLayersSupport()) {
 			throw std::runtime_error("Layer is enabled but not available!");
 		}
@@ -117,24 +121,32 @@ namespace ge::renderer {
 		createInfo.ppEnabledLayerNames = _layers.data();
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(instanceExtensions.size());
 		createInfo.ppEnabledExtensionNames = instanceExtensions.data();
-		if(vkCreateInstance(&createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_instance) != VK_SUCCESS)
+		if (vkCreateInstance(&createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_instance) != VK_SUCCESS)
 			throw std::runtime_error("Failed to create vulkan instance");
 		GE_GRAPCHICS_INFO("Vulkan instance created");
 	}
 
 	void Vulkan_RenderContext::CreateDebugMessenger() {
 		if (!_useValidationLayer) return;
+
+		constexpr VkValidationFeatureEnableEXT validation_features[2] = {
+			VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
+			VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT
+		};
+
 		VkDebugUtilsMessengerCreateInfoEXT createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 		createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 		createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 		createInfo.pfnUserCallback = debugCallback;
 		createInfo.pUserData = nullptr;
+		createInfo.pNext = validation_features;
 		if (CreateDebugUtilsMessengerEXT(_instance, &createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_debugMessenger) != VK_SUCCESS) {
 			throw std::runtime_error("failed to set up debug messenger!");
 		}
 	}
 
+	// TODO (dnm): select discrate gpu
 	void Vulkan_RenderContext::PickPhysicalDevice() {
 		uint32_t physicalDeviceCount;
 		vkEnumeratePhysicalDevices(_instance, &physicalDeviceCount, nullptr);
@@ -147,9 +159,13 @@ namespace ge::renderer {
 				break;
 			}
 		}
-		vkGetPhysicalDeviceProperties(_physicalDevice, &_physicalDeviceProperties);
+
+		FindQueueFamilies();
+
+		VkPhysicalDeviceProperties features{};
+		vkGetPhysicalDeviceProperties(_physicalDevice, &features);
 		GE_GRAPCHICS_INFO("GPU Selected: ");
-		GE_GRAPCHICS_INFO("	GPU Name: {}", _physicalDeviceProperties.deviceName);
+		GE_GRAPCHICS_INFO("	GPU Name: {}", features.deviceName);
 	}
 
 	void Vulkan_RenderContext::CreateSurface()
@@ -159,47 +175,101 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderContext::CreateLogicalDevice() {
-		QueueFamilyIndices indices = FindQueueFamilies(_physicalDevice);
-		float queuePriority = 1.0f;
-		GEVector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqeQueueFamilies = { indices.graphicsIndex.value(), indices.presentIndex.value() };
-		for (uint32_t queueFamily : uniqeQueueFamilies) {
-			VkDeviceQueueCreateInfo queueCreateInfo{};
-			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			queueCreateInfo.queueFamilyIndex = queueFamily;
-			queueCreateInfo.queueCount = 1;
-			queueCreateInfo.pQueuePriorities = &queuePriority;
-			queueCreateInfos.push_back(queueCreateInfo);
+		void* pNext = nullptr;
+
+		VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR unifiedImageLayouts{};
+		unifiedImageLayouts.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR;
+		unifiedImageLayouts.unifiedImageLayouts = true;
+		if (_deviceFeatures.unifiedImageLayouts)
+		{
+			unifiedImageLayouts.pNext = pNext;
+			pNext = &unifiedImageLayouts;
 		}
 
-		VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures{};
-		dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
-		dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
+		VkPhysicalDeviceHostImageCopyFeaturesEXT imageCopyFeatures{};
+		imageCopyFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_IMAGE_COPY_FEATURES_EXT;
+		imageCopyFeatures.hostImageCopy = true;
+		if (_deviceFeatures.hostImageCopy)
+		{
+			imageCopyFeatures.pNext = pNext;
+			pNext = &imageCopyFeatures;
+		}
+
+		VkPhysicalDeviceVulkan13Features features13{};
+		features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		features13.pNext = pNext;
+		pNext = &features13;
+
+		VkPhysicalDeviceVulkan12Features features12{};
+		features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		features12.pNext = pNext;
+		pNext = &features12;
+
+		VkPhysicalDeviceVulkan11Features features11{};
+		features11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+		features11.pNext = pNext;
+		pNext = &features11;
+
+		VkPhysicalDeviceFeatures2 features{};
+		features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		features.pNext = pNext;
+		pNext = &features;
+
+		features13.synchronization2 = true;
+		features13.dynamicRendering = true;
+		features13.inlineUniformBlock = true;
+		features12.descriptorBindingSampledImageUpdateAfterBind = true;
+		features12.descriptorBindingStorageImageUpdateAfterBind = true;
+		features12.descriptorBindingStorageBufferUpdateAfterBind = true;
+		features12.descriptorBindingVariableDescriptorCount = true;
+		features12.shaderSampledImageArrayNonUniformIndexing = true;
+		features12.shaderStorageBufferArrayNonUniformIndexing = true;
+		features12.shaderStorageImageArrayNonUniformIndexing = true;
+		features12.shaderUniformBufferArrayNonUniformIndexing = true;
+		features12.descriptorIndexing = true;
+		features12.runtimeDescriptorArray = true;
+		// if bufferDeviceAddress enabled bufferDeviceAddressCaptureReplay required for renderdoc, amd pre rdna gpu not support bufferDeviceAddressCaptureReplay
+		// features12.bufferDeviceAddress = true;
+		features12.hostQueryReset = true;
+		features12.drawIndirectCount = true;
+		features12.vulkanMemoryModel = true;
+		features12.scalarBlockLayout = true;
+		features12.separateDepthStencilLayouts = true;
+		features11.shaderDrawParameters = true;
+		features11.uniformAndStorageBuffer16BitAccess = true;
+		features11.storageBuffer16BitAccess = true;
+		features.features.pipelineStatisticsQuery = true;
+		features.features.samplerAnisotropy = true;
+		features.features.tessellationShader = true;
+		features.features.geometryShader = true;
+		features.features.shaderInt16 = true;
+		features.features.textureCompressionBC = true;
+		features.features.drawIndirectFirstInstance = true;
+
+		constexpr float queuePriority = 1.0f;
+
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = _graphicsQueueFamilyIndex;
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
 
 		VkDeviceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-		createInfo.pQueueCreateInfos = queueCreateInfos.data();
+		createInfo.queueCreateInfoCount = 1;
+		createInfo.pQueueCreateInfos = &queueCreateInfo;
 		createInfo.enabledLayerCount = static_cast<uint32_t>(_layers.size());
 		createInfo.ppEnabledLayerNames = _layers.data();
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(_deviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = _deviceExtensions.data();
+		createInfo.pNext = &features;
+
 		if (vkCreateDevice(_physicalDevice, &createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_device) != VK_SUCCESS)
 			throw std::runtime_error("Failed to create logical device");
 
-		vkGetDeviceQueue(_device, indices.graphicsIndex.value(), 0, &_graphicsQueue);
-		vkGetDeviceQueue(_device, indices.presentIndex.value(), 0, &_presentQueue);
+		vkGetDeviceQueue(_device, _graphicsQueueFamilyIndex, 0, &_graphicsQueue);
 
 		_allocator->CreateAllocator(_instance, _physicalDevice, _device);
-	}
-
-	void Vulkan_RenderContext::CreateContextCommandPool() {
-		QueueFamilyIndices indices = FindQueueFamilies(_physicalDevice);
-		VkCommandPoolCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		createInfo.queueFamilyIndex = indices.graphicsIndex.value();
-		vkCreateCommandPool(_device, &createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_commandPool);
 	}
 
 	bool Vulkan_RenderContext::CheckEnabledLayersSupport() {
@@ -223,33 +293,82 @@ namespace ge::renderer {
 		return true;
 	}
 
+	// TODO (dnm): log for unsupported features
 	bool Vulkan_RenderContext::IsPhysicalDeviceSuitable(VkPhysicalDevice device) {
-		QueueFamilyIndices indices = FindQueueFamilies(device);
-		return indices.IsValid();
+		void* pNext = nullptr;
+
+		VkPhysicalDeviceVulkan13Features features13;
+		features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		features13.pNext = pNext;
+		pNext = &features13;
+
+		VkPhysicalDeviceVulkan12Features features12;
+		features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		features12.pNext = pNext;
+		pNext = &features12;
+
+		VkPhysicalDeviceVulkan11Features features11;
+		features11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+		features11.pNext = pNext;
+		pNext = &features11;
+
+		VkPhysicalDeviceFeatures2 features;
+		features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		features.pNext = pNext;
+		pNext = &features;
+
+		vkGetPhysicalDeviceFeatures2(device, &features);
+
+		if (features13.synchronization2 != VK_TRUE) return false;
+		if (features13.dynamicRendering != VK_TRUE) return false;
+		if (features13.inlineUniformBlock != VK_TRUE) return false;
+		if (features12.descriptorBindingSampledImageUpdateAfterBind != VK_TRUE) return false;
+		if (features12.descriptorBindingStorageImageUpdateAfterBind != VK_TRUE) return false;
+		if (features12.descriptorBindingStorageBufferUpdateAfterBind != VK_TRUE) return false;
+		if (features12.descriptorBindingVariableDescriptorCount != VK_TRUE) return false;
+		if (features12.shaderSampledImageArrayNonUniformIndexing != VK_TRUE) return false;
+		if (features12.shaderStorageBufferArrayNonUniformIndexing != VK_TRUE) return false;
+		if (features12.shaderStorageImageArrayNonUniformIndexing != VK_TRUE) return false;
+		if (features12.shaderUniformBufferArrayNonUniformIndexing != VK_TRUE) return false;
+		if (features12.descriptorIndexing != VK_TRUE) return false;
+		if (features12.runtimeDescriptorArray != VK_TRUE) return false;
+		// if bufferDeviceAddress enabled bufferDeviceAddressCaptureReplay required for renderdoc, amd pre rdna gpu not support bufferDeviceAddressCaptureReplay
+		// if (features12.bufferDeviceAddress != VK_TRUE) return false;
+		if (features12.hostQueryReset != VK_TRUE) return false;
+		if (features12.drawIndirectCount != VK_TRUE) return false;
+		if (features12.vulkanMemoryModel != VK_TRUE) return false;
+		if (features12.scalarBlockLayout != VK_TRUE) return false;
+		if (features12.separateDepthStencilLayouts != VK_TRUE) return false;
+		if (features11.shaderDrawParameters != VK_TRUE) return false;
+		if (features11.uniformAndStorageBuffer16BitAccess != VK_TRUE) return false;
+		if (features11.storageBuffer16BitAccess != VK_TRUE) return false;
+		if (features.features.pipelineStatisticsQuery != VK_TRUE) return false;
+		if (features.features.samplerAnisotropy != VK_TRUE) return false;
+		if (features.features.tessellationShader != VK_TRUE) return false;
+		if (features.features.geometryShader != VK_TRUE) return false;
+		if (features.features.shaderInt16 != VK_TRUE) return false;
+		if (features.features.textureCompressionBC != VK_TRUE) return false;
+		if (features.features.drawIndirectFirstInstance != VK_TRUE) return false;
+
+		return true;
 	}
 
-	QueueFamilyIndices Vulkan_RenderContext::FindQueueFamilies(VkPhysicalDevice device)
+	void Vulkan_RenderContext::FindQueueFamilies()
 	{
-		QueueFamilyIndices indices;
 		uint32_t queueFamiliesCount;
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamiliesCount, nullptr);
+		vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamiliesCount, nullptr);
 		GEVector<VkQueueFamilyProperties> queueFamilies(queueFamiliesCount);
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamiliesCount, queueFamilies.data());
+		vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &queueFamiliesCount, queueFamilies.data());
 
+		// TODO (dnm): source
+		// all graphics queues support presentation
 		for (uint32_t i = 0; i < queueFamiliesCount; i++) {
 			const auto& queueFamily = queueFamilies[i];
-			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-				indices.graphicsIndex = i;
-
-			VkBool32 presentSupport;
-			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface, &presentSupport);
-			if (presentSupport)
-				indices.presentIndex = i;
-
-			if (indices.IsValid())
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+				_graphicsQueueFamilyIndex = i;
 				break;
+			}
 		}
-		return indices;
 	}
 
 	GEVector<const char*> Vulkan_RenderContext::GetRequiredInstanceExtensions() {
@@ -263,30 +382,42 @@ namespace ge::renderer {
 		return extensions;
 	}
 
-	VkCommandBuffer Vulkan_RenderContext::BeginSingleTimeCommand()
-	{
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = _commandPool;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = 1;
-		VkCommandBuffer cmd;
-		vkAllocateCommandBuffers(_device, &allocInfo, &cmd);
-
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		vkBeginCommandBuffer(cmd, &beginInfo);
-		return cmd;
+	GEVector<const char*> Vulkan_RenderContext::GetRequiredDeviceExtensions() {
+		return {
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+			VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME
+		};
 	}
 
-	void Vulkan_RenderContext::EndSingleTimeCommand(VkCommandBuffer cmd)
-	{
-		vkEndCommandBuffer(cmd);
-		VkSubmitInfo subInfo{};
-		subInfo.commandBufferCount = 1;
-		subInfo.pCommandBuffers = &cmd;
-		vkQueueSubmit(_graphicsQueue, 1, &subInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(_graphicsQueue);
-		vkFreeCommandBuffers(_device, _commandPool, 1, &cmd);
+	// TODO c: finish this
+	GEVector<const char*> Vulkan_RenderContext::GetSupportedOptionalDeviceExtensions() {
+		GEVector<const char*> out;
+
+		const GEVector<std::string> optExts{
+			VK_EXT_MEMORY_BUDGET_EXTENSION_NAME,
+			VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME,
+			VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME,
+			VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME,
+			VK_KHR_MAINTENANCE_5_EXTENSION_NAME
+		};
+
+		uint32_t extCount{};
+		vkEnumerateDeviceExtensionProperties(_physicalDevice, nullptr, &extCount, nullptr);
+		GEVector<VkExtensionProperties> extensions(extCount);
+		vkEnumerateDeviceExtensionProperties(_physicalDevice, nullptr, &extCount, extensions.data());
+
+		for (const auto& extension : extensions) {
+			const std::string extensionName = extension.extensionName;
+
+			for (const auto& optExtName : optExts)
+			{
+				if (extensionName == optExtName)
+				{
+					out.push_back(extension.extensionName);
+				}
+			}
+		}
+
+		return out;
 	}
 }

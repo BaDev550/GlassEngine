@@ -6,11 +6,12 @@
 #include <optional>
 
 namespace ge::renderer {
-	struct QueueFamilyIndices {
-		std::optional<uint32_t> graphicsIndex;
-		std::optional<uint32_t> presentIndex;
-
-		bool IsValid() { return graphicsIndex.has_value() && presentIndex.has_value(); }
+	struct DeviceFeatures {
+		bool unifiedImageLayouts;
+		bool hostImageCopy;
+		bool maintenance5;
+		bool shaderStencilExport;
+		bool memoryBudget;
 	};
 
 	class Vulkan_RenderContext : public RenderContext {
@@ -41,8 +42,10 @@ namespace ge::renderer {
 		void CreateContextCommandPool();
 		bool CheckEnabledLayersSupport();
 		bool IsPhysicalDeviceSuitable(VkPhysicalDevice device);
-		QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+		void FindQueueFamilies();
 		GEVector<const char*> GetRequiredInstanceExtensions();
+		GEVector<const char*> GetRequiredDeviceExtensions();
+		GEVector<const char*> GetSupportedOptionalDeviceExtensions();
 
 		VkCommandBuffer BeginSingleTimeCommand();
 		void EndSingleTimeCommand(VkCommandBuffer cmd);
@@ -55,18 +58,20 @@ namespace ge::renderer {
 		VkCommandPool _commandPool = VK_NULL_HANDLE;
 		VkDebugUtilsMessengerEXT _debugMessenger = VK_NULL_HANDLE;
 
-		VkQueue _graphicsQueue;
-		VkQueue _presentQueue;
-
-		GLFWwindow* _window;
+		uint32_t _graphicsQueueFamilyIndex{};
+		VkQueue _graphicsQueue = VK_NULL_HANDLE;
+		
+		GLFWwindow* _window = nullptr;
 		mem::Vulkan_Allocator* _allocator = nullptr;
 
-		GEVector<const char*> _layers;
-		GEVector<const char*> _deviceExtensions;
+		DeviceFeatures _deviceFeatures{};
+
+		GEVector<const char*> _layers{};
+		GEVector<const char*> _deviceExtensions{};
 #ifdef _DEBUG
-		bool _useValidationLayer = true;
+		const bool _useValidationLayer = true;
 #else
-		bool _useValidationLayer = false;
+		const bool _useValidationLayer = false;
 #endif
 	};
 }

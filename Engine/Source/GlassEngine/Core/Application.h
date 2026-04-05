@@ -22,7 +22,7 @@ namespace ge {
 		void Run();
 		void Close() { _forceClose = true; }
 
-		Window& GetWindow() { return _window; }
+		Window& GetWindow() { return *_window; }
 		static Application* Get() { return _instance; }
 		ApplicationSpecification GetSpecs() const { return _specs; }
 	protected:

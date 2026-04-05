@@ -2,7 +2,6 @@
 #include "GlassEngine/Core/Memory.h"
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Utilities/Flags.h"
-#include "Vulkan_Buffer.h"
 
 namespace ge::renderer {
 	enum class BufferUsageFlagsBit {
@@ -13,7 +12,6 @@ namespace ge::renderer {
 		Transfer_src = BIT(3)
 	};
 	using BufferUsageFlags = ge::Flags<BufferUsageFlagsBit>;
-	template<> struct ge::FlagTraits<BufferUsageFlagsBit> { static constexpr bool isBitmask = true; };
 
 	enum class MemoryPropertiesFlagsBit {
 		None			= 0,
@@ -22,18 +20,20 @@ namespace ge::renderer {
 		Device			= BIT(2)
 	};
 	using MemoryPropertiesFlags = ge::Flags<MemoryPropertiesFlagsBit>;
-	template<> struct ge::FlagTraits<MemoryPropertiesFlagsBit> { static constexpr bool isBitmask = true; };
 
 	class Buffer : public mem::RefCounted {
 	public:
 		Buffer() {}
 		virtual ~Buffer() = default;
 
-		virtual void Map(uint64_t size = UINT64_MAX, uint64_t offset = 0) {};
-		virtual void Unmap() {}
+		virtual void Map(uint64_t size = UINT64_MAX, uint64_t offset = 0) = 0;
+		virtual void Unmap() = 0;
 		virtual void Write(void* data, uint64_t size = UINT64_MAX, uint64_t offset = 0) = 0;
 		virtual void* GetData() = 0;
 
 		static ge::mem::Ref<Buffer> Create(uint64_t size, BufferUsageFlags usage, MemoryPropertiesFlags memoryProperties);
 	};
 }
+
+template<> struct ge::FlagTraits<ge::renderer::BufferUsageFlagsBit> { static constexpr bool isBitmask = true; };
+template<> struct ge::FlagTraits<ge::renderer::MemoryPropertiesFlagsBit> { static constexpr bool isBitmask = true; };

@@ -14,7 +14,10 @@ namespace ge::renderer {
 		_usage(utils::EngineBufferUsageFlags(usage)),
 		_memoryUsage(utils::EngineMemoryUsageToVMA(memoryProperties))
 	{
-		_context = CastChecked<Vulkan_RenderContext>(&Application::Get()->GetWindow().GetRenderContext());
+		// CastChecked gets C2681 build error
+		// _context = CastChecked<Vulkan_RenderContext>(&Application::Get()->GetWindow().GetRenderContext());
+		_context = static_cast<Vulkan_RenderContext *>(&Application::Get()->GetWindow().GetRenderContext());
+		
 		_alignmentSize = GetAlignment(size, 1);
 		_bufferSize = _alignmentSize * _instanceCount;
 		_context->CreateBuffer(_bufferSize, _usage, _memoryUsage, _buffer, _allocation);
@@ -28,7 +31,7 @@ namespace ge::renderer {
 		Unmap();
 	}
 
-	void Vulkan_Buffer::Map(uint64_t size = UINT64_MAX, uint64_t offset = 0) {
+	void Vulkan_Buffer::Map(uint64_t size, uint64_t offset) {
 		GE_ASSERT(_buffer, "Called memory before buffer was created");
 		vmaMapMemory(_context->GetAllocator().GetAllocator(), _allocation, &_data);
 	}
@@ -38,7 +41,7 @@ namespace ge::renderer {
 		vmaUnmapMemory(_context->GetAllocator().GetAllocator(), _allocation);
 	}
 
-	void Vulkan_Buffer::Write(void* data, uint64_t size = UINT64_MAX, uint64_t offset = 0) {
+	void Vulkan_Buffer::Write(void* data, uint64_t size, uint64_t offset) {
 		GE_ASSERT(_data, "Cannot write unmapped buffer");
 		GE_ASSERT(size < _bufferSize, "Outof range");
 		if (size == VK_WHOLE_SIZE) {
