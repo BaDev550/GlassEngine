@@ -61,6 +61,8 @@ namespace ge::renderer {
 		template <typename T = uint8_t>
 		[[nodiscard]] T* GetMappedPtr() const noexcept { return reinterpret_cast<T*>(_mappedPtr); }
 		[[nodiscard]] uint32_t GetAlighnedElementSize() const noexcept { return _alighened_element_size; }
+		[[nodiscard]] const auto& GetDescRef() const noexcept { return _desc; }
+		[[nodiscard]] auto GetDesc() const noexcept { return _desc; }
 	protected:
 		BufferCreateDesc _desc;
 		uint32_t _alighened_element_size;
