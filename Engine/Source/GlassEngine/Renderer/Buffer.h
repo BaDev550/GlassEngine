@@ -1,4 +1,5 @@
 #pragma once
+
 #include "GlassEngine/Core/Memory.h"
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Utilities/Flags.h"
@@ -16,10 +17,10 @@ namespace ge::renderer {
 	enum class BufferUsageFlagsBits : uint16_t {
 		None				= 0,
 		Uniform				= BIT(0),
-		Readonly_storage	= BIT(1),
-		Writable_storage	= BIT(2),
-		Transfer_dst		= BIT(3),
-		Transfer_src		= BIT(4),
+		Readonly			= BIT(1),
+		Writable			= BIT(2),
+		TransferDst			= BIT(3),
+		TransferSrc			= BIT(4),
 		Vertex				= BIT(5),
 		Index				= BIT(6),
 		Indirect			= BIT(7),
@@ -69,3 +70,8 @@ namespace ge::renderer {
 		void *_mappedPtr;
 	};
 }
+
+template <>
+struct ge::FlagTraits<ge::renderer::BufferUsageFlagsBits> {
+	static constexpr bool is_bitmask = true;
+};

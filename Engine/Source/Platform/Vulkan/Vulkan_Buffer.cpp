@@ -2,18 +2,12 @@
 #include "Vulkan_Buffer.h"
 
 namespace ge::renderer {
-	[[nodiscard]] constexpr VkDeviceSize GetAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) {
-		if (minOffsetAlignment > 0)
-			return (instanceSize + minOffsetAlignment - 1) & ~(minOffsetAlignment - 1);
-		return instanceSize;
-	}
-
 	[[nodiscard]] constexpr VkBufferUsageFlags GetBufferUsageFlags(BufferUsageFlags bufferUsageFlags) {
 		VkBufferUsageFlags out{};
-		if (bufferUsageFlags.Has(BufferUsageFlagsBits::Readonly_storage)) out |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Writable_storage)) out |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Transfer_dst)) out |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Transfer_src)) out |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		if (bufferUsageFlags.Has(BufferUsageFlagsBits::Readonly)) out |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Writable)) out |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::TransferDst)) out |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::TransferSrc)) out |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Vertex)) out |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Index)) out |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Indirect)) out |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;

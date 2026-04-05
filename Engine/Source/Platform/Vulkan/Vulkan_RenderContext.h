@@ -5,6 +5,8 @@
 #include "Vulkan_Allocator.h"
 #include <optional>
 
+#define VK_RENDER_CONTEXT static_cast<Vulkan_RenderContext&>(_renderContext)
+
 namespace ge::renderer {
 	struct DeviceFeatures {
 		bool unifiedImageLayouts;
@@ -31,6 +33,8 @@ namespace ge::renderer {
 		VkDevice GetDevice() const { return _device; }
 		VkPhysicalDevice GetPhysicalDevice() const { return _physicalDevice; }
 		VkPhysicalDeviceProperties GetPhysicalDeviceProperties() const { return _physicalDeviceProperties; }
+
+		VkSampleCountFlagBits GetSampleCount() { return VK_SAMPLE_COUNT_1_BIT; }
 	private:
 		void CreateVulkanAllocator();
 		void CreateInstance();
@@ -48,6 +52,7 @@ namespace ge::renderer {
 
 		VkCommandBuffer BeginSingleTimeCommand();
 		void EndSingleTimeCommand(VkCommandBuffer cmd);
+		// TODO (dnm): complate this func
 	private:
 		VkInstance _instance = VK_NULL_HANDLE;
 		VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;

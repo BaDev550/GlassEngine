@@ -3,7 +3,7 @@
 #include "Vulkan_RenderContext.h"
 
 namespace ge::renderer {
-	class Vulkan_Buffer : public Buffer {
+	class Vulkan_Buffer final : public Buffer {
 	public:
 		Vulkan_Buffer(const BufferCreateDesc& desc);
 		virtual ~Vulkan_Buffer();
