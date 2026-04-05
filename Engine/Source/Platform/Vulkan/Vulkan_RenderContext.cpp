@@ -6,7 +6,6 @@
 #include <set>
 
 namespace ge::renderer {
-#define VULKAN_ALLOCATOR_CALLBACKS &mem::Vulkan_AllocatorCallbacks::GetCallbacks()
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -112,7 +111,7 @@ namespace ge::renderer {
 		createInfo.ppEnabledLayerNames = _layers.data();
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(instanceExtensions.size());
 		createInfo.ppEnabledExtensionNames = instanceExtensions.data();
-		if (vkCreateInstance(&createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_instance) != VK_SUCCESS)
+		if (vkCreateInstance(&createInfo, VK_ALLOCATOR_CALLBACKS, &_instance) != VK_SUCCESS)
 			throw std::runtime_error("Failed to create vulkan instance");
 		GE_GRAPCHICS_INFO("Vulkan instance created");
 	}
@@ -132,7 +131,7 @@ namespace ge::renderer {
 		createInfo.pfnUserCallback = debugCallback;
 		createInfo.pUserData = nullptr;
 		createInfo.pNext = validation_features;
-		if (CreateDebugUtilsMessengerEXT(_instance, &createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_debugMessenger) != VK_SUCCESS) {
+		if (CreateDebugUtilsMessengerEXT(_instance, &createInfo, VK_ALLOCATOR_CALLBACKS, &_debugMessenger) != VK_SUCCESS) {
 			throw std::runtime_error("failed to set up debug messenger!");
 		}
 	}
@@ -160,7 +159,7 @@ namespace ge::renderer {
 
 	void Vulkan_RenderContext::CreateSurface()
 	{
-		if (glfwCreateWindowSurface(_instance, _window, VULKAN_ALLOCATOR_CALLBACKS, &_surface) != VK_SUCCESS)
+		if (glfwCreateWindowSurface(_instance, _window, VK_ALLOCATOR_CALLBACKS, &_surface) != VK_SUCCESS)
 			throw std::runtime_error("Failed to create window surface");
 	}
 
@@ -254,7 +253,7 @@ namespace ge::renderer {
 		createInfo.ppEnabledExtensionNames = _deviceExtensions.data();
 		createInfo.pNext = &features;
 
-		if (vkCreateDevice(_physicalDevice, &createInfo, VULKAN_ALLOCATOR_CALLBACKS, &_device) != VK_SUCCESS)
+		if (vkCreateDevice(_physicalDevice, &createInfo, VK_ALLOCATOR_CALLBACKS, &_device) != VK_SUCCESS)
 			throw std::runtime_error("Failed to create logical device");
 
 		vkGetDeviceQueue(_device, _graphicsQueueFamilyIndex, 0, &_graphicsQueue);

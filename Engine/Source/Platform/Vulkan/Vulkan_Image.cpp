@@ -63,14 +63,14 @@ namespace ge::renderer {
 		imageCreateInfo.usage = GetVkUsageFlags(_desc.usageFlags);
 
 		// imageCreateInfo.samples = VK_RENDER_CONTEXT.GetSampleCount(_desc.sampleCount);
-		imageCreateInfo.samples = VK_RENDER_CONTEXT.GetSampleCount();
+		imageCreateInfo.samples = VK_RENDER_CONTEXT->GetSampleCount();
 
 		VmaAllocationCreateInfo allocCreateInfo{};
 		allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
 		VmaAllocationInfo allocInfo{};
 
-		VK_RENDER_CONTEXT.GetAllocator().AllocateImage(imageCreateInfo, allocCreateInfo, _image, _allocation, allocInfo);
+		VK_ALLOCATOR.AllocateImage(imageCreateInfo, allocCreateInfo, _image, _allocation, allocInfo);
 	}
 
 	Vulkan_Image::~Vulkan_Image() {
@@ -83,8 +83,8 @@ namespace ge::renderer {
 		{
 			VkImageViewCreateInfo createInfo{};
 
-			VK_RENDER_CONTEXT.GetDevice();
-			vkCreateImageView(VK_RENDER_CONTEXT.GetDevice(), &createInfo, &mem::Vulkan_AllocatorCallbacks::GetCallbacks(), &imageView);
+			VK_RENDER_CONTEXT->GetDevice();
+			vkCreateImageView(VK_RENDER_CONTEXT->GetDevice(), &createInfo, VK_ALLOCATOR_CALLBACKS, &imageView);
 		}
 
 		return imageView;

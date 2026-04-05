@@ -5,6 +5,8 @@ set_target_properties(Engine PROPERTIES
 )
 
 find_package(Vulkan)
+find_library(Vulkan_SHADERC NAMES shaderc_shared HINTS "$ENV{VULKAN_SDK}/Lib")
+find_library(Vulkan_SHADERC_UTILS NAMES shaderc_util HINTS "$ENV{VULKAN_SDK}/Lib")
 
 # GLFW
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -68,6 +70,7 @@ target_sources(Engine PRIVATE ${ENGINE_SOURCES})
 target_include_directories(Engine 
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}/Source
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SPIRV-Reflect
 )
 target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Source/gepch.h>")
 
@@ -77,4 +80,6 @@ target_link_libraries(Engine
         spdlog
 		Vulkan::Vulkan
         GPUOpen::VulkanMemoryAllocator
+        ${Vulkan_SHADERC}
+        ${Vulkan_SHADERC_UTILS}
 )

@@ -1,6 +1,7 @@
 #pragma once
 #include "GlassEngine/Renderer/CommandBuffer.h"
 #include "GlassEngine/Renderer/RenderAPI.h"
+#include "ShaderLibrary.h"
 
 namespace ge::renderer {
 	class Renderer3D {
@@ -16,6 +17,7 @@ namespace ge::renderer {
 		static void DrawIndexed(CommandBuffer* cmd);
 
 		static RenderStats GetRenderStats();
+		static ShaderLibrary& GetShaderLibrary();
 		static mem::Ref<RenderAPI> GetRenderAPI();
 	};
 }

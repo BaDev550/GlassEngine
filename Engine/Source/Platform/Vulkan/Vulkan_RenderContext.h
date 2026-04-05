@@ -2,10 +2,13 @@
 #include <vulkan/vulkan.h>
 
 #include "GlassEngine/Renderer/RenderContext.h"
+#include "GlassEngine/Core/Core.h"
 #include "Vulkan_Allocator.h"
 #include <optional>
 
-#define VK_RENDER_CONTEXT static_cast<Vulkan_RenderContext&>(_renderContext)
+#define VK_RENDER_CONTEXT CastChecked<Vulkan_RenderContext>(&_renderContext)
+#define VK_ALLOCATOR VK_RENDER_CONTEXT->GetAllocator()
+#define VK_ALLOCATOR_CALLBACKS &mem::Vulkan_AllocatorCallbacks::GetCallbacks()
 
 namespace ge::renderer {
 	struct DeviceFeatures {
