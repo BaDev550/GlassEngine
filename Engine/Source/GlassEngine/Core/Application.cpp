@@ -1,5 +1,6 @@
 #include "gepch.h"
 #include "Application.h"
+#include "GlassEngine/Renderer/Renderer.h"
 #include <stdexcept>
 #include <iostream>
 
@@ -11,11 +12,12 @@ namespace ge {
 		_instance = this;
 
 		Logger::Init();
-		GE_CORE_INFO("Application created with title: {}, width: {}, height: ", _specs.title, _specs.width, _specs.height);
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
+		renderer::Renderer3D::Init();
 	}
 
 	Application::~Application() {
+		renderer::Renderer3D::Destroy();
 		Logger::Destroy();
 	}
 

@@ -35,7 +35,9 @@ namespace ge::mem {
 		}
 		static void GE_FreeAligned(void* block, size_t size, size_t aligment) {
 			if (block == nullptr) {
+#if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
 				std::cout << "[MEMORY] \"Free\" Tried to free up uninitialized or freed memory" << std::endl;
+#endif
 				return;
 			}
 			s_allocationMetrics.totalFreed += size;
@@ -46,7 +48,9 @@ namespace ge::mem {
 		}
 		static void GE_Free(void* block, size_t size) {
 			if (block == nullptr) {
+#if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
 				std::cout << "[MEMORY] \"Free\" Tried to free up uninitialized or freed memory" << std::endl;
+#endif
 				return;
 			}
 			s_allocationMetrics.totalFreed += size;

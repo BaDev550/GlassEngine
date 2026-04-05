@@ -2,9 +2,14 @@
 #include <iostream>
 #include "GlassEngine/Core/Memory.h"
 
+#include "GlassEngine/Renderer/RenderObject.h"
 #include "GlassEngine/Renderer/CommandBuffer.h"
 
 namespace ge::renderer {
+	struct RenderStats {
+		uint32_t drawCalls;
+	};
+
 	enum class GraphicsAPI {
 		Vulkan,
 		OpenGL,
@@ -12,7 +17,7 @@ namespace ge::renderer {
 		DirectX12
 	};
 
-	class RenderAPI {
+	class RenderAPI : public RenderObject {
 	public:
 		RenderAPI() = default;
 		virtual ~RenderAPI() = default;
@@ -24,8 +29,12 @@ namespace ge::renderer {
 		virtual void DrawVertex(CommandBuffer* cmd) = 0;
 		virtual void DrawIndexed(CommandBuffer* cmd) = 0;
 
+		static inline RenderStats GetRenderStats() { return _renderStats; }
 		static inline GraphicsAPI GetAPI() { return _graphicsAPI; }
-	private:
-		static inline GraphicsAPI _graphicsAPI = GraphicsAPI::Vulkan;
+		static void SetAPI(GraphicsAPI api) { _graphicsAPI = api; }
+		static mem::Ref<RenderAPI> Create();
+	protected:
+		static RenderStats _renderStats;
+		static GraphicsAPI _graphicsAPI;
 	};
 }
