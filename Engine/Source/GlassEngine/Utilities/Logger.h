@@ -18,7 +18,7 @@
 #define GE_GRAPCHICS_TRACE(...) ge::Logger::GetGraphicsLogger()->trace(__VA_ARGS__)
 #define GE_GRAPCHICS_INFO(...) ge::Logger::GetGraphicsLogger()->info(__VA_ARGS__)
 #define GE_GRAPCHICS_WARN(...) ge::Logger::GetGraphicsLogger()->warn(__VA_ARGS__)
-#define GE_GRAPCHICS_ERROR(...) ge::Logger::GetGraphicsLogger()->error(__VA_ARGS__)
+#define GE_GRAPHICS_ERROR(...) ge::Logger::GetGraphicsLogger()->error(__VA_ARGS__)
 #define GE_GRAPCHICS_CRITICAL(...) ge::Logger::GetGraphicsLogger()->critical(__VA_ARGS__)
 
 #define GE_SCRIPT_TRACE(...) ge::Logger::GetScriptingLogger()->trace(__VA_ARGS__)

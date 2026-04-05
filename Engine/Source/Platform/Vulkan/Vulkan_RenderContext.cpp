@@ -14,7 +14,7 @@ namespace ge::renderer {
 		void* pUserData) {
 
 		if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-			GE_GRAPCHICS_ERROR("validation layer: {}", pCallbackData->pMessage);
+			GE_GRAPHICS_ERROR("validation layer: {}", pCallbackData->pMessage);
 		return VK_FALSE;
 	}
 	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
@@ -49,7 +49,7 @@ namespace ge::renderer {
 			CreateLogicalDevice();
 		}
 		catch (const std::exception& e) {
-			GE_GRAPCHICS_ERROR(e.what());
+			GE_GRAPHICS_ERROR(e.what());
 		}
 	}
 
@@ -389,7 +389,7 @@ namespace ge::renderer {
 		};
 	}
 
-	// TODO c: finish this
+	// TODO: finish this
 	GEVector<const char*> Vulkan_RenderContext::GetSupportedOptionalDeviceExtensions() {
 		GEVector<const char*> out;
 
