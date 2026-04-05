@@ -5,6 +5,7 @@
 namespace ge {
 	static bool s_glfwInitialized = false;
 	Window::Window(const WindowSpecification& specs) : _specs(specs) {
+		GE_PROFILE_SCOPE("GE_WindowCreate");
 		if (!s_glfwInitialized) {
 			GE_ASSERT(glfwInit(), "Failed to initialize GLFW");
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

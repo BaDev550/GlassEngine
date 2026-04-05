@@ -37,7 +37,7 @@ namespace ge::renderer {
 		uint32_t _instanceCount;
 		VkDeviceSize _bufferSize;
 		VkDeviceSize _instanceSize;
-		VkDeviceSize _alignmentSize;
+		VkDeviceSize _alignmentSize; // TODO (dnm): move the size values to Buffer class
 		VmaMemoryUsage _memoryUsage;
 		VkDescriptorBufferInfo _descriptorInfo;
 		Vulkan_RenderContext* _context;

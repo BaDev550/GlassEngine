@@ -1,5 +1,5 @@
 #pragma once
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Core/Core.h"
 
 struct GLFWwindow;
 namespace ge::renderer {

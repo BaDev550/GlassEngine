@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Core/Core.h"
 
 #include "GlassEngine/Renderer/CommandBuffer.h"
 

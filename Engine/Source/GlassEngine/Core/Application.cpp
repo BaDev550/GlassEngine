@@ -11,12 +11,14 @@ namespace ge {
 		_instance = this;
 
 		Logger::Init();
+		profiler::Profiler::Init();
 		GE_CORE_INFO("Application created with title: {}, width: {}, height: ", _specs.title, _specs.width, _specs.height);
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 	}
 
 	Application::~Application() {
 		Logger::Destroy();
+		profiler::Profiler::Destroy();
 	}
 
 	void Application::Run() {
@@ -27,5 +29,6 @@ namespace ge {
 				layer->OnUpdate(0.0f);
 		}
 		_window->GetRenderContext().Wait();
+		profiler::utils::WriteProfileToFile("GEAR_ProfilerOutput.json");
 	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <vma/vk_mem_alloc.h>
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Memory/Allocator.h"
 
 namespace ge::renderer::mem {
 	class Vulkan_AllocatorCallbacks {
@@ -26,7 +26,7 @@ namespace ge::renderer::mem {
 			return ge::mem::allocFuncs::GE_ReallocateAligned(pOriginal, size, aligment);
 		}
 		static void  VKAPI_CALL Free(void* pUserData, void* pBlock) {
-			ge::mem::allocFuncs::GE_FreeAligned(pBlock, 0, 0);
+			ge::mem::allocFuncs::GE_FreeAligned(pBlock, 0, 0); // TODO (badev): pass actual size of object freed
 		}
 		static inline VkAllocationCallbacks _allocationCallbacks;
 		static inline VmaDeviceMemoryCallbacks _deviceMemoryCallbacks;

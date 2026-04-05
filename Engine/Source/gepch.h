@@ -7,6 +7,6 @@
 
 #include "GlassEngine/Utilities/Logger.h"
 #include "GlassEngine/Core/Core.h"
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Memory/Ref.h"
 #include "GlassEngine/Renderer/RenderAPI.h"
 #include "GlassEngine/Core/Application.h"

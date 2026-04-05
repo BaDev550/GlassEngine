@@ -6,6 +6,7 @@
 namespace ge::renderer {
 	ge::mem::Ref<Buffer> Buffer::Create(uint64_t size, BufferUsageFlags usage, MemoryPropertiesFlags memoryProperties)
 	{
+		GE_PROFILE_SCOPE("GERender_BufferCreate");
 		switch (RenderAPI::GetAPI())
 		{
 		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Buffer>::Create(size, usage, memoryProperties);

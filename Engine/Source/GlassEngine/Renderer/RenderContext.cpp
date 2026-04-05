@@ -5,6 +5,7 @@
 
 namespace ge::renderer {
 	ge::mem::Scope<RenderContext> RenderContext::Create(GLFWwindow* window) {
+		GE_PROFILE_SCOPE("GERender_RenderContextCreate");
 		switch (RenderAPI::GetAPI())
 		{
 		case GraphicsAPI::Vulkan: return ge::mem::CreateScope<Vulkan_RenderContext>(window);
