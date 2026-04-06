@@ -2,6 +2,7 @@
 #include "GlassEngine/Renderer/Shader.h"
 #include "Vulkan_RenderContext.h"
 #include <map>
+#include "Vulkan_Types.h"
 
 namespace ge::renderer {
 	struct CompiledData {

@@ -20,7 +20,7 @@ namespace ge::renderer {
 		for (auto const& [set, bindings] : _compiledData.ReflectData) {
 			GEVector<VkDescriptorSetLayoutBinding> layoutBindings;
 			for (auto const& [binding, info] : bindings) {
-				VkDescriptorType vkType = ShaderReflectionTypeToVulkanType(info.type);
+				VkDescriptorType vkType = utility::ShaderReflectionTypeToVulkanType(info.type);
 				VkDescriptorSetLayoutBinding layoutBinding{};
 				layoutBinding.binding = binding;
 				layoutBinding.descriptorType = vkType,
