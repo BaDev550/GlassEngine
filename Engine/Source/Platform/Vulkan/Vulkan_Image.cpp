@@ -30,8 +30,7 @@ namespace ge::renderer {
 		imageCreateInfo.flags = createFlags;
 		imageCreateInfo.usage = utility::Vulkan_GetImageUsageFlags(_desc.usageFlags);
 
-		// imageCreateInfo.samples = VK_RENDER_CONTEXT.GetSampleCount(_desc.sampleCount);
-		imageCreateInfo.samples = VK_RENDER_CONTEXT->GetSampleCount();
+		imageCreateInfo.samples = VK_RENDER_CONTEXT->GetSampleCount(_desc.sampleCount);
 
 		VmaAllocationCreateInfo allocCreateInfo{};
 		allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;

@@ -4,6 +4,7 @@
 #include "GlassEngine/Renderer/RenderContext.h"
 #include "GlassEngine/Core/Core.h"
 #include "Vulkan_Allocator.h"
+#include "Vulkan_Types.h"
 #include <optional>
 
 #define VK_RENDER_CONTEXT CastChecked<Vulkan_RenderContext>(&_renderContext)
@@ -35,7 +36,7 @@ namespace ge::renderer {
 		VkInstance GetInstance() const { return _instance; }
 		VkDevice GetDevice() const { return _device; }
 
-		VkSampleCountFlagBits GetSampleCount() { return VK_SAMPLE_COUNT_1_BIT; }
+		VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) { return _sampleMap[static_cast<uint16_t>(sample)]; }
 	private:
 		void CreateVulkanAllocator();
 		void CreateInstance();
@@ -53,7 +54,6 @@ namespace ge::renderer {
 
 		VkCommandBuffer BeginSingleTimeCommand();
 		void EndSingleTimeCommand(VkCommandBuffer cmd);
-		// TODO (dnm): complate this func
 	private:
 		VkInstance _instance = VK_NULL_HANDLE;
 		VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
@@ -72,6 +72,8 @@ namespace ge::renderer {
 
 		GEVector<const char*> _layers{};
 		GEVector<const char*> _deviceExtensions{};
+
+		std::array<VkSampleCountFlagBits, 4> _sampleMap;
 #ifdef _DEBUG
 		const bool _useValidationLayer = true;
 #else

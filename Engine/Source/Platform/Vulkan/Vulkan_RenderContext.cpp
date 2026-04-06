@@ -1,5 +1,6 @@
 #include "gepch.h"
 #include "Vulkan_RenderContext.h"
+#include "Vulkan_Types.h"
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <exception>
@@ -152,14 +153,6 @@ namespace ge::renderer {
 
 		FindQueueFamilies();
 
-		const GEVector<std::string> optExts{
-			VK_EXT_MEMORY_BUDGET_EXTENSION_NAME,
-			VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME,
-			VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME,
-			VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME,
-			VK_KHR_MAINTENANCE_5_EXTENSION_NAME
-		};
-
 		uint32_t extCount{};
 		vkEnumerateDeviceExtensionProperties(_physicalDevice, nullptr, &extCount, nullptr);
 		GEVector<VkExtensionProperties> extensions(extCount);
@@ -196,6 +189,42 @@ namespace ge::renderer {
 		GE_GRAPCHICS_INFO("GPU Name: {}", physicalDeviceProperties.deviceName);
 		for (const auto ext : supportedExtensions)
 			GE_GRAPCHICS_INFO("GPU supported optional extensions: {}", ext);
+
+		physicalDeviceProperties.limits.framebufferColorSampleCounts;
+
+		const auto supportedSamples = physicalDeviceProperties.limits.framebufferColorSampleCounts;
+
+		_sampleMap[int(ImageSampleCount::e1)] = VK_SAMPLE_COUNT_1_BIT;
+		_sampleMap[int(ImageSampleCount::e2)] = VK_SAMPLE_COUNT_1_BIT;
+		_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_1_BIT;
+		_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_1_BIT;
+
+		if (VK_SAMPLE_COUNT_2_BIT & supportedSamples) {
+			_sampleMap[int(ImageSampleCount::e2)] = VK_SAMPLE_COUNT_2_BIT;
+		}
+		else if (VK_SAMPLE_COUNT_4_BIT & supportedSamples) {
+			_sampleMap[int(ImageSampleCount::e2)] = VK_SAMPLE_COUNT_4_BIT;
+		}
+
+		if (VK_SAMPLE_COUNT_4_BIT & supportedSamples) {
+			_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_4_BIT;
+		}
+		else if (VK_SAMPLE_COUNT_8_BIT & supportedSamples) {
+			_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_8_BIT;
+		}
+		else if (VK_SAMPLE_COUNT_2_BIT & supportedSamples) {
+			_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_2_BIT;
+		}
+
+		if (VK_SAMPLE_COUNT_8_BIT & supportedSamples) {
+			_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_8_BIT;
+		}
+		else if (VK_SAMPLE_COUNT_4_BIT & supportedSamples) {
+			_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_4_BIT;
+		}
+		else if (VK_SAMPLE_COUNT_2_BIT & supportedSamples) {
+			_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_2_BIT;
+		}
 	}
 
 	void Vulkan_RenderContext::CreateSurface()
