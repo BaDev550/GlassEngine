@@ -13,7 +13,9 @@ namespace ge::renderer {
 	private:
 		VkImage _image;
 		VmaAllocation _allocation;
-		VkImageLayout _imageLayout;
+		VkImageLayout _imageLayout{VK_IMAGE_LAYOUT_UNDEFINED};
+		VkFormat _format;
+		VkImageAspectFlags _aspectFlags;
 		
 		std::unordered_map<ImageSubresource, VkImageView> m_image_views;
 	};

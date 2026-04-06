@@ -1,46 +1,14 @@
 #include "gepch.h"
 #include "Vulkan_Image.h"
+#include "Vulkan_Types.h"
 
 namespace ge::renderer {
-	static constexpr VkImageType GetVkImageType(ImageType imageType) noexcept {
-		switch (imageType) {
-		case ImageType::e1D: return VK_IMAGE_TYPE_1D;
-		case ImageType::e2D: return VK_IMAGE_TYPE_2D;
-		case ImageType::e3D: return VK_IMAGE_TYPE_3D;
-		}
-	}
-
-	static constexpr VkImageUsageFlags GetVkUsageFlags(ImageUsageFlags usageFlags) noexcept {
-		VkImageUsageFlags out;
-		if (usageFlags.Has(ImageUsageFlagsBits::ColorAttachment))
-			out |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-		if (usageFlags.Has(ImageUsageFlagsBits::DepthStencilAttachment))
-			out |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-
-		if (usageFlags.Has(ImageUsageFlagsBits::Readonly))
-			out |= VK_IMAGE_USAGE_SAMPLED_BIT;
-
-		if (usageFlags.Has(ImageUsageFlagsBits::Writable))
-			out |= VK_IMAGE_USAGE_STORAGE_BIT;
-
-		if (usageFlags.Has(ImageUsageFlagsBits::TransferSrc))
-			out |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-
-		if (usageFlags.Has(ImageUsageFlagsBits::TransferDst))
-			out |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-
-		return out;
-	}
-
-	// TODO:
-	static constexpr VkFormat GetVkFormat() {
-		return VK_FORMAT_R8G8B8A8_UNORM;
-	}
-
 	Vulkan_Image::Vulkan_Image(const ImageCreateDesc& desc)
 		: Image(desc)
 	{
+		_format = utility::Vulkan_GetImageFormat(_desc.imageFormat);
+		_aspectFlags = utility::Vulkan_GetAspectFlags(_desc.imageFormat);
+
 		VkImageCreateFlags createFlags{};
 
 		if (desc.imageType == ImageType::e2D && (desc.arrayCount % 6) == 0)
@@ -55,12 +23,12 @@ namespace ge::renderer {
 		imageCreateInfo.arrayLayers = _desc.arrayCount;
 		imageCreateInfo.extent = VkExtent3D{_desc.extent.x, _desc.extent.y, _desc.extent.z };
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageCreateInfo.imageType = GetVkImageType(_desc.imageType);
-		imageCreateInfo.format = GetVkFormat();
+		imageCreateInfo.imageType = utility::Vulkan_GetImageType(_desc.imageType);
+		imageCreateInfo.format = _format;
 		imageCreateInfo.mipLevels = _desc.mipmapCount;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
 		imageCreateInfo.flags = createFlags;
-		imageCreateInfo.usage = GetVkUsageFlags(_desc.usageFlags);
+		imageCreateInfo.usage = utility::Vulkan_GetImageUsageFlags(_desc.usageFlags);
 
 		// imageCreateInfo.samples = VK_RENDER_CONTEXT.GetSampleCount(_desc.sampleCount);
 		imageCreateInfo.samples = VK_RENDER_CONTEXT->GetSampleCount();
@@ -82,7 +50,10 @@ namespace ge::renderer {
 		if (imageView == VK_NULL_HANDLE)
 		{
 			VkImageViewCreateInfo createInfo{};
-
+			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			createInfo.format = VK_FORMAT_A1B5G5R5_UNORM_PACK16;
+			createInfo.image = _image;
+			
 			VK_RENDER_CONTEXT->GetDevice();
 			vkCreateImageView(VK_RENDER_CONTEXT->GetDevice(), &createInfo, VK_ALLOCATOR_CALLBACKS, &imageView);
 		}

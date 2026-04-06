@@ -4,6 +4,7 @@
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Utilities/Flags.h"
 #include "RenderObject.h"
+#include "Types.h"
 
 namespace ge::renderer {
 	namespace utility {
@@ -13,31 +14,6 @@ namespace ge::renderer {
 			return instanceSize;
 		}
 	}
-
-	enum class BufferUsageFlagsBits : uint16_t {
-		None				= 0,
-		Uniform				= BIT(0),
-		Readonly			= BIT(1),
-		Writable			= BIT(2),
-		TransferDst			= BIT(3),
-		TransferSrc			= BIT(4),
-		Vertex				= BIT(5),
-		Index				= BIT(6),
-		Indirect			= BIT(7),
-	};
-	using BufferUsageFlags = ge::Flags<BufferUsageFlagsBits>;
-
-	enum class BufferCpuAccess : uint8_t {
-		None = 0,
-		Write,
-		ReadWrite
-	};
-
-	enum class BufferMemoryType : uint8_t {
-		Auto = 0,
-		DeviceMemory,
-		SystemMemory
-	};
 
 	struct BufferCreateDesc {
 		uint32_t elementSize;
@@ -70,8 +46,3 @@ namespace ge::renderer {
 		void *_mappedPtr;
 	};
 }
-
-template <>
-struct ge::FlagTraits<ge::renderer::BufferUsageFlagsBits> {
-	static constexpr bool is_bitmask = true;
-};
