@@ -17,7 +17,13 @@ namespace ge::renderer {
 			ImageCreateDesc createDesc{};
 			createDesc.imageFormat = _specs.format;
 			createDesc.extent = { _specs.width, _specs.height, 1 };
-			createDesc.usageFlags = ImageUsageFlagsBits::ColorAttachment;
+			createDesc.usageFlags |= ImageUsageFlagsBits::Readonly;
+			if (_specs.attachment)
+				createDesc.usageFlags |= utility::IsColorFormat(_specs.format) ?
+					ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
+			else
+				createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
+
 			_image = Image::Create(createDesc); // TODO (0x): add a function to pass data into image
 		}
 	}
