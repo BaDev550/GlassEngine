@@ -81,6 +81,13 @@ namespace ge::renderer {
 		eCubeArray,
 	};
 
+	enum class ShaderDataType : uint8_t {
+		None = 0,
+		Sampler2D,
+		SamplerCube,
+		UniformBuffer
+	};
+
 	namespace utility {
 		[[nodiscard]] constexpr bool IsDepthFormat(ImageFormat imageFormat) noexcept {
 			return ImageFormat::D16 == imageFormat || ImageFormat::D32 == imageFormat;
