@@ -1,6 +1,7 @@
 #pragma once
 #include "GlassEngine/Renderer/Shader.h"
 #include "Vulkan_RenderContext.h"
+#include "Vulkan_Types.h"
 #include <map>
 
 namespace ge::renderer {

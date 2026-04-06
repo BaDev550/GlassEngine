@@ -164,7 +164,7 @@ namespace ge::renderer {
                 uint32_t stride = 0;
                 for (const auto& input : filteredInputs) {
                     VkFormat format = static_cast<VkFormat>(input->format);
-                    uint32_t size = GetFormatSize(format);
+                    uint32_t size = utility::GetFormatSize(format);
 
                     VkVertexInputAttributeDescription attrib{};
                     attrib.location = input->location;
