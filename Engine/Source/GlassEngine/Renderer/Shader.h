@@ -1,14 +1,8 @@
 #pragma once
 #include "GlassEngine/Renderer/RenderObject.h"
+#include "GlassEngine/Renderer/Types.h"
 
 namespace ge::renderer {
-	enum class ShaderDataType : uint8_t {
-		None = 0,
-		Sampler2D,
-		SamplerCube,
-		UniformBuffer
-	};
-
 	enum class ShaderStat : uint8_t {
 		None = 0,
 		LoadedCompiled
