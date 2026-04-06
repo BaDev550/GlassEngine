@@ -34,8 +34,6 @@ namespace ge::renderer {
 		mem::Vulkan_Allocator& GetAllocator() { return *_allocator; }
 		VkInstance GetInstance() const { return _instance; }
 		VkDevice GetDevice() const { return _device; }
-		VkPhysicalDevice GetPhysicalDevice() const { return _physicalDevice; }
-		VkPhysicalDeviceProperties GetPhysicalDeviceProperties() const { return _physicalDeviceProperties; }
 
 		VkSampleCountFlagBits GetSampleCount() { return VK_SAMPLE_COUNT_1_BIT; }
 	private:
@@ -59,7 +57,6 @@ namespace ge::renderer {
 	private:
 		VkInstance _instance = VK_NULL_HANDLE;
 		VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
-		VkPhysicalDeviceProperties _physicalDeviceProperties;
 		VkDevice _device = VK_NULL_HANDLE;
 		VkSurfaceKHR _surface = VK_NULL_HANDLE;
 		VkCommandPool _commandPool = VK_NULL_HANDLE;

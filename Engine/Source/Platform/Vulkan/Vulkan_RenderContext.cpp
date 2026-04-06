@@ -53,7 +53,7 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderContext::Wait() {
-		vkDeviceWaitIdle(_device);
+		vkQueueWaitIdle(_graphicsQueue);
 	}
 
 	void Vulkan_RenderContext::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& image, VmaAllocation& alloc)
@@ -152,9 +152,50 @@ namespace ge::renderer {
 
 		FindQueueFamilies();
 
-		vkGetPhysicalDeviceProperties(_physicalDevice, &_physicalDeviceProperties);
+		const GEVector<std::string> optExts{
+			VK_EXT_MEMORY_BUDGET_EXTENSION_NAME,
+			VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME,
+			VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME,
+			VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME,
+			VK_KHR_MAINTENANCE_5_EXTENSION_NAME
+		};
+
+		uint32_t extCount{};
+		vkEnumerateDeviceExtensionProperties(_physicalDevice, nullptr, &extCount, nullptr);
+		GEVector<VkExtensionProperties> extensions(extCount);
+		vkEnumerateDeviceExtensionProperties(_physicalDevice, nullptr, &extCount, extensions.data());
+
+		GEVector<GEString> supportedExtensions{};
+		for (const auto& extension : extensions) {
+			const std::string extensionName = extension.extensionName;
+
+			if (extensionName == VK_EXT_MEMORY_BUDGET_EXTENSION_NAME) {
+				_deviceFeatures.memoryBudget = true; supportedExtensions.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+			}
+
+			if (extensionName == VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME) {
+				_deviceFeatures.hostImageCopy = true; supportedExtensions.push_back(VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME);
+			}
+
+			if (extensionName == VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME) {
+				_deviceFeatures.unifiedImageLayouts = true; supportedExtensions.push_back(VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME);
+			}
+
+			if (extensionName == VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME) {
+				_deviceFeatures.shaderStencilExport = true; supportedExtensions.push_back(VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME);
+			}
+
+			if (extensionName == VK_KHR_MAINTENANCE_5_EXTENSION_NAME) {
+				_deviceFeatures.maintenance5 = true; supportedExtensions.push_back(VK_KHR_MAINTENANCE_5_EXTENSION_NAME);
+			}
+		}
+
+		VkPhysicalDeviceProperties physicalDeviceProperties;
+		vkGetPhysicalDeviceProperties(_physicalDevice, &physicalDeviceProperties);
 		GE_GRAPCHICS_INFO("GPU Selected: ");
-		GE_GRAPCHICS_INFO("	GPU Name: {}", _physicalDeviceProperties.deviceName);
+		GE_GRAPCHICS_INFO("GPU Name: {}", physicalDeviceProperties.deviceName);
+		for (const auto ext : supportedExtensions)
+			GE_GRAPCHICS_INFO("GPU supported optional extensions: {}", ext);
 	}
 
 	void Vulkan_RenderContext::CreateSurface()
