@@ -19,8 +19,9 @@ namespace ge::renderer {
 		VkShaderModule GetVertexModule() const { return _vertexModule; }
 		VkShaderModule GetFragmentModule() const { return _fragmentModule; }
 
-		const std::map<uint32_t, VkDescriptorSetLayout>& GetDescriptorLayouts() const { return _descriptorLayouts; }
-		const std::map<uint32_t, std::map<uint32_t, DescriptorInfo>>& GetReflectData() const { return _compiledData.ReflectData; }
+		[[nodiscard]] const CompiledData& GetCompiledData() const { return _compiledData; }
+		[[nodiscard]] const std::map<uint32_t, VkDescriptorSetLayout>& GetDescriptorLayouts() const { return _descriptorLayouts; }
+		[[nodiscard]] const std::map<uint32_t, std::map<uint32_t, DescriptorInfo>>& GetReflectData() const { return _compiledData.ReflectData; }
 	private:
 		void CreateShaderModule(const GEVector<char>& code, VkShaderModule& shaderModule);
 		GEString _vertexPath, _fragmentPath;
