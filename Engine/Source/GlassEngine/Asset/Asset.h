@@ -3,6 +3,19 @@
 #include "GlassEngine/Utilities/UUID.h"
 
 namespace ge {
+	/* All the source mesh / textures are loaded from disk to engine
+	* then selects the type for example for mesh:
+	*	selected type is static mesh so it calls static mesh serializer to serialize new file
+	*	into selected directory reseves first 4 byte for magic names
+	*	for model its MODL then serializes the model as .gasset in disk
+	*	when loading the mesh is selected from disk looks inside of the first 4 bytes to select witch is
+	*	model or other type then processes the mesh or texture
+	* 
+	* constexpr char MODEL_MAGIC[4] = { 'M', 'O', 'D', 'L' };
+	* constexpr char TEXTURE_MAGIC[4] = { 'T', 'E', 'X', 'T' };
+	* constexpr char MATERIAL_MAGIC[4] = { 'M', 'A', 'T', 'L' };
+	*/
+
 	enum class AssetType : uint8_t {
 		Unknown = 0,
 		SourceMesh,
