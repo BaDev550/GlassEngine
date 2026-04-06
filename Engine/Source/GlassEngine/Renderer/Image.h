@@ -36,6 +36,11 @@ namespace ge::renderer {
 		eRGBA8 = 0
 	};
 
+	enum class ImageFilter : uint8_t {
+		Linear,
+		Nearest
+	};
+
 	enum class ImageSubresourceType : uint8_t {
 		e1D = 0,
 		e1DArray,
