@@ -143,7 +143,7 @@ namespace ge::renderer {
 
         for (const auto& ds : bindings) {
             shaderInfo.ReflectData[ds->set][ds->binding] = { ds->name, utils::GetResourceType(ds), ds->count };
-            GE_GRAPCHICS_INFO("Found input/buffer n:{}, b:{}", ds->name, ds->binding);
+            GE_GRAPHICS_INFO("Found input/buffer n:{}, b:{}", ds->name, ds->binding);
         }
 
         if (module.shader_stage & SPV_REFLECT_SHADER_STAGE_VERTEX_BIT) {

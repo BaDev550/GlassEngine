@@ -114,7 +114,7 @@ namespace ge::renderer {
 		createInfo.ppEnabledExtensionNames = instanceExtensions.data();
 		if (vkCreateInstance(&createInfo, VK_ALLOCATOR_CALLBACKS, &_instance) != VK_SUCCESS)
 			throw std::runtime_error("Failed to create vulkan instance");
-		GE_GRAPCHICS_INFO("Vulkan instance created");
+		GE_GRAPHICS_INFO("Vulkan instance created");
 	}
 
 	void Vulkan_RenderContext::CreateDebugMessenger() {
@@ -185,10 +185,10 @@ namespace ge::renderer {
 
 		VkPhysicalDeviceProperties physicalDeviceProperties;
 		vkGetPhysicalDeviceProperties(_physicalDevice, &physicalDeviceProperties);
-		GE_GRAPCHICS_INFO("GPU Selected: ");
-		GE_GRAPCHICS_INFO("GPU Name: {}", physicalDeviceProperties.deviceName);
+		GE_GRAPHICS_INFO("GPU Selected: ");
+		GE_GRAPHICS_INFO("GPU Name: {}", physicalDeviceProperties.deviceName);
 		for (const auto ext : supportedExtensions)
-			GE_GRAPCHICS_INFO("GPU supported optional extensions: {}", ext);
+			GE_GRAPHICS_INFO("GPU supported optional extensions: {}", ext);
 
 		physicalDeviceProperties.limits.framebufferColorSampleCounts;
 

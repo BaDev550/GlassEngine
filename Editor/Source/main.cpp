@@ -8,13 +8,13 @@
 class EditorLayer : public ge::Layer {
 public:
 	EditorLayer() : ge::Layer("EditorLayer") {
-		GE_APPLICATOIN_INFO("EditorLayer created!");
+		GE_APPLICATION_INFO("EditorLayer created!");
 	}
 	virtual void OnAttach() override {
-		GE_APPLICATOIN_INFO("EditorLayer attached!");
+		GE_APPLICATION_INFO("EditorLayer attached!");
 	}
 	virtual void OnDetach() override {
-		GE_APPLICATOIN_INFO("EditorLayer detached!");
+		GE_APPLICATION_INFO("EditorLayer detached!");
 	}
 	virtual void OnUpdate(float deltaTime) override {}
 };
@@ -22,7 +22,7 @@ public:
 class EditorApp : public ge::Application {
 public:
 	EditorApp(const ge::ApplicationSpecification& createInfo) : ge::Application(createInfo) {
-		GE_APPLICATOIN_INFO("EditorApp created!");
+		GE_APPLICATION_INFO("EditorApp created!");
 		PushLayer(new EditorLayer());
 	}
 };
