@@ -55,18 +55,24 @@ namespace ge {
         }
 
         uint32_t width, height;
-        ImportAssetData asset;
+        renderer::TextureSpecification textureSpecs;
         in.ReadData(reinterpret_cast<char*>(&width),  sizeof(uint32_t));
         in.ReadData(reinterpret_cast<char*>(&height), sizeof(uint32_t));
-        in.ReadData(reinterpret_cast<char*>(&asset),  sizeof(renderer::TextureSpecification));
-        asset.textureSpecs->width = width;
-        asset.textureSpecs->height = height;
+        in.ReadData(reinterpret_cast<char*>(&textureSpecs),  sizeof(renderer::TextureSpecification));
+        textureSpecs.width = width;
+        textureSpecs.height = height;
 
         size_t dataSize = width * height * STBI_rgb_alpha;
         std::vector<uint8_t> pixelData(dataSize);
         in.ReadData(reinterpret_cast<char*>(pixelData.data()), dataSize);
 
         mem::Ref<renderer::Texture2D> texture = renderer::Texture2D::Create(*asset.textureSpecs, pixelData.data());
+        return texture;
+    }
+
+    mem::Ref<Asset> TextureSerializer::DeserializeFromFile(const std::vector<uint8_t>& buffer)
+    {
+        mem::Ref<renderer::Texture2D> texture = renderer::Texture2D::Create(*asset.textureSpecs, buffer.data());
         return texture;
     }
 }

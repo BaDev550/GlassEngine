@@ -46,8 +46,10 @@ namespace ge {
 		RuntimeAssetManager(const std::filesystem::path& assetPakPath);
 		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) override;
 	private:
-		AssetRegistry _assetRegistry;
-		PackedAssetMap _loadedAssets;
+		bool AssetLoaded(AssetHandle handle);
+		bool AssetInRegistry(AssetHandle handle);
+		PackedAssetMap _assetRegistry;
+		AssetMap _loadedAssets;
 		file::Reader _pakFileReader;
 	};
 }

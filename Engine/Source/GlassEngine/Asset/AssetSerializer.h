@@ -9,6 +9,7 @@ namespace ge {
 		virtual ~AssetSerializer() = default;
 		virtual void SerializeToFile(const std::filesystem::path& target, mem::Ref<Asset>& asset, const AssetMetadata& mtd) = 0;
 		[[nodiscard]] virtual mem::Ref<Asset> DeserializeFromFile(const AssetMetadata& mtd) = 0;
+		[[nodiscard]] virtual mem::Ref<Asset> DeserializeFromFile(const std::vector<uint8_t>& buffer) = 0;
 	};
 
 	class SourceSerializer : public mem::RefCounted {
@@ -25,5 +26,6 @@ namespace ge {
 	public:
 		virtual void SerializeToFile(const std::filesystem::path& target, mem::Ref<Asset>& asset, const AssetMetadata& mtd) override {};
 		[[nodiscard]] virtual mem::Ref<Asset> DeserializeFromFile(const AssetMetadata& mtd) override;
+		[[nodiscard]] virtual mem::Ref<Asset> DeserializeFromFile(const std::vector<uint8_t>& buffer) override;
 	};
 }
