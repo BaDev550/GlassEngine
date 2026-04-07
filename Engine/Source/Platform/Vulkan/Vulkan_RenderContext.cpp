@@ -331,6 +331,14 @@ namespace ge::renderer {
 		_allocator->CreateAllocator(_instance, _physicalDevice, _device);
 	}
 
+	void Vulkan_RenderContext::CreatePipelineCache() {
+		// TODO (dnm) : get pipeline cache from cache file
+		// TODO (dnm) : write cache to file
+		VkPipelineCacheCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+		vkCreatePipelineCache(_device, &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipelineCache);
+	}
+
 	bool Vulkan_RenderContext::CheckEnabledLayersSupport() {
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);

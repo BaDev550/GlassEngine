@@ -32,11 +32,12 @@ namespace ge::renderer {
 		void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 		//void TransitionImageLayout(); later
 
-		mem::Vulkan_Allocator& GetAllocator() { return *_allocator; }
-		VkInstance GetInstance() const { return _instance; }
-		VkDevice GetDevice() const { return _device; }
+		[[nodiscard]] mem::Vulkan_Allocator& GetAllocator() { return *_allocator; }
+		[[nodiscard]] VkInstance GetInstance() const noexcept { return _instance; }
+		[[nodiscard]] VkInstance GetPipelineCache() const noexcept { return _pipelineCache; }
+		[[nodiscard]] VkDevice GetDevice() const noexcept { return _device; }
 
-		VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) { return _sampleMap[static_cast<uint16_t>(sample)]; }
+		[[nodiscard]] VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) const noexcept { return _sampleMap[static_cast<uint16_t>(sample)]; }
 	private:
 		void CreateVulkanAllocator();
 		void CreateInstance();
@@ -45,6 +46,7 @@ namespace ge::renderer {
 		void CreateSurface();
 		void CreateLogicalDevice();
 		void CreateContextCommandPool();
+		void CreatePipelineCache();
 		bool CheckEnabledLayersSupport();
 		bool IsPhysicalDeviceSuitable(VkPhysicalDevice device);
 		void FindQueueFamilies();
@@ -61,6 +63,7 @@ namespace ge::renderer {
 		VkSurfaceKHR _surface = VK_NULL_HANDLE;
 		VkCommandPool _commandPool = VK_NULL_HANDLE;
 		VkDebugUtilsMessengerEXT _debugMessenger = VK_NULL_HANDLE;
+		VkPipelineCache _pipelineCache = VK_NULL_HANDLE;
 
 		uint32_t _graphicsQueueFamilyIndex{};
 		VkQueue _graphicsQueue = VK_NULL_HANDLE;

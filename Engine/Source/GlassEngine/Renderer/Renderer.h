@@ -17,7 +17,7 @@ namespace ge::renderer {
 		static void DrawIndexed(CommandBuffer* cmd);
 
 		static RenderStats GetRenderStats();
-		static ShaderLibrary& GetShaderLibrary();
+		static ShaderLibrary& GetShaderLibrary(); 
 		static mem::Ref<RenderAPI> GetRenderAPI();
 	};
 }
