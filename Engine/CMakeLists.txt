@@ -5,6 +5,7 @@ set_target_properties(Engine PROPERTIES
 )
 
 find_package(Vulkan)
+find_package(slang)
 find_library(Vulkan_SHADERC NAMES shaderc_shared HINTS "$ENV{VULKAN_SDK}/Lib")
 find_library(Vulkan_SHADERC_UTILS NAMES shaderc_util HINTS "$ENV{VULKAN_SDK}/Lib")
 
@@ -80,6 +81,7 @@ target_link_libraries(Engine
 		glfw
         spdlog
 		Vulkan::Vulkan
+        slang::slang
         GPUOpen::VulkanMemoryAllocator
         ${Vulkan_SHADERC}
         ${Vulkan_SHADERC_UTILS}

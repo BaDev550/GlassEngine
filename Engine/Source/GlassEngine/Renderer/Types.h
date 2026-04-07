@@ -1,6 +1,8 @@
 #pragma once
 
-#include "GlassEngine/Utilities/Flags.h"
+#include <GlassEngine/Utilities/Flags.h>
+#include <GlassEngine/Utilities/Blob.h>
+#include <GlassEngine/Core/Memory.h>
 
 namespace ge::renderer {
 	enum class BufferUsageFlagsBits : uint16_t {
@@ -88,6 +90,52 @@ namespace ge::renderer {
 		UniformBuffer
 	};
 
+	enum class ShaderStageBits : uint16_t {
+		Vertex = BIT(1),
+		Geometry = BIT(2),
+		TessellationControl = BIT(3),
+		TessellationEvaluation = BIT(4),
+		Fragment = BIT(5),
+		Compute = BIT(6),
+	};
+	using ShaderStageFlags = ge::Flags<ShaderStageBits>;
+
+	enum class ShaderResourceType : uint8_t {
+		UniformBuffer = 0,
+		ReadonlyBuffer,
+		WritableBuffer,
+		ReadonlyImage,
+		WritableImage,
+		Sampler,
+	};
+
+	enum class ShaderType : uint8_t {
+		Graphics,
+		Compute,
+	};
+
+	struct ShaderResource {
+		GEString name;
+		uint16_t resourceCount;
+		uint16_t bindingIndex;
+		ShaderResourceType type;
+	};
+
+	struct ShaderEntryPoint {
+		GEString name;
+		ShaderStageBits type;
+	};
+
+	struct ShaderReflection {
+		std::unordered_map<GEString, ShaderEntryPoint> entryPoints;
+		std::unordered_map<GEString, ShaderResource> resources;
+	};
+
+	struct ShaderData {
+		ShaderReflection reflection;
+		std::vector<char> byteCode;
+	};
+
 	namespace utility {
 		[[nodiscard]] constexpr bool IsDepthFormat(ImageFormat imageFormat) noexcept {
 			return ImageFormat::D16 == imageFormat || ImageFormat::D32 == imageFormat;
@@ -105,6 +153,11 @@ namespace ge::renderer {
 
 template <>
 struct ge::FlagTraits<ge::renderer::BufferUsageFlagsBits> {
+	static constexpr bool is_bitmask = true;
+};
+
+template <>
+struct ge::FlagTraits<ge::renderer::ShaderStageBits> {
 	static constexpr bool is_bitmask = true;
 };
 

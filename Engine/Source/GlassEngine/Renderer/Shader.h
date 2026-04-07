@@ -3,21 +3,6 @@
 #include "GlassEngine/Renderer/Types.h"
 
 namespace ge::renderer {
-	enum class ShaderResourceType : uint8_t {
-		UniformBuffer = 0,
-		ReadonlyBuffer,
-		WritableBuffer,
-		ReadonlyImage,
-		WritableImage,
-		Sampler,
-	};
-
-	struct ShaderResource {
-		std::string name;
-		uint16_t resourceCount;
-		ShaderResourceType type;
-	};
-
 	enum class ShaderStat : uint8_t {
 		None = 0,
 		LoadedCompiled
