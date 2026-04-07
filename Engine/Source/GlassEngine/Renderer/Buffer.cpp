@@ -4,7 +4,7 @@
 #include "Platform/Vulkan/Vulkan_Buffer.h"
 
 namespace ge::renderer {
-	ge::mem::Ref<Buffer> Buffer::Create(const BufferCreateDesc& desc)
+	ge::mem::Ref<Buffer> Buffer::Create(const BufferSpec& desc)
 	{
 		switch (RenderAPI::GetAPI())
 		{

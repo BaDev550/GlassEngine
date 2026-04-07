@@ -3,7 +3,7 @@
 #include "Vulkan_Types.h"
 
 namespace ge::renderer {
-	Vulkan_Image::Vulkan_Image(const ImageCreateDesc& desc)
+	Vulkan_Image::Vulkan_Image(const ImageSpec& desc)
 		: Image(desc)
 	{
 		_format = utility::Vulkan_GetImageFormat(_desc.imageFormat);

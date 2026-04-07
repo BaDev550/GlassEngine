@@ -14,7 +14,7 @@ namespace ge::renderer {
 		stbi_uc* data = stbi_load(filePath.string().c_str(), &width, &height, &channes, STBI_rgb_alpha);
 
 		if (data) {
-			ImageCreateDesc createDesc{};
+			ImageSpec createDesc{};
 			createDesc.imageFormat = _specs.format;
 			createDesc.extent = { _specs.width, _specs.height, 1 };
 			createDesc.usageFlags |= ImageUsageFlagsBits::Readonly;

@@ -10,7 +10,7 @@
 #include <bitset>
 
 namespace ge::renderer {
-	struct ImageCreateDesc {
+	struct ImageSpec {
 		glm::uvec3 extent;
 		ImageUsageFlags usageFlags;
 		ImageSampleCount sampleCount;
@@ -32,15 +32,15 @@ namespace ge::renderer {
 
 	class Image : public RenderObject {
 	public:
-		[[nodiscard]] static ge::mem::Ref<Image> Create(const ImageCreateDesc& desc);
+		[[nodiscard]] static ge::mem::Ref<Image> Create(const ImageSpec& desc);
 
-		explicit Image(const ImageCreateDesc& desc) noexcept : _desc(desc) {}
+		explicit Image(const ImageSpec& desc) noexcept : _desc(desc) {}
 		virtual ~Image() = default;
 
 		[[nodiscard]] const auto& GetDescRef() const noexcept { return _desc; }
 		[[nodiscard]] auto GetDesc() const noexcept { return _desc; }
 	protected:
-		ImageCreateDesc _desc;
+		ImageSpec _desc;
 	};
 }
 

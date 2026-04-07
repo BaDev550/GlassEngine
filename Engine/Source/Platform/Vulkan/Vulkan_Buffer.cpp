@@ -3,7 +3,7 @@
 #include "Vulkan_Types.h"
 
 namespace ge::renderer {
-	Vulkan_Buffer::Vulkan_Buffer(const BufferCreateDesc& desc)
+	Vulkan_Buffer::Vulkan_Buffer(const BufferSpec& desc)
 		: Buffer(desc)
 	{
 		VkBufferCreateInfo bufferCreateInfo{};

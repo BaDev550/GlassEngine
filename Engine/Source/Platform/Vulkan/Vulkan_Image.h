@@ -6,7 +6,7 @@
 namespace ge::renderer {
 	class Vulkan_Image final : public Image {
 	public:
-		Vulkan_Image(const ImageCreateDesc& desc);
+		Vulkan_Image(const ImageSpec& desc);
 		virtual ~Vulkan_Image();
 
 		[[nodiscard]] VkImageView CreateGetImageView(ImageSubresource subresource) noexcept;

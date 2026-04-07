@@ -5,7 +5,7 @@
 namespace ge::renderer {
 	class Vulkan_Buffer final : public Buffer {
 	public:
-		Vulkan_Buffer(const BufferCreateDesc& desc);
+		Vulkan_Buffer(const BufferSpec& desc);
 		virtual ~Vulkan_Buffer();
 	private:
 		VkBuffer _buffer;

@@ -3,7 +3,7 @@
 #include "Platform/Vulkan/Vulkan_Image.h"
 
 namespace ge::renderer {
-	ge::mem::Ref<Image> Image::Create(const ImageCreateDesc& desc)
+	ge::mem::Ref<Image> Image::Create(const ImageSpec& desc)
 	{
 		switch (RenderAPI::GetAPI())
 		{
