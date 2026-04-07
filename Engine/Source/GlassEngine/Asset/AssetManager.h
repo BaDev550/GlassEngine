@@ -2,18 +2,20 @@
 #include "Asset.h"
 #include "AssetMetadata.h"
 #include "AssetImporter.h"
+#include "GlassEngine/Serialization/FileSerializer.h"
 #include <map>
 
 namespace ge {
 	using AssetRegistry = std::unordered_map<AssetHandle, AssetMetadata>;
 	using AssetMap = std::map<AssetHandle, mem::Ref<Asset>>;
+	using PackedAssetMap = std::map<AssetHandle, PackedAsset>;
 	class AssetManager {
 	public:
 		AssetManager() { _importer = mem::CreateScope<AssetImporter>(); }
 		virtual ~AssetManager() = default;
 		AssetManager(AssetManager&) = delete;
 		AssetManager& operator=(AssetManager&) = delete;
-		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) = 0; // Gets the loaded asset from handle
+		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) = 0;
 	protected:
 		mem::Scope<AssetImporter> _importer;
 	};
@@ -24,6 +26,7 @@ namespace ge {
 		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) override;
 		AssetHandle ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
 		mem::Ref<Asset> LoadAssetFromFile(AssetHandle handle);
+		void CompileIntoPakFile(const std::filesystem::path& outPath);
 	private:
 		bool AssetInRegistry(AssetHandle handle);
 		bool AssetLoaded(AssetHandle handle);
@@ -40,6 +43,11 @@ namespace ge {
 
 	class RuntimeAssetManager : public AssetManager {
 	public:
-		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) {};
+		RuntimeAssetManager(const std::filesystem::path& assetPakPath);
+		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) override;
+	private:
+		AssetRegistry _assetRegistry;
+		PackedAssetMap _loadedAssets;
+		file::Reader _pakFileReader;
 	};
 }

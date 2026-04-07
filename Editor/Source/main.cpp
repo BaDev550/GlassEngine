@@ -27,6 +27,8 @@ public:
 		assetData.textureSpecs = &specs;
 		ge::AssetHandle texture = GetAssetManager().ImportAsset(assetData, "Resouces/Texture_01.png", "Assets/Textures/Texture_01");
 		auto asset = GetAssetManager().GetAsset(texture).Cast<ge::renderer::Texture2D>();
+
+		GetAssetManager().CompileIntoPakFile("Assets.pak");
 	}
 };
 

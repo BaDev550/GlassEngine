@@ -68,6 +68,13 @@ namespace ge {
 		virtual AssetType GetAssetType() const { return GetStaticAssetType(); }
 	};
 
+	struct PackedAsset {
+		AssetHandle handle;
+		uint64_t offset;
+		uint64_t size;
+		AssetType type;
+	};
+
 	namespace renderer {
 		struct TextureSpecification;
 	}

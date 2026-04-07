@@ -20,7 +20,10 @@ namespace ge::file {
 	class Reader {
 	public:
 		Reader(const std::filesystem::path& path) : _path(path) { _stream = std::ifstream(path, std::ifstream::in | std::ifstream::binary); }
+		Reader(const std::filesystem::path& path, std::ios_base::openmode mode) : _path(path) { _stream = std::ifstream(path, mode); }
+		Reader() : _path("") {}
 		~Reader() { _stream.close(); }
+		void OpenStream(const std::filesystem::path& path) { _path = path; _stream.open(path.string(), std::ifstream::in | std::ifstream::binary); }
 		bool IsStreamGood() const { return _stream.good(); }
 		uint64_t GetStreamPosition() { return _stream.tellg(); }
 		void SetStreamPosition(uint64_t pos) { _stream.seekg(pos); }
