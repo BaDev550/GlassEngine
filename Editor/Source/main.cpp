@@ -20,15 +20,15 @@ public:
 		GE_APPLICATOIN_INFO("EditorApp created!");
 		PushLayer(new EditorLayer());
 
-		ge::ImportAssetData assetData{};
-		ge::renderer::TextureSpecification specs{};
-		specs.filter = ge::renderer::ImageFilter::Linear;
-		specs.format = ge::renderer::ImageFormat::RGBA8;
-		assetData.textureSpecs = &specs;
-		ge::AssetHandle texture = GetAssetManager().ImportAsset(assetData, "Resouces/Texture_01.png", "Assets/Textures/Texture_01");
-		auto asset = GetAssetManager().GetAsset(texture).Cast<ge::renderer::Texture2D>();
+		//ge::ImportAssetData assetData{};
+		//ge::renderer::TextureSpecification specs{};
+		//specs.filter = ge::renderer::ImageFilter::Linear;
+		//specs.format = ge::renderer::ImageFormat::RGBA8;
+		//assetData.textureSpecs = &specs;
+		//ge::AssetHandle texture = GetAssetManager().ImportAsset(assetData, "Resouces/Texture_01.png", "Assets/Textures/Texture_01");
+		//auto asset = GetAssetManager().GetAsset(texture).Cast<ge::renderer::Texture2D>();
 
-		GetAssetManager().CompileIntoPakFile("Assets.pak");
+		//GetAssetManager().CompileIntoPakFile("Assets.pak");
 	}
 };
 

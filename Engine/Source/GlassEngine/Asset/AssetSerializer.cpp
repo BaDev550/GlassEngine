@@ -2,6 +2,7 @@
 #include "AssetSerializer.h"
 #include "AssetExtensions.h"
 #include "GlassEngine/Serialization/FileSerializer.h"
+#include "GlassEngine/Serialization/BufferReader.h"
 #include "GlassEngine/Renderer/Texture.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -66,13 +67,38 @@ namespace ge {
         std::vector<uint8_t> pixelData(dataSize);
         in.ReadData(reinterpret_cast<char*>(pixelData.data()), dataSize);
 
-        mem::Ref<renderer::Texture2D> texture = renderer::Texture2D::Create(*asset.textureSpecs, pixelData.data());
+        mem::Ref<renderer::Texture2D> texture = renderer::Texture2D::Create(textureSpecs, pixelData.data());
         return texture;
     }
 
     mem::Ref<Asset> TextureSerializer::DeserializeFromFile(const std::vector<uint8_t>& buffer)
     {
-        mem::Ref<renderer::Texture2D> texture = renderer::Texture2D::Create(*asset.textureSpecs, buffer.data());
+        file::BufferReader in(buffer);
+        char magic[4];
+        if (!in.ReadData(magic, 4) || strncmp(magic, TEXTURE_MAGIC, 4) != 0) {
+            GE_CORE_ERROR("Invalid magic for texture asset");
+            return nullptr;
+        }
+        uint32_t width, height;
+        if (!in.Read(width) || !in.Read(height)) {
+            GE_CORE_ERROR("Failed to read dimensions from buffer");
+            return nullptr;
+        }
+        renderer::TextureSpecification specs;
+        if (!in.Read(specs)) {
+            GE_CORE_ERROR("Failed to read specs");
+            return nullptr;
+        }
+        specs.width = width;
+        specs.height = height;
+
+        size_t dataSize = width * height * STBI_rgb_alpha; // STBI_rgb_alpha TEMP
+        const uint8_t* pixelData = in.ReadPtr(dataSize);
+        if (!pixelData) {
+            GE_CORE_ERROR("No texture data found in buffer or buffer size mismacth with image size");
+            return nullptr;
+        }
+        mem::Ref<renderer::Texture2D> texture = renderer::Texture2D::Create(specs, pixelData);
         return texture;
     }
 }

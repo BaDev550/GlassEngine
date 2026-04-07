@@ -38,6 +38,7 @@ namespace ge {
 		LayerStack _layerStack;
 
 		mem::Scope<EditorAssetManager> _assetManager; // Temp variable in application it needs to be moved in project class
+		mem::Scope<RuntimeAssetManager> _rAssetManager;
 
 		bool _forceClose = false;
 	};
