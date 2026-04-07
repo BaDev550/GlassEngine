@@ -15,17 +15,17 @@ namespace ge {
 		Logger::Init();
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		renderer::Renderer3D::Init();
-		//_assetManager = mem::CreateScope<EditorAssetManager>();
-		_rAssetManager = mem::CreateScope<RuntimeAssetManager>("Assets.pak");
+		_assetManager = mem::CreateScope<EditorAssetManager>();
+		//_rAssetManager = mem::CreateScope<RuntimeAssetManager>("Assets.pak");
 
-		//ImportAssetData assetData{};
-		//ge::renderer::TextureSpecification textureSpecs{};
-		//textureSpecs.filter = ge::renderer::ImageFilter::Linear;
-		//textureSpecs.format = ge::renderer::ImageFormat::RGBA8;
-		//assetData.textureSpecs = &textureSpecs;
-		//auto iconHandle = _assetManager->ImportAsset(assetData, "Resouces/icon-512.png");
+		ImportAssetData assetData{};
+		ge::renderer::TextureSpecification textureSpecs{};
+		textureSpecs.filter = ge::renderer::ImageFilter::Linear;
+		textureSpecs.format = ge::renderer::ImageFormat::RGBA8;
+		assetData.textureSpecs = &textureSpecs;
+		auto iconHandle = _assetManager->ImportAsset(assetData, "Resouces/icon-512.png");
 
-		auto iconAsset = _rAssetManager->GetAsset(10441522450149829031).Cast<renderer::Texture2D>();
+		auto iconAsset = _assetManager->GetAsset(iconHandle).Cast<renderer::Texture2D>();
 		_window->SetIcon(iconAsset->GetData(), iconAsset->GetWidth(), iconAsset->GetHeight());
 	}
 
