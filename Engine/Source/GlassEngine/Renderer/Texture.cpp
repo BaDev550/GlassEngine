@@ -18,11 +18,11 @@ namespace ge::renderer {
 		return nullptr;
 	}
 
-	ge::mem::Ref<Texture2D> Texture2D::Create(const TextureSpecification& spec, const std::filesystem::path& filePath)
+	ge::mem::Ref<Texture2D> Texture2D::Create(const TextureSpecification& spec, const void* data)
 	{
 		switch (RenderAPI::GetAPI())
 		{
-		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Texture2D>::Create(spec, filePath);
+		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Texture2D>::Create(spec, data);
 		case GraphicsAPI::DirectX11: return nullptr;
 		case GraphicsAPI::OpenGL: return nullptr;
 		default:

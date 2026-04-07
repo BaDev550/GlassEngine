@@ -1,18 +1,14 @@
 #include "gepch.h"
 #include "Vulkan_Texture.h"
 
-#include "stb_image.h"
-
 namespace ge::renderer {
 	Vulkan_Texture2D::Vulkan_Texture2D(const TextureSpecification& spec) {
 		_specs = spec;
 	}
 
-	Vulkan_Texture2D::Vulkan_Texture2D(const TextureSpecification& spec, const std::filesystem::path& filePath) {
+	Vulkan_Texture2D::Vulkan_Texture2D(const TextureSpecification& spec, const void* data) {
 		_specs = spec;
-		int width, height, channes;
-		stbi_uc* data = stbi_load(filePath.string().c_str(), &width, &height, &channes, STBI_rgb_alpha);
-
+		size_t size = _specs.width * _specs.height * 4; // for rgba
 		if (data) {
 			ImageCreateDesc createDesc{};
 			createDesc.imageFormat = _specs.format;

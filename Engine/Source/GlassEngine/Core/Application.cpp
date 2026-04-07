@@ -14,6 +14,7 @@ namespace ge {
 		Logger::Init();
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		renderer::Renderer3D::Init();
+		_assetManager = mem::CreateScope<EditorAssetManager>();
 	}
 
 	Application::~Application() {

@@ -24,6 +24,9 @@ public:
 	EditorApp(const ge::ApplicationSpecification& createInfo) : ge::Application(createInfo) {
 		GE_APPLICATOIN_INFO("EditorApp created!");
 		PushLayer(new EditorLayer());
+
+		ge::AssetHandle texture = GetAssetManager().ImportAsset("Resouces/Texture_01.png", "Assets/Textures/Texture_01.anythink");
+		auto asset = GetAssetManager().GetAsset(texture);
 	}
 };
 

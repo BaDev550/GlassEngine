@@ -60,7 +60,7 @@ namespace ge {
 	}
 
 	using AssetHandle = UUID;
-	class Asset : mem::RefCounted {
+	class Asset : public virtual mem::RefCounted {
 	public:
 		virtual ~Asset() = default;
 		AssetHandle _assetHandle = GE_INVALID_ASSET_HANDLE;

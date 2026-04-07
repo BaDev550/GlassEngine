@@ -3,6 +3,8 @@
 #include "GlassEngine/Renderer/RenderObject.h"
 #include <filesystem>
 
+#include "GlassEngine/Asset/Asset.h"
+
 namespace ge::renderer {
 	struct TextureSpecification {
 		uint32_t width = 1;
@@ -25,10 +27,13 @@ namespace ge::renderer {
 		TextureSpecification _specs;
 	};
 
-	class Texture2D : public Texture {
+	class Texture2D : public Texture, public Asset {
 	public:
 		virtual ~Texture2D() = default;
 		static ge::mem::Ref<Texture2D> Create(const TextureSpecification& spec);
-		static ge::mem::Ref<Texture2D> Create(const TextureSpecification& spec, const std::filesystem::path& filePath);
+		static ge::mem::Ref<Texture2D> Create(const TextureSpecification& spec, const void* data);
+
+		static AssetType GetStaticAssetType() { return AssetType::Texture; }
+		AssetType GetAssetType() const override { return GetStaticAssetType(); }
 	};
 }
