@@ -37,7 +37,7 @@ namespace ge {
 			AssetMetadata mtd;
 			mtd.handle = handle;
 			mtd.type = packedAsset.type;
-			std::vector<uint8_t> buffer(packedAsset.size);
+			GEVector<uint8_t> buffer(packedAsset.size);
 			_pakFileReader.SetStreamPosition(packedAsset.offset);
 			_pakFileReader.ReadData(reinterpret_cast<char*>(buffer.data()), packedAsset.size);
 			mem::Ref<Asset> asset = _importer->DeserializeFromFile(mtd, buffer);

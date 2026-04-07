@@ -30,7 +30,7 @@ namespace ge {
 				GE_CORE_ERROR("Failed to find serializer for type: {}", AssetTypeToString(mtd.type));
 			}
 		}
-		mem::Ref<Asset> DeserializeFromFile(const AssetMetadata& mtd, const std::vector<uint8_t>& buffer) {
+		mem::Ref<Asset> DeserializeFromFile(const AssetMetadata& mtd, const GEVector<uint8_t>& buffer) {
 			if (_serializers.contains(mtd.type)) {
 				return _serializers[mtd.type]->DeserializeFromFile(buffer);
 			}
