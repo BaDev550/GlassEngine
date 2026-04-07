@@ -16,6 +16,7 @@ namespace ge {
 		AssetLoadingState state = AssetLoadingState::NotLoaded;
 		std::filesystem::path path;
 
+		bool IsLoaded() const { return state == AssetLoadingState::Loaded; }
 		bool IsValid() const { return type != GE_INVALID_ASSET_TYPE; }
 	};
 }

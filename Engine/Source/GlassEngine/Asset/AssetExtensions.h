@@ -3,6 +3,10 @@
 #include <map>
 
 namespace ge {
+	constexpr char MODEL_MAGIC[4] = { 'M', 'O', 'D', 'L' };
+	constexpr char TEXTURE_MAGIC[4] = { 'T', 'E', 'X', 'T' };
+	constexpr char MATERIAL_MAGIC[4] = { 'M', 'A', 'T', 'L' };
+
 	static std::map<std::string, AssetType> s_extensionAssetMap = {
 		{ ".scene", AssetType::Scene },
 
@@ -19,5 +23,11 @@ namespace ge {
 		{ ".dae",  AssetType::SourceMesh },
 
 		{ ".gasset",  AssetType::CompiledAsset }
+	};
+
+	static std::map<std::string, AssetType> s_magicAssetMap = {
+		{ MODEL_MAGIC, AssetType::StaticMesh },
+		{ TEXTURE_MAGIC, AssetType::Texture },
+		{ MATERIAL_MAGIC, AssetType::Material },
 	};
 }
