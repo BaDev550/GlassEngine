@@ -27,6 +27,15 @@ namespace ge {
 		glfwPollEvents();
 	}
 
+	void Window::SetIcon(std::vector<uint8_t> data, uint32_t width, uint32_t height)
+	{
+		GLFWimage images[1];
+		images[0].pixels = data.data();
+		images[0].width = width;
+		images[0].height = height;
+		glfwSetWindowIcon(_handle, 1, images);
+	}
+
 	bool Window::ShoudClose() const {
 		return glfwWindowShouldClose(_handle);
 	}

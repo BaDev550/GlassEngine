@@ -4,7 +4,7 @@
 extern ge::Application* ge::CreateApplication(const ge::ApplicationSpecification& createInfo);
 
 int main() {
-	auto app = ge::CreateApplication({ "GlassEngineApp", 1280, 720 });
+	auto app = ge::CreateApplication({ "GlassEngineApp", 1280, 720 }); // TODO (badev): change this to only passing args
 	app->Run();
 	delete app;
 }

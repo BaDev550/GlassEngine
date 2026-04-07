@@ -10,6 +10,8 @@ namespace ge::renderer {
 		_specs = spec;
 		size_t size = _specs.width * _specs.height * 4; // for rgba
 		if (data) {
+			_data.resize(size);
+			memcpy(_data.data(), data, size);
 			ImageCreateDesc createDesc{};
 			createDesc.imageFormat = _specs.format;
 			createDesc.extent = { _specs.width, _specs.height, 1 };

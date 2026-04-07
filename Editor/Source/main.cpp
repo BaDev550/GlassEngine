@@ -4,18 +4,13 @@
 #include <GlassEngine/Layers/Layer.h>
 #include <GlassEngine/Core/Memory.h>
 #include <GlassEngine/Core/Core.h>
+#include <GlassEngine/Renderer/Texture.h>
 
 class EditorLayer : public ge::Layer {
 public:
-	EditorLayer() : ge::Layer("EditorLayer") {
-		GE_APPLICATOIN_INFO("EditorLayer created!");
-	}
-	virtual void OnAttach() override {
-		GE_APPLICATOIN_INFO("EditorLayer attached!");
-	}
-	virtual void OnDetach() override {
-		GE_APPLICATOIN_INFO("EditorLayer detached!");
-	}
+	EditorLayer() : ge::Layer("EditorLayer") {}
+	virtual void OnAttach() override {}
+	virtual void OnDetach() override {}
 	virtual void OnUpdate(float deltaTime) override {}
 };
 
@@ -25,8 +20,8 @@ public:
 		GE_APPLICATOIN_INFO("EditorApp created!");
 		PushLayer(new EditorLayer());
 
-		ge::AssetHandle texture = GetAssetManager().ImportAsset("Resouces/Texture_01.png", "Assets/Textures/Texture_01.anythink");
-		auto asset = GetAssetManager().GetAsset(texture);
+		ge::AssetHandle texture = GetAssetManager().ImportAsset("Resouces/Texture_01.png", "Assets/Textures/Texture_01");
+		auto asset = GetAssetManager().GetAsset(texture).Cast<ge::renderer::Texture2D>();
 	}
 };
 

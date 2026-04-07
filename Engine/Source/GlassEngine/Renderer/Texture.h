@@ -35,5 +35,9 @@ namespace ge::renderer {
 
 		static AssetType GetStaticAssetType() { return AssetType::Texture; }
 		AssetType GetAssetType() const override { return GetStaticAssetType(); }
+
+		std::vector<uint8_t>& GetData() { return _data; }
+	protected:
+		std::vector<uint8_t> _data;
 	};
 }

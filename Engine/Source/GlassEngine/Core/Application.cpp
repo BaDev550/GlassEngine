@@ -1,6 +1,7 @@
 #include "gepch.h"
 #include "Application.h"
 #include "GlassEngine/Renderer/Renderer.h"
+#include "GlassEngine/Renderer/Texture.h"
 #include <stdexcept>
 #include <iostream>
 
@@ -15,6 +16,10 @@ namespace ge {
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		renderer::Renderer3D::Init();
 		_assetManager = mem::CreateScope<EditorAssetManager>();
+
+		auto iconHandle = _assetManager->ImportAsset("Resouces/icon-512.png");
+		auto iconAsset = GetAssetManager().GetAsset(iconHandle).Cast<renderer::Texture2D>();
+		_window->SetIcon(iconAsset->GetData(), iconAsset->GetWidth(), iconAsset->GetHeight());
 	}
 
 	Application::~Application() {
