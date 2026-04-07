@@ -20,8 +20,9 @@ namespace ge {
 
 	class EditorAssetManager : public AssetManager {
 	public:
+		EditorAssetManager();
 		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) override;
-		AssetHandle ImportAsset(std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
+		AssetHandle ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
 		mem::Ref<Asset> LoadAssetFromFile(AssetHandle handle);
 	private:
 		bool AssetInRegistry(AssetHandle handle);
@@ -31,6 +32,10 @@ namespace ge {
 
 		AssetRegistry _assetRegistry;
 		AssetMap _loadedAssets;
+
+		void SaveAssetRegistry();
+		void LoadAssetRegistry();
+		const std::filesystem::path _assetRegistryPath = "assetregistry.ge";
 	};
 
 	class RuntimeAssetManager : public AssetManager {

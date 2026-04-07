@@ -11,7 +11,7 @@ namespace ge {
 	// Source serialzers
 
 	// Source texture
-	AssetType SourceTextureSerializer::ImportFromSource(const std::filesystem::path& source, const std::filesystem::path& targetPath) {
+	AssetType SourceTextureSerializer::ImportFromSource(const ImportAssetData& asset, const std::filesystem::path& source, const std::filesystem::path& targetPath) {
         int width, height, channels;
         stbi_uc* pixels = stbi_load(source.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
@@ -28,9 +28,10 @@ namespace ge {
         size_t dataSize = width * height * STBI_rgb_alpha;
 
         out.WriteData(TEXTURE_MAGIC, 4);
-        out.WriteData(reinterpret_cast<const char*>(&width), sizeof(uint32_t));
+        out.WriteData(reinterpret_cast<const char*>(&width),  sizeof(uint32_t));
         out.WriteData(reinterpret_cast<const char*>(&height), sizeof(uint32_t));
-        out.WriteData(reinterpret_cast<const char*>(pixels), dataSize);
+        out.WriteData(reinterpret_cast<const char*>(&asset),  sizeof(renderer::TextureSpecification));
+        out.WriteData(reinterpret_cast<const char*>(pixels),  dataSize);
 
         stbi_image_free(pixels);
         return AssetType::Texture;
@@ -54,20 +55,18 @@ namespace ge {
         }
 
         uint32_t width, height;
-        in.ReadData(reinterpret_cast<char*>(&width), sizeof(uint32_t));
+        ImportAssetData asset;
+        in.ReadData(reinterpret_cast<char*>(&width),  sizeof(uint32_t));
         in.ReadData(reinterpret_cast<char*>(&height), sizeof(uint32_t));
-        size_t dataSize = width * height * STBI_rgb_alpha;
+        in.ReadData(reinterpret_cast<char*>(&asset),  sizeof(renderer::TextureSpecification));
+        asset.textureSpecs->width = width;
+        asset.textureSpecs->height = height;
 
+        size_t dataSize = width * height * STBI_rgb_alpha;
         std::vector<uint8_t> pixelData(dataSize);
         in.ReadData(reinterpret_cast<char*>(pixelData.data()), dataSize);
 
-        renderer::TextureSpecification spec{};
-        spec.width = width;
-        spec.height = height;
-        spec.attachment = false; // save this to
-        spec.filter = renderer::ImageFilter::Linear;
-        spec.format = renderer::ImageFormat::RGBA8;
-        mem::Ref<renderer::Texture2D> texture = renderer::Texture2D::Create(spec, pixelData.data());
+        mem::Ref<renderer::Texture2D> texture = renderer::Texture2D::Create(*asset.textureSpecs, pixelData.data());
         return texture;
     }
 }

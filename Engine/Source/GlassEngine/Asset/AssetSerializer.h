@@ -13,12 +13,12 @@ namespace ge {
 
 	class SourceSerializer : public mem::RefCounted {
 	public:
-		virtual AssetType ImportFromSource(const std::filesystem::path& source, const std::filesystem::path& targetPath) = 0;
+		virtual AssetType ImportFromSource(const ImportAssetData& asset, const std::filesystem::path& source, const std::filesystem::path& targetPath) = 0;
 	};
 
 	class SourceTextureSerializer : public SourceSerializer {
 	public:
-		virtual AssetType ImportFromSource(const std::filesystem::path& source, const std::filesystem::path& targetPath) override;
+		virtual AssetType ImportFromSource(const ImportAssetData& asset, const std::filesystem::path& source, const std::filesystem::path& targetPath) override;
 	};
 
 	class TextureSerializer : public AssetSerializer {

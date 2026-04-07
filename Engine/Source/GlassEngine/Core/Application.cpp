@@ -17,7 +17,13 @@ namespace ge {
 		renderer::Renderer3D::Init();
 		_assetManager = mem::CreateScope<EditorAssetManager>();
 
-		auto iconHandle = _assetManager->ImportAsset("Resouces/icon-512.png");
+		ImportAssetData assetData{};
+		ge::renderer::TextureSpecification textureSpecs{};
+		textureSpecs.filter = ge::renderer::ImageFilter::Linear;
+		textureSpecs.format = ge::renderer::ImageFormat::RGBA8;
+		assetData.textureSpecs = &textureSpecs;
+
+		auto iconHandle = _assetManager->ImportAsset(assetData, "Resouces/icon-512.png");
 		auto iconAsset = GetAssetManager().GetAsset(iconHandle).Cast<renderer::Texture2D>();
 		_window->SetIcon(iconAsset->GetData(), iconAsset->GetWidth(), iconAsset->GetHeight());
 	}

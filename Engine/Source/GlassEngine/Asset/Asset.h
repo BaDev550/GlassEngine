@@ -67,4 +67,12 @@ namespace ge {
 		static AssetType GetStaticAssetType() { return GE_INVALID_ASSET_TYPE; }
 		virtual AssetType GetAssetType() const { return GetStaticAssetType(); }
 	};
+
+	namespace renderer {
+		struct TextureSpecification;
+	}
+
+	struct ImportAssetData {
+		renderer::TextureSpecification* textureSpecs;
+	};
 }

@@ -31,11 +31,11 @@ namespace ge {
 			}
 		}
 
-		AssetType ImportToGAsset(const std::filesystem::path& source, std::filesystem::path& targetPath) {
+		AssetType ImportToGAsset(const ImportAssetData& asset, const std::filesystem::path& source, std::filesystem::path& targetPath) {
 			AssetType sourceType = s_extensionAssetMap[source.extension().string()];
 			if (_sourceSerializers.contains(sourceType)) {
 				targetPath.replace_extension(GE_ASSET_EXTENSION);
-				return _sourceSerializers[sourceType]->ImportFromSource(source, targetPath);
+				return _sourceSerializers[sourceType]->ImportFromSource(asset, source, targetPath);
 			}
 			else {
 				GE_CORE_ERROR("Failed to find serializer for type: {}", AssetTypeToString(sourceType));
