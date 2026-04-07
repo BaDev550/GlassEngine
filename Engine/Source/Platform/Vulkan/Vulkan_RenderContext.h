@@ -34,7 +34,7 @@ namespace ge::renderer {
 
 		[[nodiscard]] mem::Vulkan_Allocator& GetAllocator() { return *_allocator; }
 		[[nodiscard]] VkInstance GetInstance() const noexcept { return _instance; }
-		[[nodiscard]] VkInstance GetPipelineCache() const noexcept { return _pipelineCache; }
+		[[nodiscard]] VkPipelineCache GetPipelineCache() const noexcept { return _pipelineCache; }
 		[[nodiscard]] VkDevice GetDevice() const noexcept { return _device; }
 
 		[[nodiscard]] VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) const noexcept { return _sampleMap[static_cast<uint16_t>(sample)]; }
