@@ -13,28 +13,29 @@ __DynamicResource<__DynamicResourceKind.General> uniformBufferHandles[];
 [vk::binding(0, 4)]
 __DynamicResource<__DynamicResourceKind.Sampler> samplerHandles[];
 
-export T getDescriptorFromHandle<T>(DescriptorHandle<T> handle) where T : IOpaqueDescriptor
+
+export T getDescriptorFromHandle<T>(uint handle) where T : IOpaqueDescriptor
 {
     __target_switch
     {
     case spirv:
         if (T.kind == DescriptorKind.Sampler)
-            return samplerHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
+            return samplerHandles[handle].asOpaqueDescriptor<T>();
 
         else if (T.kind == DescriptorKind.Texture) {
             if (T.This.descriptorAccess == T.This.descriptorAccess::Read) {
-                return textureHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
+                return textureHandles[handle].asOpaqueDescriptor<T>();
             }
             else {
-                return imageHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
+                return imageHandles[handle].asOpaqueDescriptor<T>();
             }
         }
         else if (T.kind == DescriptorKind.ConstantBuffer)
-            return uniformBufferHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
+            return uniformBufferHandles[handle].asOpaqueDescriptor<T>();
         else
-            return uniformBufferHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
-    default:
-        return defaultGetDescriptorFromHandle(handle);
+            return uniformBufferHandles[handle].asOpaqueDescriptor<T>();
+    case hlsl:
+        return __loadResourceDescriptorFromHeap<T>(handle);
     }
 }
 
