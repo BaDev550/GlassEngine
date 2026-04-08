@@ -8,9 +8,9 @@ namespace ge::renderer {
 		ShaderResourceType resourceType;
 	};
 
-	class BindlessManager {
+	class Vulkan_BindlessManager {
 	public:
-		BindlessManager(Vulkan_RenderContext& renderContext, const BindlessManagerSpec &spec);
+		Vulkan_BindlessManager(Vulkan_RenderContext& renderContext, const BindlessManagerSpec &spec);
 
 		uint32_t AddWritableImage(Vulkan_Image* image, ImageSubresource subresource);
 		uint32_t AddReadonlyImage(Vulkan_Image* image, ImageSubresource subresource);

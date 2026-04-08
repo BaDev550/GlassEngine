@@ -9,13 +9,13 @@ namespace ge::renderer {
 		case ShaderResourceType::WritableImage: return 10'000;
 		case ShaderResourceType::Sampler: return 1'000; // this enough, reuse
 		case ShaderResourceType::ReadonlyBuffer: 
-			GE_ASSERT(ShaderResourceType::ReadonlyBuffer != type, "BindlessManager not support ReadonlyBuffer, use bda") return 0;
+			GE_ASSERT(ShaderResourceType::ReadonlyBuffer != type, "Vulkan_BindlessManager not support ReadonlyBuffer, use bda") return 0;
 		case ShaderResourceType::WritableBuffer: 
-			GE_ASSERT(ShaderResourceType::WritableBuffer != type, "BindlessManager not support WritableBuffer, use bda") return 0;
+			GE_ASSERT(ShaderResourceType::WritableBuffer != type, "Vulkan_BindlessManager not support WritableBuffer, use bda") return 0;
 		}
 	}
 
-	BindlessManager::BindlessManager(Vulkan_RenderContext& renderContext, const BindlessManagerSpec& spec)
+	Vulkan_BindlessManager::Vulkan_BindlessManager(Vulkan_RenderContext& renderContext, const BindlessManagerSpec& spec)
 		: _resourceType(spec.resourceType), _renderContext(renderContext), _descriptorCount(GetDescriptorCount(spec.resourceType)) {
 		// create dst pool
 		{
@@ -82,7 +82,7 @@ namespace ge::renderer {
 		}
 	}
 
-	uint32_t BindlessManager::AddReadonlyImage(Vulkan_Image* image, ImageSubresource subresource) {
+	uint32_t Vulkan_BindlessManager::AddReadonlyImage(Vulkan_Image* image, ImageSubresource subresource) {
 		// TODO (dnm): write error
 		GE_ASSERT(ShaderResourceType::ReadonlyImage == _resourceType, "");
 		VkDescriptorImageInfo imageInfo{};
@@ -91,7 +91,7 @@ namespace ge::renderer {
 		return WriteDescriptor(&imageInfo, nullptr);
 	}
 
-	uint32_t BindlessManager::AddWritableImage(Vulkan_Image* image, ImageSubresource subresource) {
+	uint32_t Vulkan_BindlessManager::AddWritableImage(Vulkan_Image* image, ImageSubresource subresource) {
 		// TODO (dnm): write error
 		GE_ASSERT(ShaderResourceType::WritableImage == _resourceType, "");
 		VkDescriptorImageInfo imageInfo{};
@@ -100,7 +100,7 @@ namespace ge::renderer {
 		return WriteDescriptor(&imageInfo, nullptr);
 	}
 
-	uint32_t BindlessManager::AddUnifromBuffer(Vulkan_Buffer* buffer, uint16_t firstElement, uint16_t elementCount) {
+	uint32_t Vulkan_BindlessManager::AddUnifromBuffer(Vulkan_Buffer* buffer, uint16_t firstElement, uint16_t elementCount) {
 		// TODO (dnm): write error
 		GE_ASSERT(ShaderResourceType::UniformBuffer == _resourceType, "");
 		VkDescriptorBufferInfo bufferInfo{};
@@ -110,12 +110,12 @@ namespace ge::renderer {
 		return WriteDescriptor(nullptr, &bufferInfo);
 	}
 
-	void BindlessManager::DeleteDescriptor(uint32_t index) {
+	void Vulkan_BindlessManager::DeleteDescriptor(uint32_t index) {
 		GE_ASSERT(index < _descriptorCount, "index out of bounds");
 		_deletedIndex.push_back(index);
 	}
 
-	uint32_t BindlessManager::WriteDescriptor(const VkDescriptorImageInfo* imageInfo, const VkDescriptorBufferInfo* bufferInfo) noexcept {
+	uint32_t Vulkan_BindlessManager::WriteDescriptor(const VkDescriptorImageInfo* imageInfo, const VkDescriptorBufferInfo* bufferInfo) noexcept {
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.descriptorCount = 1;
@@ -129,7 +129,7 @@ namespace ge::renderer {
 		return write.dstArrayElement;
 	}
 
-	uint64_t BindlessManager::GetIndex() noexcept {
+	uint64_t Vulkan_BindlessManager::GetIndex() noexcept {
 		if (_descriptorCount != _usage) {
 			return _usage++;
 		}

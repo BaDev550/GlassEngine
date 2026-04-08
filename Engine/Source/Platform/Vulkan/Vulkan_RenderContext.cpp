@@ -346,10 +346,10 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderContext::CreateBindlessManagers() {
-		_bindlessManagers[BindlessIndexReadonlyImage] = ge::mem::CreateScope<BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::ReadonlyImage });
-		_bindlessManagers[BindlessIndexWritableImage] = ge::mem::CreateScope<BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::WritableImage });
-		_bindlessManagers[BindlessIndexUniformBuffer] = ge::mem::CreateScope<BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::UniformBuffer });
-		_bindlessManagers[BindlessIndexSampler] = ge::mem::CreateScope<BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::Sampler});
+		_bindlessManagers[BindlessIndexReadonlyImage] = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::ReadonlyImage });
+		_bindlessManagers[BindlessIndexWritableImage] = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::WritableImage });
+		_bindlessManagers[BindlessIndexUniformBuffer] = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::UniformBuffer });
+		_bindlessManagers[BindlessIndexSampler] = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::Sampler});
 	}
 
 	bool Vulkan_RenderContext::CheckEnabledLayersSupport() {

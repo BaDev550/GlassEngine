@@ -14,7 +14,7 @@
 #define VK_ALLOCATOR_CALLBACKS &mem::Vulkan_AllocatorCallbacks::GetCallbacks()
 
 namespace ge::renderer {
-	class BindlessManager;
+	class Vulkan_BindlessManager;
 
 	static constexpr uint32_t BindlessIndexReadonlyImage = 0;
 	static constexpr uint32_t BindlessIndexWritableImage = 1;
@@ -89,7 +89,7 @@ namespace ge::renderer {
 		GEVector<const char*> _layers{};
 		GEVector<const char*> _deviceExtensions{};
 
-		std::array<ge::mem::Scope<BindlessManager>, 4> _bindlessManagers{};
+		std::array<ge::mem::Scope<Vulkan_BindlessManager>, 4> _bindlessManagers{};
 		std::array<VkSampleCountFlagBits, 4> _sampleMap{};
 #ifdef _DEBUG
 		const bool _useValidationLayer = true;
