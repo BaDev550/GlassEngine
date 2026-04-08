@@ -36,6 +36,9 @@ export T getDescriptorFromHandle<T>(uint handle) where T : IOpaqueDescriptor
             return uniformBufferHandles[handle].asOpaqueDescriptor<T>();
     case hlsl:
         return __loadResourceDescriptorFromHeap<T>(handle);
+
+    default: static_assert(false, "unsupported shader target");
+        return {};
     }
 }
 
