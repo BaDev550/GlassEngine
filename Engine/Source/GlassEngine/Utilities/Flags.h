@@ -15,6 +15,8 @@ namespace ge {
         constexpr Flags() noexcept : _value(0) {}
         constexpr Flags(T bit) noexcept : _value(static_cast<Type>(bit)) {}
         constexpr Flags(Type bits) noexcept : _value(bits) {}
+        constexpr bool operator==(Type bits) const noexcept = default;
+        constexpr bool operator==(Flags bits) const noexcept = default;
         constexpr Flags operator|(Flags o) const noexcept { return Flags(_value | o._value); }
         constexpr Flags operator&(Flags o) const noexcept { return Flags(_value & o._value); }
         constexpr Flags operator^(Flags o) const noexcept { return Flags(_value ^ o._value); }
