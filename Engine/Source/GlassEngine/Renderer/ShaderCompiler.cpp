@@ -1,12 +1,25 @@
 #include "ShaderCompiler.h"
+#include <GlassEngine/Utilities/Counter.h>
+#include <spirv_reflect.h>
 #include <slang/slang.h>
 #include <slang/slang-com-ptr.h>
 #include <slang/slang-com-helper.h>
-#include <GlassEngine/Utilities/Counter.h>
 
 namespace ge::renderer {
-    static constexpr uint32_t SPIRV_TARGET_INDEX = 0;
-    static constexpr uint32_t DXIL_TARGET_INDEX = 1;
+    static constexpr uint32_t BindlessReadonlyImageSetIndex = 0;
+    static constexpr uint32_t BindlessWritableImageSetIndex = 1;
+    static constexpr uint32_t BindlessUniformBufferSetIndex = 2;
+    static constexpr uint32_t BindlessSamplerSetIndex = 3;
+    static constexpr uint32_t UserResourceSetIndex = 4;
+
+    static constexpr uint32_t InShaderUserResourceSetIndex = 0;
+    static constexpr uint32_t InShaderBindlessReadonlyImageSetIndex = 1;
+    static constexpr uint32_t InShaderBindlessWritableImageSetIndex = 2;
+    static constexpr uint32_t InShaderBindlessUniformBufferSetIndex = 3;
+    static constexpr uint32_t InShaderBindlessSamplerSetIndex = 4;
+
+    static constexpr uint32_t SpirvTargetIndex = 0;
+    static constexpr uint32_t DxilTargetIndex = 1;
 
     static constexpr ShaderResourceType SlangToGE(const slang::BindingType type) {
         switch (type) {
@@ -45,6 +58,9 @@ namespace ge::renderer {
             auto* var_layout = layout->getParameterByIndex(i);
 
             const auto type = SlangToGE(var_layout->getTypeLayout()->getBindingRangeType(0));
+
+            if (!var_layout->getType()->findUserAttributeByName("Resource"))
+                continue;
 
             resources.emplace(
                 var_layout->getName(),
@@ -87,8 +103,29 @@ namespace ge::renderer {
         {
             Slang::ComPtr<slang::IBlob> diagnosticsBlob;
             linkedProgram->getTargetCode(
-                SPIRV_TARGET_INDEX,
+                SpirvTargetIndex,
                 blob.writeRef());
+        }
+
+        spv_reflect::ShaderModule reflect(blob->getBufferSize(), (char*)blob->getBufferPointer());
+
+        uint32_t count;
+        reflect.EnumerateDescriptorSets(&count, nullptr);
+        std::vector<SpvReflectDescriptorSet*> dstSets(count);
+        reflect.EnumerateDescriptorSets(&count, dstSets.data());
+        for (auto* set : dstSets)
+        {
+            uint32_t newSetIndex;
+            switch (set->set) {
+            case InShaderBindlessReadonlyImageSetIndex: newSetIndex = BindlessReadonlyImageSetIndex; break;
+            case InShaderBindlessWritableImageSetIndex: newSetIndex = BindlessWritableImageSetIndex; break;
+            case InShaderBindlessUniformBufferSetIndex: newSetIndex = BindlessUniformBufferSetIndex; break;
+            case InShaderBindlessSamplerSetIndex: newSetIndex = BindlessSamplerSetIndex; break;
+            case InShaderUserResourceSetIndex: newSetIndex = UserResourceSetIndex; break;
+            default: GE_GRAPHICS_WARN("meaningless descriptor set, set = {}", set->set);
+            }
+            
+            reflect.ChangeDescriptorSetNumber(set, newSetIndex);
         }
 
         return { (char*)blob->getBufferPointer(), (char*)(blob->getBufferPointer()) + blob->getBufferSize() };
@@ -105,7 +142,7 @@ namespace ge::renderer {
                 Slang::ComPtr<slang::IBlob> diagnosticsBlob;
                 linkedProgram->getEntryPointCode(
                     entryPointIndex,
-                    DXIL_TARGET_INDEX,
+                    DxilTargetIndex,
                     blob.writeRef(),
                     nullptr
                 );
@@ -125,11 +162,11 @@ namespace ge::renderer {
         slang::SessionDesc sessionDesc = {};
 
         std::array<slang::TargetDesc, 2> targetDesc;
-        targetDesc[SPIRV_TARGET_INDEX].format = SLANG_SPIRV;
-        targetDesc[SPIRV_TARGET_INDEX].profile = globalSession->findProfile("spirv_1_3");
+        targetDesc[SpirvTargetIndex].format = SLANG_SPIRV;
+        targetDesc[SpirvTargetIndex].profile = globalSession->findProfile("spirv_1_3");
 
-        targetDesc[DXIL_TARGET_INDEX].format = SLANG_DXIL;
-        targetDesc[DXIL_TARGET_INDEX].profile = globalSession->findProfile("sm_6_6");
+        targetDesc[DxilTargetIndex].format = SLANG_DXIL;
+        targetDesc[DxilTargetIndex].profile = globalSession->findProfile("sm_6_6");
 
         std::array<slang::CompilerOptionEntry, 2> options;
         options[0].name = slang::CompilerOptionName::Optimization;

@@ -28,6 +28,7 @@ namespace ge::renderer {
 			dstPoolCreateInfo.maxSets = 1;
 			dstPoolCreateInfo.poolSizeCount = 1;
 			dstPoolCreateInfo.pPoolSizes = &poolSize;
+			// pre turing gpu's don't have update after bind for uniform buffers
 			dstPoolCreateInfo.flags = _resourceType != ShaderResourceType::UniformBuffer 
 				? VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT : VkDescriptorPoolCreateFlags{};
 			vkCreateDescriptorPool(_renderContext.GetDevice(), &dstPoolCreateInfo, VK_ALLOCATOR_CALLBACKS, &_descriptorPool);
@@ -39,6 +40,7 @@ namespace ge::renderer {
 				= VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT
 				| VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT
 				| VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT
+				// pre turing gpu's don't have update after bind for uniform buffers
 				| (_resourceType != ShaderResourceType::UniformBuffer ? VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT : VkDescriptorBindingFlags{})
 				;
 
@@ -57,6 +59,7 @@ namespace ge::renderer {
 			dstLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 			dstLayoutCreateInfo.pBindings = &binding;
 			dstLayoutCreateInfo.bindingCount = 1;
+			// pre turing gpu's don't have update after bind for uniform buffers
 			dstLayoutCreateInfo.flags = _resourceType != ShaderResourceType::UniformBuffer
 				? VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT : VkDescriptorSetLayoutCreateFlags{};
 			dstLayoutCreateInfo.pNext = &bindingFlagsCreateInfo;
