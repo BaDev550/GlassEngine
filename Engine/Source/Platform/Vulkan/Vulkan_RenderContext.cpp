@@ -57,32 +57,6 @@ namespace ge::renderer {
 		vkQueueWaitIdle(_graphicsQueue);
 	}
 
-	void Vulkan_RenderContext::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& image, VmaAllocation& alloc)
-	{
-		VkImageCreateInfo createInfo{};
-		createInfo.imageType = VK_IMAGE_TYPE_2D;
-		createInfo.extent.width = width;
-		createInfo.extent.height = height;
-		createInfo.extent.depth = 1;
-		createInfo.mipLevels = 1;
-		createInfo.tiling = tiling;
-		createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		createInfo.format = format;
-		createInfo.usage = usage;
-		createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		// _allocator->AllocateImage(image, alloc, createInfo, memoryUsage);
-	}
-
-	void Vulkan_RenderContext::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
-	{
-
-	}
-
-	void Vulkan_RenderContext::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
-	{
-	}
-
 	void Vulkan_RenderContext::CreateVulkanAllocator() {
 		mem::Vulkan_AllocatorCallbacks::InitCallbacks();
 		_allocator = new mem::Vulkan_Allocator();
@@ -181,6 +155,14 @@ namespace ge::renderer {
 			if (extensionName == VK_KHR_MAINTENANCE_5_EXTENSION_NAME) {
 				_deviceFeatures.maintenance5 = true; supportedExtensions.push_back(VK_KHR_MAINTENANCE_5_EXTENSION_NAME);
 			}
+
+			if (extensionName == VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME) {
+				_deviceFeatures.descriptorHeap = true; supportedExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
+			}
+
+			if (extensionName == VK_EXT_MUTABLE_DESCRIPTOR_TYPE_EXTENSION_NAME) {
+				_deviceFeatures.mutableDescriptorType = true; supportedExtensions.push_back(VK_EXT_MUTABLE_DESCRIPTOR_TYPE_EXTENSION_NAME);
+			}
 		}
 
 		VkPhysicalDeviceProperties physicalDeviceProperties;
@@ -235,6 +217,24 @@ namespace ge::renderer {
 
 	void Vulkan_RenderContext::CreateLogicalDevice() {
 		void* pNext = nullptr;
+
+		VkPhysicalDeviceDescriptorHeapFeaturesEXT descriptorHeap{};
+		descriptorHeap.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT;
+		descriptorHeap.descriptorHeap = true;
+		if (_deviceFeatures.descriptorHeap)
+		{
+			descriptorHeap.pNext = pNext;
+			pNext = &descriptorHeap;
+		}
+
+		VkPhysicalDeviceMutableDescriptorTypeFeaturesEXT mutableDescriptorType{};
+		mutableDescriptorType.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MUTABLE_DESCRIPTOR_TYPE_FEATURES_EXT;
+		mutableDescriptorType.mutableDescriptorType = true;
+		if (_deviceFeatures.mutableDescriptorType)
+		{
+			mutableDescriptorType.pNext = pNext;
+			pNext = &mutableDescriptorType;
+		}
 
 		VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR unifiedImageLayouts{};
 		unifiedImageLayouts.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR;

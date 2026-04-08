@@ -18,6 +18,8 @@ namespace ge::renderer {
 		bool maintenance5;
 		bool shaderStencilExport;
 		bool memoryBudget;
+		bool descriptorHeap;
+		bool mutableDescriptorType;
 	};
 
 	class Vulkan_RenderContext final : public RenderContext {
@@ -27,15 +29,11 @@ namespace ge::renderer {
 		virtual void Init() override;
 		virtual void Wait() override;
 
-		void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VmaMemoryUsage memoryUsage, VkImage& image, VmaAllocation& alloc);
-		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-		void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-		//void TransitionImageLayout(); later
-
 		[[nodiscard]] mem::Vulkan_Allocator& GetAllocator() { return *_allocator; }
 		[[nodiscard]] VkInstance GetInstance() const noexcept { return _instance; }
 		[[nodiscard]] VkPipelineCache GetPipelineCache() const noexcept { return _pipelineCache; }
 		[[nodiscard]] VkDevice GetDevice() const noexcept { return _device; }
+		[[nodiscard]] DeviceFeatures GetDeviceFeatures() const noexcept { return _deviceFeatures; }
 
 		[[nodiscard]] VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) const noexcept { return _sampleMap[static_cast<uint16_t>(sample)]; }
 	private:

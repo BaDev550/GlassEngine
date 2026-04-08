@@ -26,7 +26,7 @@ namespace ge::renderer {
 		imageCreateInfo.imageType = utility::Vulkan_GetImageType(_desc.imageType);
 		imageCreateInfo.format = _format;
 		imageCreateInfo.mipLevels = _desc.mipmapCount;
-		imageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
+		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.flags = createFlags;
 		imageCreateInfo.usage = utility::Vulkan_GetImageUsageFlags(_desc.usageFlags);
 
