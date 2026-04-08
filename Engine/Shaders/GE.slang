@@ -1,6 +1,42 @@
-#pragma warning(disable: 39001)
 [__AttributeUsage(_AttributeTargets::Var)]
 struct Resource {};
+
+[vk::binding(0, 1)]
+__DynamicResource<__DynamicResourceKind.General> textureHandles[];
+
+[vk::binding(0, 2)]
+__DynamicResource<__DynamicResourceKind.General> imageHandles[];
+
+[vk::binding(0, 3)]
+__DynamicResource<__DynamicResourceKind.General> uniformBufferHandles[];
+
+[vk::binding(0, 4)]
+__DynamicResource<__DynamicResourceKind.Sampler> samplerHandles[];
+
+export T getDescriptorFromHandle<T>(DescriptorHandle<T> handle) where T : IOpaqueDescriptor
+{
+    __target_switch
+    {
+    case spirv:
+        if (T.kind == DescriptorKind.Sampler)
+            return samplerHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
+
+        else if (T.kind == DescriptorKind.Texture) {
+            if (T.This.descriptorAccess == T.This.descriptorAccess::Read) {
+                return textureHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
+            }
+            else {
+                return imageHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
+            }
+        }
+        else if (T.kind == DescriptorKind.ConstantBuffer)
+            return uniformBufferHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
+        else
+            return uniformBufferHandles[((uint2)handle).x].asOpaqueDescriptor<T>();
+    default:
+        return defaultGetDescriptorFromHandle(handle);
+    }
+}
 
 #define UniformBuffer [Resource] ConstantBuffer
 
@@ -12,31 +48,3 @@ struct Resource {};
 #define WriteonlyImage [Resource] WTexture2D
 
 #define Sampler [Resource] SamplerState
-
-#if defined(__TARGET_SPIRV__)
-#define GetBindless(type, index) __bindless_##type##__[index]
-#elif defined(__TARGET_DXIL__)
-#define GetBindless(type, index) __loadResourceDescriptorFromHeap<type>(index)
-#endif
-
-#if defined(__TARGET_SPIRV__)
-[[vk_binding(0, 1)]] Texture1D __bindless_Texture1D__[];
-[[vk_binding(0, 1)]] Texture1DArray __bindless_Texture1DArray__[];
-[[vk_binding(0, 1)]] Texture2D __bindless_Texture2D__[];
-[[vk_binding(0, 1)]] Texture2DArray __bindless_Texture2DArray__[];
-[[vk_binding(0, 1)]] Texture3D __bindless_Texture3D__[];
-[[vk_binding(0, 1)]] TextureCube __bindless_TextureCube__[];
-[[vk_binding(0, 1)]] TextureCubeArray __bindless_TextureCubeArray__[];
-
-[[vk_binding(0, 2)]] RWTexture1D __bindless_RWTexture1D__[];
-[[vk_binding(0, 2)]] RWTexture1DArray __bindless_RWTexture1DArray__[];
-[[vk_binding(0, 2)]] RWTexture2D __bindless_RWTexture2D__[];
-[[vk_binding(0, 2)]] RWTexture2DArray __bindless_RWTexture2DArray__[];
-[[vk_binding(0, 2)]] RWTexture3D __bindless_RWTexture3D__[];
-
-[[vk_binding(0, 2)]] WTexture1D __bindless_WTexture1D__[];
-[[vk_binding(0, 2)]] WTexture1DArray __bindless_WTexture1DArray__[];
-[[vk_binding(0, 2)]] WTexture2D __bindless_WTexture2D__[];
-[[vk_binding(0, 2)]] WTexture2DArray __bindless_WTexture2DArray__[];
-[[vk_binding(0, 2)]] WTexture3D __bindless_WTexture3D__[];
-#endif
