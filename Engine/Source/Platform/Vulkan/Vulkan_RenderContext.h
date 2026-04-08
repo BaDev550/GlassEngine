@@ -3,15 +3,24 @@
 
 #include "GlassEngine/Renderer/RenderContext.h"
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Core/memory.h"
 #include "Vulkan_Allocator.h"
 #include "Vulkan_Types.h"
 #include <optional>
+#include <span>
 
 #define VK_RENDER_CONTEXT CastChecked<Vulkan_RenderContext>(&_renderContext)
 #define VK_ALLOCATOR VK_RENDER_CONTEXT->GetAllocator()
 #define VK_ALLOCATOR_CALLBACKS &mem::Vulkan_AllocatorCallbacks::GetCallbacks()
 
 namespace ge::renderer {
+	class BindlessManager;
+
+	static constexpr uint32_t BindlessIndexReadonlyImage = 0;
+	static constexpr uint32_t BindlessIndexWritableImage = 1;
+	static constexpr uint32_t BindlessIndexUniformBuffer = 2;
+	static constexpr uint32_t BindlessIndexSampler = 3;
+
 	struct DeviceFeatures {
 		bool unifiedImageLayouts;
 		bool hostImageCopy;
@@ -35,6 +44,11 @@ namespace ge::renderer {
 		[[nodiscard]] VkDevice GetDevice() const noexcept { return _device; }
 		[[nodiscard]] DeviceFeatures GetDeviceFeatures() const noexcept { return _deviceFeatures; }
 
+		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_bindlessManagers[BindlessIndexReadonlyImage]; }
+		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_bindlessManagers[BindlessIndexWritableImage]; }
+		[[nodiscard]] auto &GetBindlessManagersUniformBuffer() noexcept { return *_bindlessManagers[BindlessIndexUniformBuffer]; }
+		[[nodiscard]] auto &GetBindlessManagersSampler() noexcept { return *_bindlessManagers[BindlessIndexSampler]; }
+
 		[[nodiscard]] VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) const noexcept { return _sampleMap[static_cast<uint16_t>(sample)]; }
 	private:
 		void CreateVulkanAllocator();
@@ -48,6 +62,7 @@ namespace ge::renderer {
 		bool CheckEnabledLayersSupport();
 		bool IsPhysicalDeviceSuitable(VkPhysicalDevice device);
 		void FindQueueFamilies();
+		void CreateBindlessManagers();
 		GEVector<const char*> GetRequiredInstanceExtensions();
 		GEVector<const char*> GetRequiredDeviceExtensions();
 		GEVector<const char*> GetSupportedOptionalDeviceExtensions();
@@ -74,7 +89,8 @@ namespace ge::renderer {
 		GEVector<const char*> _layers{};
 		GEVector<const char*> _deviceExtensions{};
 
-		std::array<VkSampleCountFlagBits, 4> _sampleMap;
+		std::array<ge::mem::Scope<BindlessManager>, 4> _bindlessManagers{};
+		std::array<VkSampleCountFlagBits, 4> _sampleMap{};
 #ifdef _DEBUG
 		const bool _useValidationLayer = true;
 #else

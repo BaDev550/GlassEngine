@@ -122,6 +122,17 @@ namespace ge::renderer::utility {
 		}
 	}
 
+	[[nodiscard]] constexpr VkDescriptorType Vulkan_GetDescriptorType(ShaderResourceType type) noexcept {
+		switch (type) {
+		case ShaderResourceType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		case ShaderResourceType::ReadonlyImage: return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		case ShaderResourceType::WritableImage: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		case ShaderResourceType::ReadonlyBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		case ShaderResourceType::WritableBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		case ShaderResourceType::Sampler: return VK_DESCRIPTOR_TYPE_SAMPLER;
+		}
+	}
+
 	[[nodiscard]] constexpr VkImageLayout OptimalImageLayout(ImageUsageFlags flags) noexcept {
 		if (flags.Has(ImageUsageFlagsBits::Readonly)) {
 			if (flags.Has(ImageUsageFlagsBits::Writable))

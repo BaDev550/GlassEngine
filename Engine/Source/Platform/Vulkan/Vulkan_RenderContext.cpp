@@ -1,6 +1,7 @@
 #include "gepch.h"
 #include "Vulkan_RenderContext.h"
 #include "Vulkan_Types.h"
+#include "Vulkan_BindlessManager.h"
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <exception>
@@ -47,6 +48,7 @@ namespace ge::renderer {
 			CreateSurface();
 			PickPhysicalDevice();
 			CreateLogicalDevice();
+			CreateBindlessManagers();
 		}
 		catch (const std::exception& e) {
 			GE_GRAPHICS_ERROR(e.what());
@@ -280,11 +282,15 @@ namespace ge::renderer {
 		features12.descriptorBindingSampledImageUpdateAfterBind = true;
 		features12.descriptorBindingStorageImageUpdateAfterBind = true;
 		features12.descriptorBindingStorageBufferUpdateAfterBind = true;
-		features12.descriptorBindingVariableDescriptorCount = true;
+		features12.descriptorBindingStorageImageUpdateAfterBind = true;
+		features12.descriptorBindingStorageBufferUpdateAfterBind = true;
 		features12.shaderSampledImageArrayNonUniformIndexing = true;
 		features12.shaderStorageBufferArrayNonUniformIndexing = true;
 		features12.shaderStorageImageArrayNonUniformIndexing = true;
 		features12.shaderUniformBufferArrayNonUniformIndexing = true;
+		features12.descriptorBindingUpdateUnusedWhilePending = true;
+		features12.descriptorBindingVariableDescriptorCount = true;
+		features12.descriptorBindingPartiallyBound = true;
 		features12.descriptorIndexing = true;
 		features12.runtimeDescriptorArray = true;
 		// if bufferDeviceAddress enabled bufferDeviceAddressCaptureReplay required for renderdoc, amd pre rdna gpu not support bufferDeviceAddressCaptureReplay
@@ -337,6 +343,13 @@ namespace ge::renderer {
 		VkPipelineCacheCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 		vkCreatePipelineCache(_device, &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipelineCache);
+	}
+
+	void Vulkan_RenderContext::CreateBindlessManagers() {
+		_bindlessManagers[BindlessIndexReadonlyImage] = ge::mem::CreateScope<BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::ReadonlyImage });
+		_bindlessManagers[BindlessIndexWritableImage] = ge::mem::CreateScope<BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::WritableImage });
+		_bindlessManagers[BindlessIndexUniformBuffer] = ge::mem::CreateScope<BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::UniformBuffer });
+		_bindlessManagers[BindlessIndexSampler] = ge::mem::CreateScope<BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::Sampler});
 	}
 
 	bool Vulkan_RenderContext::CheckEnabledLayersSupport() {
