@@ -121,4 +121,26 @@ namespace ge::renderer::utility {
 		default: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		}
 	}
+
+	[[nodiscard]] constexpr VkImageLayout OptimalImageLayout(ImageUsageFlags flags) noexcept {
+		if (flags.Has(ImageUsageFlagsBits::Readonly)) {
+			if (flags.Has(ImageUsageFlagsBits::Writable))
+				return VK_IMAGE_LAYOUT_GENERAL;
+			else
+				return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		}
+		if (!flags.Has(ImageUsageFlagsBits::Writable))
+		{
+			// ordering is neccesery
+			if (flags.Has(ImageUsageFlagsBits::ColorAttachment))
+				return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			else if (flags.Has(ImageUsageFlagsBits::DepthStencilAttachment))
+				return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+			else if (flags.Has(ImageUsageFlagsBits::TransferDst))
+				return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+			else if (flags.Has(ImageUsageFlagsBits::TransferSrc))
+				return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		}
+	}
 }
