@@ -85,31 +85,31 @@ namespace ge::renderer {
 		}
 	}
 
-	uint32_t Vulkan_BindlessManager::AddReadonlyImage(Vulkan_Image* image, ImageSubresource subresource) {
+	uint32_t Vulkan_BindlessManager::AddReadonlyImage(Vulkan_Image &image, ImageSubresource subresource) {
 		// TODO (dnm): write error
 		GE_ASSERT(ShaderResourceType::ReadonlyImage == _resourceType, "");
 		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = utility::OptimalImageLayout(image->GetDescRef().usageFlags);
-		imageInfo.imageView = image->CreateGetImageView(subresource);
+		imageInfo.imageLayout = utility::OptimalImageLayout(image.GetDescRef().usageFlags);
+		imageInfo.imageView = image.CreateGetImageView(subresource);
 		return WriteDescriptor(&imageInfo, nullptr);
 	}
 
-	uint32_t Vulkan_BindlessManager::AddWritableImage(Vulkan_Image* image, ImageSubresource subresource) {
+	uint32_t Vulkan_BindlessManager::AddWritableImage(Vulkan_Image &image, ImageSubresource subresource) {
 		// TODO (dnm): write error
 		GE_ASSERT(ShaderResourceType::WritableImage == _resourceType, "");
 		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = utility::OptimalImageLayout(image->GetDescRef().usageFlags);
-		imageInfo.imageView = image->CreateGetImageView(subresource);
+		imageInfo.imageLayout = utility::OptimalImageLayout(image.GetDescRef().usageFlags);
+		imageInfo.imageView = image.CreateGetImageView(subresource);
 		return WriteDescriptor(&imageInfo, nullptr);
 	}
 
-	uint32_t Vulkan_BindlessManager::AddUnifromBuffer(Vulkan_Buffer* buffer, uint16_t firstElement, uint16_t elementCount) {
+	uint32_t Vulkan_BindlessManager::AddUnifromBuffer(Vulkan_Buffer &buffer, uint16_t firstElement, uint16_t elementCount) {
 		// TODO (dnm): write error
 		GE_ASSERT(ShaderResourceType::UniformBuffer == _resourceType, "");
 		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = buffer->GetVkBuffer();
-		bufferInfo.offset = buffer->GetAlighnedElementSize() * firstElement;
-		bufferInfo.range = buffer->GetAlighnedElementSize() * elementCount;
+		bufferInfo.buffer = buffer.GetVkBuffer();
+		bufferInfo.offset = buffer.GetAlighnedElementSize() * firstElement;
+		bufferInfo.range = buffer.GetAlighnedElementSize() * elementCount;
 		return WriteDescriptor(nullptr, &bufferInfo);
 	}
 

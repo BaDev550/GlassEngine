@@ -137,6 +137,18 @@ namespace ge::renderer {
 	};
 
 	namespace utility {
+		[[nodiscard]] constexpr std::string_view ToString(ShaderResourceType type) {
+			switch (type) {
+			case ShaderResourceType::UniformBuffer:  return "UniformBuffer";
+			case ShaderResourceType::ReadonlyBuffer: return "ReadonlyBuffer";
+			case ShaderResourceType::WritableBuffer: return "WritableBuffer";
+			case ShaderResourceType::ReadonlyImage:  return "ReadonlyImage";
+			case ShaderResourceType::WritableImage:  return "WritableImage";
+			case ShaderResourceType::Sampler:        return "Sampler";
+			default:                                 return "Unknown";
+			}
+		}
+
 		[[nodiscard]] constexpr bool IsDepthFormat(ImageFormat imageFormat) noexcept {
 			return ImageFormat::D16 == imageFormat || ImageFormat::D32 == imageFormat;
 		}

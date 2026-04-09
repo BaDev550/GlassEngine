@@ -21,7 +21,7 @@ namespace ge::renderer {
 	static constexpr uint32_t BindlessIndexUniformBuffer = 2;
 	static constexpr uint32_t BindlessIndexSampler = 3;
 
-	struct DeviceFeatures {
+	struct Vulkan_DeviceFeatures {
 		bool unifiedImageLayouts;
 		bool hostImageCopy;
 		bool maintenance5;
@@ -38,11 +38,12 @@ namespace ge::renderer {
 		virtual void Init() override;
 		virtual void Wait() override;
 
-		[[nodiscard]] mem::Vulkan_Allocator& GetAllocator() { return *_allocator; }
+		[[nodiscard]] mem::Vulkan_Allocator& GetAllocator() const noexcept { return *_allocator; }
 		[[nodiscard]] VkInstance GetInstance() const noexcept { return _instance; }
 		[[nodiscard]] VkPipelineCache GetPipelineCache() const noexcept { return _pipelineCache; }
 		[[nodiscard]] VkDevice GetDevice() const noexcept { return _device; }
-		[[nodiscard]] DeviceFeatures GetDeviceFeatures() const noexcept { return _deviceFeatures; }
+		[[nodiscard]] VkDescriptorPool GetGlobalDescriptorPool() const noexcept { return _globalDescriptorPool; }
+		[[nodiscard]] Vulkan_DeviceFeatures GetDeviceFeatures() const noexcept { return _deviceFeatures; }
 
 		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_bindlessManagers[BindlessIndexReadonlyImage]; }
 		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_bindlessManagers[BindlessIndexWritableImage]; }
@@ -63,6 +64,7 @@ namespace ge::renderer {
 		bool IsPhysicalDeviceSuitable(VkPhysicalDevice device);
 		void FindQueueFamilies();
 		void CreateBindlessManagers();
+		void CreateGlobalDescriptorPool();
 		GEVector<const char*> GetRequiredInstanceExtensions();
 		GEVector<const char*> GetRequiredDeviceExtensions();
 		GEVector<const char*> GetSupportedOptionalDeviceExtensions();
@@ -77,6 +79,7 @@ namespace ge::renderer {
 		VkCommandPool _commandPool = VK_NULL_HANDLE;
 		VkDebugUtilsMessengerEXT _debugMessenger = VK_NULL_HANDLE;
 		VkPipelineCache _pipelineCache = VK_NULL_HANDLE;
+		VkDescriptorPool _globalDescriptorPool = VK_NULL_HANDLE; // for user descriptors
 
 		uint32_t _graphicsQueueFamilyIndex{};
 		VkQueue _graphicsQueue = VK_NULL_HANDLE;
@@ -84,7 +87,7 @@ namespace ge::renderer {
 		GLFWwindow* _window = nullptr;
 		mem::Vulkan_Allocator* _allocator = nullptr;
 
-		DeviceFeatures _deviceFeatures{};
+		Vulkan_DeviceFeatures _deviceFeatures{};
 
 		GEVector<const char*> _layers{};
 		GEVector<const char*> _deviceExtensions{};

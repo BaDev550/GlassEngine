@@ -373,6 +373,41 @@ namespace ge::renderer {
 		return true;
 	}
 
+	void Vulkan_RenderContext::CreateGlobalDescriptorPool() {
+		// create dst pool
+		{
+			GEVector<VkDescriptorPoolSize> poolSizes{};
+			poolSizes.emplace_back(
+				VK_DESCRIPTOR_TYPE_SAMPLER,
+				1024
+			);
+			poolSizes.emplace_back(
+				VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+				1024
+			);
+			poolSizes.emplace_back(
+				VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+				1024
+			);
+			poolSizes.emplace_back(
+				VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+				1024
+			);
+			poolSizes.emplace_back(
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				1024
+			);
+
+			VkDescriptorPoolCreateInfo dstPoolCreateInfo{};
+			dstPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+			dstPoolCreateInfo.maxSets = 1024;
+			dstPoolCreateInfo.poolSizeCount = poolSizes.size();
+			dstPoolCreateInfo.pPoolSizes = poolSizes.data();
+			dstPoolCreateInfo.flags = VkDescriptorPoolCreateFlags{};
+			vkCreateDescriptorPool(_device, &dstPoolCreateInfo, VK_ALLOCATOR_CALLBACKS, &_globalDescriptorPool);
+		}
+	}
+
 	// TODO (dnm): log for unsupported features
 	bool Vulkan_RenderContext::IsPhysicalDeviceSuitable(VkPhysicalDevice device) {
 		void* pNext = nullptr;

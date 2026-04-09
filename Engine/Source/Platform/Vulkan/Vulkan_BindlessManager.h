@@ -12,14 +12,18 @@ namespace ge::renderer {
 	public:
 		Vulkan_BindlessManager(Vulkan_RenderContext& renderContext, const BindlessManagerSpec &spec);
 
-		uint32_t AddWritableImage(Vulkan_Image* image, ImageSubresource subresource);
-		uint32_t AddReadonlyImage(Vulkan_Image* image, ImageSubresource subresource);
-		uint32_t AddUnifromBuffer(Vulkan_Buffer* buffer, uint16_t firstElement, uint16_t elementCount);
+		uint32_t AddWritableImage(Vulkan_Image &image, ImageSubresource subresource);
+		uint32_t AddReadonlyImage(Vulkan_Image &image, ImageSubresource subresource);
+		uint32_t AddUnifromBuffer(Vulkan_Buffer &buffer, uint16_t firstElement, uint16_t elementCount);
 		// TODO (0x): sampler 
 		uint32_t AddSampler();
 
 		// any type
 		void DeleteDescriptor(uint32_t index);
+
+		[[nodiscard]] auto GetDstPool() const noexcept { return _descriptorPool; }
+		[[nodiscard]] auto GetDstSetLayout() const noexcept { return _descriptorSetLayout; }
+		[[nodiscard]] auto GetDstSet() const noexcept { return _descriptorSet; }
 	private:
 		uint32_t WriteDescriptor(const VkDescriptorImageInfo *imageInfo, const VkDescriptorBufferInfo* bufferInfo) noexcept;
 		uint64_t GetIndex() noexcept;
