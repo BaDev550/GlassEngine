@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GlassEngine/Core/Memory.h>
+#include <GlassEngine/Core/Core.h>
 
 namespace ge {
 	class Layer {
