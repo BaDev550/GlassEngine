@@ -124,7 +124,7 @@ namespace ge::renderer {
             case InShaderUserResourceSetIndex: newSetIndex = UserResourceSetIndex; break;
             default: GE_GRAPHICS_WARN("meaningless descriptor set, set = {}", set->set);
             }
-            
+
             reflect.ChangeDescriptorSetNumber(set, newSetIndex);
         }
 
@@ -171,8 +171,8 @@ namespace ge::renderer {
         std::array<slang::CompilerOptionEntry, 2> options;
         options[0].name = slang::CompilerOptionName::Optimization;
         options[0].value = { slang::CompilerOptionValueKind::Int, 3 };
-        options[0].name = slang::CompilerOptionName::EmitSpirvDirectly;
-        options[0].value = { slang::CompilerOptionValueKind::Int, 1 };
+        options[1].name = slang::CompilerOptionName::EmitSpirvDirectly;
+        options[1].value = { slang::CompilerOptionValueKind::Int, 1 };
 
         sessionDesc.targets = targetDesc.data();
         sessionDesc.targetCount = targetDesc.size();
@@ -200,7 +200,7 @@ namespace ge::renderer {
                     ReadShaderFile(shaderPath).data(),
                     diagnosticsBlob.writeRef()
                 );
-                
+
                 if (!slang_module) {
                     GE_GRAPHICS_WARN("Shader module loading error: {}",
                         std::string_view(static_cast<const char*>(diagnosticsBlob->getBufferPointer()), diagnosticsBlob->getBufferSize()));
