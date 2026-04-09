@@ -128,7 +128,7 @@ namespace ge::renderer {
             reflect.ChangeDescriptorSetNumber(set, newSetIndex);
         }
 
-        return { (char*)reflect.GetCode(), (char*)(reflect.GetCode() + reflect.GetCodeSize()) };
+        return { (char*)reflect.GetCode(), ((char*)reflect.GetCode()) + reflect.GetCodeSize() };
     }
 
     // TODO: complate this func
