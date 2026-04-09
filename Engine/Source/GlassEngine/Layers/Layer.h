@@ -1,5 +1,7 @@
 #pragma once
 
+#include <GlassEngine/Core/Memory.h>
+
 namespace ge {
 	class Layer {
 	public:
@@ -9,8 +11,8 @@ namespace ge {
 		virtual void OnDetach() {}
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnEvent() {}
-		inline const char* GetDebugName() const { return _debugName; }
+		inline const char* GetDebugName() const { return _debugName.c_str(); }
 	private:
-		const char* _debugName = "Layer";
+		GEString _debugName = "Layer";
 	};
 }
