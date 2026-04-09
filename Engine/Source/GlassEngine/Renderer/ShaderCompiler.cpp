@@ -115,7 +115,7 @@ namespace ge::renderer {
         reflect.EnumerateDescriptorSets(&count, dstSets.data());
         for (auto* set : dstSets)
         {
-            uint32_t newSetIndex;
+            uint32_t newSetIndex{};
             switch (set->set) {
             case InShaderBindlessReadonlyImageSetIndex: newSetIndex = BindlessReadonlyImageSetIndex; break;
             case InShaderBindlessWritableImageSetIndex: newSetIndex = BindlessWritableImageSetIndex; break;
@@ -128,7 +128,7 @@ namespace ge::renderer {
             reflect.ChangeDescriptorSetNumber(set, newSetIndex);
         }
 
-        return { (char*)blob->getBufferPointer(), (char*)(blob->getBufferPointer()) + blob->getBufferSize() };
+        return { (char*)reflect.GetCode(), (char*)(reflect.GetCode() + reflect.GetCodeSize()) };
     }
 
     // TODO: complate this func
