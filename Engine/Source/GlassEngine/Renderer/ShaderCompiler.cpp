@@ -44,7 +44,7 @@ namespace ge::renderer {
         };
     }
 
-    static std::vector<char> ReadShaderFile(const std::filesystem::path& path) {
+    static GEString ReadShaderFile(const std::filesystem::path& path) {
         std::ifstream file(path);
 
         return { std::istreambuf_iterator<char>(file),
@@ -197,7 +197,7 @@ namespace ge::renderer {
                 slang_module = session->loadModuleFromSourceString(
                     shaderName.c_str(),
                     shaderPath.string().c_str(),
-                    ReadShaderFile(shaderPath).data(),
+                    ReadShaderFile(shaderPath).c_str(),
                     diagnosticsBlob.writeRef()
                 );
 
