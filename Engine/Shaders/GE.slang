@@ -1,6 +1,3 @@
-[__AttributeUsage(_AttributeTargets::Var)]
-struct Resource {};
-
 [vk::binding(0, 1)]
 __DynamicResource<__DynamicResourceKind.General> textureHandles[];
 
@@ -14,7 +11,7 @@ __DynamicResource<__DynamicResourceKind.General> uniformBufferHandles[];
 __DynamicResource<__DynamicResourceKind.Sampler> samplerHandles[];
 
 
-export T getDescriptorFromHandle<T>(uint handle) where T : IOpaqueDescriptor
+export T GetBindless<T>(uint handle) where T : IOpaqueDescriptor
 {
     __target_switch
     {
@@ -42,13 +39,16 @@ export T getDescriptorFromHandle<T>(uint handle) where T : IOpaqueDescriptor
     }
 }
 
-#define UniformBuffer [Resource] ConstantBuffer
+__generic<T>
+typealias UniformBuffer = ConstantBuffer<T>;
 
-#define ReadonlyBuffer [Resource] StructuredBuffer
-#define WritableBuffer [Resource] RWStructuredBuffer
+__generic<T>
+typealias ReadonlyBuffer = StructuredBuffer<T>;
+__generic<T>
+typealias WritableBuffer = RWStructuredBuffer<T>;
 
-#define ReadonlyImage [Resource] Texture2D
-#define WritableImage [Resource] RWTexture2D
-#define WriteonlyImage [Resource] WTexture2D
+typealias ReadonlyImage = Texture2D;
+typealias WritableImage = RWTexture2D;
+typealias WriteonlyImage = WTexture2D;
 
-#define Sampler [Resource] SamplerState
+typealias Sampler = SamplerState;

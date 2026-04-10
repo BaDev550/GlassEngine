@@ -57,10 +57,7 @@ namespace ge::renderer {
         for (const auto i : Counter(layout->getParameterCount())) {
             auto* var_layout = layout->getParameterByIndex(i);
 
-            const auto type = SlangToGE(var_layout->getTypeLayout()->getBindingRangeType(0));
-
-            if (!var_layout->getType()->findUserAttributeByName("Resource"))
-                continue;
+            if (layout->getParameterByIndex(i)->getBindingSpace() != 0) continue;
 
             resources.emplace(
                 var_layout->getName(),
