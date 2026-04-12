@@ -25,6 +25,7 @@ namespace ge {
 		EditorAssetManager();
 		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) override;
 		AssetHandle ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
+		void ImportAssetAsync(const ImportAssetData& asset, std::function<void(AssetHandle)> loadedFunc, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
 		mem::Ref<Asset> LoadAssetFromFile(AssetHandle handle);
 		void CompileIntoPakFile(const std::filesystem::path& outPath);
 	private:

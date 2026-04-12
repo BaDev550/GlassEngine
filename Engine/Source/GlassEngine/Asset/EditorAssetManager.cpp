@@ -1,5 +1,6 @@
 #include "gepch.h"
 #include "AssetManager.h"
+#include "GlassEngine/Core/Application.h"
 #include "GlassEngine/Asset/AssetExtensions.h"
 
 namespace ge {
@@ -22,6 +23,16 @@ namespace ge {
 		return nullptr;
 	}
 
+	void EditorAssetManager::ImportAssetAsync(const ImportAssetData& asset, std::function<void(AssetHandle)> loadedFunc, std::filesystem::path sourcePath, std::filesystem::path targetPath) {
+		Application::Get()->GetThreadManager().Enqueue([this, asset, sourcePath, targetPath, loadedFunc]() {
+			AssetHandle result = ImportAsset(asset, sourcePath, targetPath);
+			if (loadedFunc) {
+				loadedFunc(result);
+				GE_CORE_INFO("Asset Loaded: {}", sourcePath.string());
+			}
+			});
+	}
+
 	AssetHandle EditorAssetManager::ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath)
 	{
 		if (!std::filesystem::exists(sourcePath)) {
@@ -32,14 +43,14 @@ namespace ge {
 		if (targetPath.empty())
 			targetPath = sourcePath;
 
-
 		AssetHandle handle = AssetHandle();
 		AssetType compiledType = _importer->ImportToGAsset(asset, sourcePath, targetPath);
+		GE_CORE_INFO("Getting Asset from: {}", sourcePath.string());
 
 		auto existingMtd = GetMetadata(targetPath);
 		if (existingMtd.IsValid())
 			return existingMtd.handle;
-
+		
 		if (compiledType != AssetType::Unknown) {
 			AssetMetadata mtd;
 			mtd.handle = handle;
