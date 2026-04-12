@@ -5,7 +5,7 @@ set_target_properties(Engine PROPERTIES
 )
 
 find_package(Vulkan)
-set(slang_DIR "${CMAKE_CURRENT_SOURCE_DIR}/slang/cmake")
+set(slang_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/slang/cmake")
 find_package(slang)
 find_library(Vulkan_SHADERC NAMES shaderc_shared HINTS "$ENV{VULKAN_SDK}/Lib")
 find_library(Vulkan_SHADERC_UTILS NAMES shaderc_util HINTS "$ENV{VULKAN_SDK}/Lib")

@@ -12,7 +12,7 @@ namespace ge::renderer {
 		if (data) {
 			_data.resize(size);
 			memcpy(_data.data(), data, size);
-			ImageCreateDesc createDesc{};
+			ImageSpec createDesc{};
 			createDesc.imageFormat = _specs.format;
 			createDesc.extent = { _specs.width, _specs.height, 1 };
 			createDesc.usageFlags |= ImageUsageFlagsBits::Readonly;
