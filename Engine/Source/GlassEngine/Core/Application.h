@@ -7,6 +7,8 @@
 #include "GlassEngine/Core/Window.h"
 #include "GlassEngine/Core/Core.h"
 
+#include "GlassEngine/Asset/AssetManager.h"
+
 namespace ge {
 	struct ApplicationSpecification {
 		GEString title = "Glass Engine";
@@ -23,6 +25,7 @@ namespace ge {
 		void Close() { _forceClose = true; }
 
 		Window& GetWindow() { return *_window; }
+		EditorAssetManager& GetAssetManager() { return *_assetManager; }
 		static Application* Get() { return _instance; }
 		ApplicationSpecification GetSpecs() const { return _specs; }
 	protected:
@@ -33,6 +36,9 @@ namespace ge {
 		ApplicationSpecification _specs;
 		mem::Scope<Window> _window;
 		LayerStack _layerStack;
+
+		mem::Scope<EditorAssetManager> _assetManager; // Temp variable in application it needs to be moved in project class
+		mem::Scope<RuntimeAssetManager> _rAssetManager;
 
 		bool _forceClose = false;
 	};

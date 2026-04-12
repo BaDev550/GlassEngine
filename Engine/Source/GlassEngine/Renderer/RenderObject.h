@@ -5,7 +5,7 @@
 #include "RenderContext.h"
 
 namespace ge::renderer {
-	class RenderObject : public ge::mem::RefCounted {
+	class RenderObject : public virtual ge::mem::RefCounted {
 	public:
 		explicit RenderObject() noexcept : _renderContext(Application::Get()->GetWindow().GetRenderContext()) {};
 	protected:
