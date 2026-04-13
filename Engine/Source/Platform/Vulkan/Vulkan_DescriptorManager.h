@@ -8,7 +8,8 @@ namespace ge::renderer {
 	class Vulkan_DescriptorManager {
 	public:
 		Vulkan_DescriptorManager(Vulkan_RenderContext& renderContext, const ShaderReflection& reflection);
-		
+		~Vulkan_DescriptorManager();
+
 		[[nodiscard]] auto GetDstSetLayout() const noexcept { return _descriptorSetLayout; }
 		[[nodiscard]] auto GetDstSet() const noexcept { return _descriptorSet; }
 		[[nodiscard]] auto GetPipelineLayout() const noexcept { return _pipelineLayout; }
@@ -26,4 +27,9 @@ namespace ge::renderer {
 
 		Vulkan_RenderContext& _renderContext;
 	};
+
+	inline Vulkan_DescriptorManager::~Vulkan_DescriptorManager() {
+		vkDestroyDescriptorSetLayout(_renderContext.GetDevice(), _descriptorSetLayout, VK_ALLOCATOR_CALLBACKS);
+		vkDestroyPipelineLayout(_renderContext.GetDevice(), _pipelineLayout, VK_ALLOCATOR_CALLBACKS);
+	}
 }

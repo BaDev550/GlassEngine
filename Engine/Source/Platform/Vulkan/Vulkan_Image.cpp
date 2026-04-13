@@ -29,7 +29,6 @@ namespace ge::renderer {
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.flags = createFlags;
 		imageCreateInfo.usage = utility::Vulkan_GetImageUsageFlags(_desc.usageFlags);
-
 		imageCreateInfo.samples = VK_RENDER_CONTEXT->GetSampleCount(_desc.sampleCount);
 
 		VmaAllocationCreateInfo allocCreateInfo{};
@@ -40,10 +39,6 @@ namespace ge::renderer {
 		VK_ALLOCATOR.AllocateImage(imageCreateInfo, allocCreateInfo, _image, _allocation, allocInfo);
 	}
 
-	Vulkan_Image::~Vulkan_Image() {
-		VK_ALLOCATOR.DestroyImage(_image, _allocation);
-	}
-
 	VkImageView Vulkan_Image::CreateGetImageView(ImageSubresource subresource) noexcept {
 		auto &imageView = m_image_views[subresource];
 
@@ -51,10 +46,9 @@ namespace ge::renderer {
 		{
 			VkImageViewCreateInfo createInfo{};
 			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			createInfo.format = VK_FORMAT_A1B5G5R5_UNORM_PACK16;
+			createInfo.format = _format;
 			createInfo.image = _image;
 			
-			VK_RENDER_CONTEXT->GetDevice();
 			vkCreateImageView(VK_RENDER_CONTEXT->GetDevice(), &createInfo, VK_ALLOCATOR_CALLBACKS, &imageView);
 		}
 

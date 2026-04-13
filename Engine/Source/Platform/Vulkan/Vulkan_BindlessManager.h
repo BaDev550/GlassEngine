@@ -11,6 +11,7 @@ namespace ge::renderer {
 	class Vulkan_BindlessManager {
 	public:
 		Vulkan_BindlessManager(Vulkan_RenderContext& renderContext, const BindlessManagerSpec &spec);
+		~Vulkan_BindlessManager();
 
 		uint32_t AddWritableImage(Vulkan_Image &image, ImageSubresource subresource);
 		uint32_t AddReadonlyImage(Vulkan_Image &image, ImageSubresource subresource);
@@ -39,4 +40,9 @@ namespace ge::renderer {
 
 		Vulkan_RenderContext& _renderContext;
 	};
+
+	inline Vulkan_BindlessManager::~Vulkan_BindlessManager() {
+		vkDestroyDescriptorSetLayout(_renderContext.GetDevice(), _descriptorSetLayout, VK_ALLOCATOR_CALLBACKS);
+		vkDestroyDescriptorPool(_renderContext.GetDevice(), _descriptorPool, VK_ALLOCATOR_CALLBACKS);
+	}
 }

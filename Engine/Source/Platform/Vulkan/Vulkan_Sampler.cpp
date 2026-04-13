@@ -25,8 +25,4 @@ namespace ge::renderer {
 
 		vkCreateSampler(VK_RENDER_CONTEXT->GetDevice(), &createInfo, VK_ALLOCATOR_CALLBACKS, &_sampler);
 	}
-
-	Vulkan_Sampler::~Vulkan_Sampler() {
-		vkDestroySampler(VK_RENDER_CONTEXT->GetDevice(), _sampler, VK_ALLOCATOR_CALLBACKS);
-	}
 }

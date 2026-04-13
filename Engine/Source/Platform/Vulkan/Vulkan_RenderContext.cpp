@@ -27,10 +27,10 @@ namespace ge::renderer {
 			return VK_ERROR_EXTENSION_NOT_PRESENT;
 		}
 	}
-	void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
+	static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger) {
 		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
 		if (func != nullptr) {
-			func(instance, debugMessenger, pAllocator);
+			func(instance, debugMessenger, VK_ALLOCATOR_CALLBACKS);
 		}
 	}
 
@@ -38,6 +38,19 @@ namespace ge::renderer {
 	Vulkan_RenderContext::~Vulkan_RenderContext() {
 		delete _allocator;
 		_allocator = nullptr;
+
+		for (auto &manager : _bindlessManagers) {
+			manager.reset();
+		}
+
+		vkDestroyPipelineCache(_device, _pipelineCache, VK_ALLOCATOR_CALLBACKS);
+		vkDestroyCommandPool(_device, _commandPool, VK_ALLOCATOR_CALLBACKS);
+		vkDestroyDescriptorPool(_device, _globalDescriptorPool, VK_ALLOCATOR_CALLBACKS);
+
+		vkDestroyDevice(_device, VK_ALLOCATOR_CALLBACKS);
+		vkDestroySurfaceKHR(_instance, _surface, VK_ALLOCATOR_CALLBACKS);
+		DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger);
+		vkDestroyInstance(_instance, VK_ALLOCATOR_CALLBACKS);
 	}
 
 	void Vulkan_RenderContext::Init()
@@ -56,6 +69,7 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderContext::Wait() {
+		// TODO (dnm): wait fence
 		vkQueueWaitIdle(_graphicsQueue);
 	}
 

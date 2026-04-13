@@ -6,7 +6,7 @@ namespace ge::renderer {
 	class Vulkan_Buffer final : public Buffer {
 	public:
 		Vulkan_Buffer(const BufferSpec& desc);
-		virtual ~Vulkan_Buffer();
+		~Vulkan_Buffer();
 
 		[[nodiscard]] auto GetVkBuffer() const noexcept { return _buffer; }
 		[[nodiscard]] auto *GetAllocation() const noexcept { return _allocation; }
@@ -14,4 +14,8 @@ namespace ge::renderer {
 		VkBuffer _buffer;
 		VmaAllocation _allocation;
 	};
+
+	inline Vulkan_Buffer::~Vulkan_Buffer() {
+		VK_ALLOCATOR.DestroyBuffer(_buffer, _allocation);
+	}
 }

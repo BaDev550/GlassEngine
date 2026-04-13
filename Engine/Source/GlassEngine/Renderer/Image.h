@@ -13,11 +13,11 @@ namespace ge::renderer {
 	struct ImageSpec {
 		glm::uvec3 extent;
 		ImageUsageFlags usageFlags;
-		ImageSampleCount sampleCount;
+		ImageSampleCount sampleCount = ImageSampleCount::e1;
 		ImageFormat imageFormat;
-		ImageType imageType;
-		uint16_t arrayCount;
-		uint16_t mipmapCount;
+		ImageType imageType = ImageType::e2D;
+		uint16_t arrayCount = 1;
+		uint16_t mipmapCount = 1;
 	};
 
 	struct ImageSubresource {
