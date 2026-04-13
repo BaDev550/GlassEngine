@@ -6,7 +6,7 @@
 #include "GlassEngine/Asset/Asset.h"
 
 namespace ge::renderer {
-	struct TextureSpecification {
+	struct TextureSpec {
 		uint32_t width = 1;
 		uint32_t height = 1;
 		ImageFilter filter = ImageFilter::Linear;
@@ -23,13 +23,16 @@ namespace ge::renderer {
 		uint32_t GetHeight() const { return _specs.height; }
 		mem::Ref<Image>& GetImage() { return _image; }
 	protected:
+		Texture(mem::Ref<Image> image, const TextureSpec& specs)
+			: _image(image), _specs(specs) {}
 		mem::Ref<Image> _image = nullptr;
-		TextureSpecification _specs;
+		TextureSpec _specs;
 	};
 
 	class Texture2D : public Texture, public Asset {
 	public:
 		virtual ~Texture2D() = default;
+<<<<<<< Updated upstream
 		static ge::mem::Ref<Texture2D> Create(const TextureSpecification& spec);
 		static ge::mem::Ref<Texture2D> Create(const TextureSpecification& spec, const void* data);
 
@@ -39,5 +42,11 @@ namespace ge::renderer {
 		std::vector<uint8_t>& GetData() { return _data; }
 	protected:
 		std::vector<uint8_t> _data;
+=======
+		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec);
+		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec, const std::filesystem::path& filePath);
+	private:
+		Texture2D(mem::Ref<Image> image, const TextureSpec& specs) : Texture(image, specs) {}
+>>>>>>> Stashed changes
 	};
 }
