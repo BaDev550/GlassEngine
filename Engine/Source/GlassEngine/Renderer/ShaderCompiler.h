@@ -8,6 +8,7 @@
 #include <span>
 #include <filesystem>
 #include <string_view>
+#include <array>
 
 namespace ge::renderer {
 	class ShaderCompiler {

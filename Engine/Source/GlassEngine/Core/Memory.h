@@ -1,5 +1,4 @@
 #pragma once
-#include "GlassEngine/Utilities/Logger.h"
 #include <iostream>
 #include <atomic>
 

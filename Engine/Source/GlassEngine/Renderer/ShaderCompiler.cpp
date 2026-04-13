@@ -1,3 +1,4 @@
+#include "gepch.h"
 #include "ShaderCompiler.h"
 #include <GlassEngine/Utilities/Counter.h>
 #include <spirv_reflect.h>

@@ -8,6 +8,7 @@
 #include "Vulkan_Types.h"
 #include <optional>
 #include <span>
+#include <array>
 
 #define VK_RENDER_CONTEXT CastChecked<Vulkan_RenderContext>(&_renderContext)
 #define VK_ALLOCATOR VK_RENDER_CONTEXT->GetAllocator()

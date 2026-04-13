@@ -14,8 +14,4 @@ namespace ge::renderer {
 		VkBuffer _buffer;
 		VmaAllocation _allocation;
 	};
-
-	inline Vulkan_Buffer::~Vulkan_Buffer() {
-		VK_ALLOCATOR.DestroyBuffer(_buffer, _allocation);
-	}
 }

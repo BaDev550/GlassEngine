@@ -1,7 +1,7 @@
 #pragma once
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <memory>
+#include "GlassEngine/Core/Memory.h"
+#include <format>
+#include <chrono>
 
 #ifdef _DEBUG
 #define GE_CORE_TRACE(...) ge::Logger::GetCoreLogger()->trace(__VA_ARGS__)
@@ -47,23 +47,51 @@
 #endif
 
 namespace ge {
+	namespace log {
+		enum logLevel {
+			LL_Error,
+			LL_Info,
+			LL_Trace,
+			LL_Warn,
+			LL_Critical
+		};
+		constexpr std::string_view LogTypeToString(logLevel lvl) {
+			switch (lvl)
+			{
+			case LL_Error: return "Error";
+			case LL_Info: return "Info";
+			case LL_Trace: return "Trace";
+			case LL_Warn: return "Warn";
+			case LL_Critical: return "Critical";
+			default: return "INVALID_TYPE";
+			}
+		}
+#define GE_LOG(name, level, msg) std::cout << std::format("[time][{}][{}]: {}", name, LogTypeToString(level), msg) << std::endl;
+		class Logger : public mem::RefCounted {
+		public:
+			Logger(const char* name) : _name(name) {}
+			~Logger() = default;
+			template<typename... Args>
+			void info(std::format_string<Args...> fmt, Args&&... args) { GE_LOG(_name, LL_Info, std::vformat(fmt.get(), std::make_format_args(std::forward<Args>(args)...))); }
+			template<typename... Args>
+			void trace(std::format_string<Args...> fmt, Args&&... args) { GE_LOG(_name, LL_Trace, std::vformat(fmt.get(), std::make_format_args(std::forward<Args>(args)...))); }
+			template<typename... Args>
+			void warn(std::format_string<Args...> fmt, Args&&... args) { GE_LOG(_name, LL_Warn, std::vformat(fmt.get(), std::make_format_args(std::forward<Args>(args)...))); }
+			template<typename... Args>
+			void error(std::format_string<Args...> fmt, Args&&... args) { GE_LOG(_name, LL_Error, std::vformat(fmt.get(), std::make_format_args(std::forward<Args>(args)...))); }
+			template<typename... Args>
+			void critical(std::format_string<Args...> fmt, Args&&... args) { GE_LOG(_name, LL_Critical, std::vformat(fmt.get(), std::make_format_args(std::forward<Args>(args)...))); }
+		private:
+			const char* _name;
+		};
+	}
 	class Logger {
 	public:
 		static void Init() {
-			auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-			spdlog::set_pattern("%^[%T] %n: %v%$");
-
-			s_coreLogger = std::make_shared<spdlog::logger>("CORE", consoleSink);
-			s_coreLogger->set_level(spdlog::level::trace);
-			
-			s_graphicsLogger = std::make_shared<spdlog::logger>("GRAPCHICS", consoleSink);
-			s_graphicsLogger->set_level(spdlog::level::trace);
-			
-			s_applicationLogger = std::make_shared<spdlog::logger>("APPLICATION", consoleSink);
-			s_applicationLogger->set_level(spdlog::level::trace);
-			
-			s_scriptingLogger = std::make_shared<spdlog::logger>("SCRIPT", consoleSink);
-			s_scriptingLogger->set_level(spdlog::level::info);
+			s_coreLogger = mem::Ref<log::Logger>::Create("CORE");
+			s_graphicsLogger = mem::Ref<log::Logger>::Create("GRAPHICS");
+			s_applicationLogger = mem::Ref<log::Logger>::Create("APPLICATION");
+			s_scriptingLogger = mem::Ref<log::Logger>::Create("SCRIPT");
 		}
 		static void Destroy() {
 			s_coreLogger = nullptr;
@@ -71,14 +99,14 @@ namespace ge {
 			s_applicationLogger = nullptr;
 			s_scriptingLogger = nullptr;
 		}
-		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_coreLogger; }
-		inline static std::shared_ptr<spdlog::logger>& GetGraphicsLogger() { return s_graphicsLogger; }
-		inline static std::shared_ptr<spdlog::logger>& GetApplicationLogger() { return s_applicationLogger; }
-		inline static std::shared_ptr<spdlog::logger>& GetScriptingLogger() { return s_scriptingLogger; }
+		inline static mem::Ref<log::Logger>& GetCoreLogger() { return s_coreLogger; }
+		inline static mem::Ref<log::Logger>& GetGraphicsLogger() { return s_graphicsLogger; }
+		inline static mem::Ref<log::Logger>& GetApplicationLogger() { return s_applicationLogger; }
+		inline static mem::Ref<log::Logger>& GetScriptingLogger() { return s_scriptingLogger; }
 	private:
-		static inline std::shared_ptr<spdlog::logger> s_coreLogger = nullptr;
-		static inline std::shared_ptr<spdlog::logger> s_graphicsLogger = nullptr;
-		static inline std::shared_ptr<spdlog::logger> s_applicationLogger = nullptr;
-		static inline std::shared_ptr<spdlog::logger> s_scriptingLogger = nullptr;
+		static inline mem::Ref<log::Logger> s_coreLogger = nullptr;
+		static inline mem::Ref<log::Logger> s_graphicsLogger = nullptr;
+		static inline mem::Ref<log::Logger> s_applicationLogger = nullptr;
+		static inline mem::Ref<log::Logger> s_scriptingLogger = nullptr;
 	};
 }

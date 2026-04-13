@@ -64,7 +64,7 @@ namespace ge::renderer {
 			CreateBindlessManagers();
 		}
 		catch (const std::exception& e) {
-			GE_GRAPHICS_ERROR(e.what());
+			GE_GRAPHICS_ERROR("{}", e.what());
 		}
 	}
 

@@ -22,14 +22,6 @@ FetchContent_Declare(
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw
 )
 FetchContent_MakeAvailable(glfw)
-# Spdlog
-FetchContent_Declare(
-    spdlog
-    GIT_REPOSITORY https://github.com/gabime/spdlog.git
-    GIT_TAG v1.17.0
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog
-)
-FetchContent_MakeAvailable(spdlog)
 # imgui
 set(IMGUI_IMPL_OPENGL_LOADER_GLAD OFF CACHE BOOL "" FORCE)
 set(IMGUI_IMPL_OPENGL_LOADER_GL3W OFF CACHE BOOL "" FORCE)
@@ -80,7 +72,6 @@ target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURR
 target_link_libraries(Engine
 	PUBLIC
 		glfw
-        spdlog
 		Vulkan::Vulkan
         slang::slang
         GPUOpen::VulkanMemoryAllocator
