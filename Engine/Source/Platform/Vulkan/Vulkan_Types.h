@@ -133,6 +133,43 @@ namespace ge::renderer::utility {
 		}
 	}
 
+	[[nodiscard]] constexpr VkFilter Vulkan_GetFilterType(FilterType type) noexcept {
+		switch (type) {
+		case FilterType::Linear: return VK_FILTER_LINEAR;
+		case FilterType::Nearest: return VK_FILTER_NEAREST;
+		}
+	}
+
+	[[nodiscard]] constexpr VkSamplerMipmapMode Vulkan_GetMipmapFilterType(FilterType type) noexcept {
+		switch (type) {
+		case FilterType::Linear: return VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		case FilterType::Nearest: return VK_SAMPLER_MIPMAP_MODE_NEAREST;
+		}
+	}
+
+	[[nodiscard]] constexpr VkSamplerAddressMode Vulkan_GetSamplerAddressMode(SamplerAddressMode mode) noexcept {
+		switch (mode) {
+		case SamplerAddressMode::ClampToBorder: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		case SamplerAddressMode::ClampToEdge: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		case SamplerAddressMode::MirroredRepeat: return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+		case SamplerAddressMode::Repeat: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		}
+	}
+
+	[[nodiscard]] constexpr VkCompareOp Vulkan_GetCompareOp(CompareOp op) noexcept {
+		switch (op) {
+		case CompareOp::None:          return VK_COMPARE_OP_ALWAYS;
+		case CompareOp::Never:          return VK_COMPARE_OP_NEVER;
+		case CompareOp::Always:         return VK_COMPARE_OP_ALWAYS;
+		case CompareOp::Equal:          return VK_COMPARE_OP_EQUAL;
+		case CompareOp::NotEqual:       return VK_COMPARE_OP_NOT_EQUAL;
+		case CompareOp::Less:           return VK_COMPARE_OP_LESS;
+		case CompareOp::LessOrEqual:    return VK_COMPARE_OP_LESS_OR_EQUAL;
+		case CompareOp::Greater:        return VK_COMPARE_OP_GREATER;
+		case CompareOp::GreaterOrEqual: return VK_COMPARE_OP_GREATER_OR_EQUAL;
+		}
+	}
+
 	[[nodiscard]] constexpr VkImageLayout OptimalImageLayout(ImageUsageFlags flags) noexcept {
 		if (flags.Has(ImageUsageFlagsBits::Readonly)) {
 			if (flags.Has(ImageUsageFlagsBits::Writable))

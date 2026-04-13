@@ -26,5 +26,6 @@ namespace ge::renderer {
 	}
 
 	Vulkan_Buffer::~Vulkan_Buffer() {
+		VK_ALLOCATOR.DestroyBuffer(_buffer, _allocation);
 	}
 }

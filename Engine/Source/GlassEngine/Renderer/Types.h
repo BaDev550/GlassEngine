@@ -5,6 +5,30 @@
 #include <GlassEngine/Core/Memory.h>
 
 namespace ge::renderer {
+	enum class FilterType : uint8_t {
+		Nearest,
+		Linear,
+	};
+
+	enum class SamplerAddressMode : uint8_t {
+		Repeat,
+		MirroredRepeat,
+		ClampToEdge,
+		ClampToBorder
+	};
+
+	enum class CompareOp : uint8_t {
+		None,
+		Never,
+		Always,
+		Equal,
+		NotEqual,
+		Less,
+		LessOrEqual,
+		Greater,
+		GreaterOrEqual,
+	};
+
 	enum class BufferUsageFlagsBits : uint16_t {
 		None = 0,
 		Uniform = BIT(0),
@@ -159,6 +183,16 @@ namespace ge::renderer {
 
 		[[nodiscard]] constexpr bool IsColorFormat(ImageFormat imageFormat) noexcept {
 			return !(IsDepthFormat(imageFormat) || IsDepthStencilFormat(imageFormat));
+		}
+
+		[[nodiscard]] constexpr uint32_t GetPixelSize(ImageFormat imageFormat) noexcept {
+			switch (imageFormat) {
+			case ImageFormat::RGBA8: return 4;
+			case ImageFormat::D16: return 2;
+			case ImageFormat::D32: return 4;
+			case ImageFormat::D32S8: return 8;
+			case ImageFormat::D24S8: return 4;
+			}
 		}
 	}
 }

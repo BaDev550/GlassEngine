@@ -4,6 +4,7 @@
 
 #include "GlassEngine/Renderer/RenderObject.h"
 #include "GlassEngine/Renderer/CommandBuffer.h"
+#include "GlassEngine/Renderer/Texture.h"
 
 namespace ge::renderer {
 	struct RenderStats {
@@ -28,6 +29,8 @@ namespace ge::renderer {
 		virtual void EndDefaultPass() = 0;
 		virtual void DrawVertex(CommandBuffer* cmd) = 0;
 		virtual void DrawIndexed(CommandBuffer* cmd) = 0;
+
+		virtual void LoadDataToTexture2D(CommandBuffer& cmd, Texture2D& texture, void* data, uint64_t dataSize) = 0;
 
 		static inline RenderStats GetRenderStats() { return _renderStats; }
 		static inline GraphicsAPI GetAPI() { return _graphicsAPI; }

@@ -10,5 +10,7 @@ namespace ge::renderer {
 		virtual void EndDefaultPass() override;
 		virtual void DrawVertex(CommandBuffer* cmd) override;
 		virtual void DrawIndexed(CommandBuffer* cmd) override;
+
+		virtual void LoadDataToTexture2D(CommandBuffer& cmd, Texture2D& texture, void* data, uint64_t dataSize) override {}
 	};
 }

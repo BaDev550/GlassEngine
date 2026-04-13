@@ -41,6 +41,7 @@ namespace ge::renderer {
 	}
 
 	Vulkan_Image::~Vulkan_Image() {
+		VK_ALLOCATOR.DestroyImage(_image, _allocation);
 	}
 
 	VkImageView Vulkan_Image::CreateGetImageView(ImageSubresource subresource) noexcept {
