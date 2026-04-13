@@ -20,20 +20,6 @@ namespace ge::renderer {
 		return ge::mem::Ref<Texture2D>(new Texture2D(Image::Create(createDesc), spec));
 	}
 
-<<<<<<< Updated upstream
-	ge::mem::Ref<Texture2D> Texture2D::Create(const TextureSpecification& spec, const void* data)
-	{
-		switch (RenderAPI::GetAPI())
-		{
-		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Texture2D>::Create(spec, data);
-		case GraphicsAPI::DirectX11: return nullptr;
-		case GraphicsAPI::OpenGL: return nullptr;
-		default:
-			GE_CORE_ERROR("Failed to select api");
-			break;
-		}
-		return nullptr;
-=======
 	ge::mem::Ref<Texture2D> Texture2D::Create(const TextureSpec& spec, const std::filesystem::path& filePath)
 	{
 		int width, height, channes;
@@ -52,6 +38,5 @@ namespace ge::renderer {
 		auto texture = ge::mem::Ref<Texture2D>(new Texture2D(Image::Create(createDesc), spec));
 		// Renderer3D::GetRenderAPI()->LoadDataToTexture2D({}, *texture, data, width * height * utility::GetPixelSize(spec.format));
 		return texture;
->>>>>>> Stashed changes
 	}
 }
