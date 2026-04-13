@@ -24,7 +24,7 @@ namespace ge {
 			CastChecked<AssetManager>(_runtimeAssetManager.get());
 
 		ImportAssetData assetData{};
-		ge::renderer::TextureSpecification textureSpecs{};
+		ge::renderer::TextureSpec textureSpecs{};
 		textureSpecs.filter = ge::renderer::ImageFilter::Linear;
 		textureSpecs.format = ge::renderer::ImageFormat::RGBA8;
 		assetData.textureSpecs = &textureSpecs;

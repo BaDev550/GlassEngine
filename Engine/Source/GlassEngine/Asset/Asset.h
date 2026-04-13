@@ -76,10 +76,10 @@ namespace ge {
 	};
 
 	namespace renderer {
-		struct TextureSpecification;
+		struct TextureSpec;
 	}
 
 	struct ImportAssetData {
-		renderer::TextureSpecification* textureSpecs;
+		renderer::TextureSpec* textureSpecs;
 	};
 }

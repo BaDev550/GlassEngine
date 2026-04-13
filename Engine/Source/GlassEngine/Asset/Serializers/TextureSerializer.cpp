@@ -26,7 +26,7 @@ namespace ge {
         out.WriteData(TEXTURE_MAGIC, 4);
         out.WriteData(reinterpret_cast<const char*>(&width), sizeof(uint32_t));
         out.WriteData(reinterpret_cast<const char*>(&height), sizeof(uint32_t));
-        out.WriteData(reinterpret_cast<const char*>(&asset), sizeof(renderer::TextureSpecification));
+        out.WriteData(reinterpret_cast<const char*>(&asset), sizeof(renderer::TextureSpec));
         out.WriteData(reinterpret_cast<const char*>(pixels), dataSize);
 
         stbi_image_free(pixels);
@@ -49,12 +49,13 @@ namespace ge {
         }
 
         uint32_t width, height;
-        renderer::TextureSpecification textureSpecs;
+        renderer::TextureSpec textureSpecs{};
         in.ReadData(reinterpret_cast<char*>(&width), sizeof(uint32_t));
         in.ReadData(reinterpret_cast<char*>(&height), sizeof(uint32_t));
-        in.ReadData(reinterpret_cast<char*>(&textureSpecs), sizeof(renderer::TextureSpecification));
+        in.ReadData(reinterpret_cast<char*>(&textureSpecs), sizeof(renderer::TextureSpec));
         textureSpecs.width = width;
         textureSpecs.height = height;
+        textureSpecs.format = renderer::ImageFormat::RGBA8;
 
         size_t dataSize = width * height * STBI_rgb_alpha;
         GEVector<uint8_t> pixelData(dataSize);
@@ -77,7 +78,7 @@ namespace ge {
             GE_CORE_ERROR("Failed to read dimensions from buffer");
             return nullptr;
         }
-        renderer::TextureSpecification specs;
+        renderer::TextureSpec specs;
         if (!in.Read(specs)) {
             GE_CORE_ERROR("Failed to read specs");
             return nullptr;

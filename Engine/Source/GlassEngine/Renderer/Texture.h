@@ -34,7 +34,12 @@ namespace ge::renderer {
 		virtual ~Texture2D() = default;
 		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec);
 		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec, const std::filesystem::path& filePath);
+		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec, const void* data);
+		
+		[[nodiscard]] auto& GetData() const noexcept { return _data; }
+		[[nodiscard]] auto& GetData() noexcept { return _data; }
 	private:
 		Texture2D(mem::Ref<Image> image, const TextureSpec& specs) : Texture(image, specs) {}
+		std::vector<uint8_t> _data;
 	};
 }
