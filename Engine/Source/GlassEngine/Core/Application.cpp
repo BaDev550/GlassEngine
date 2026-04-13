@@ -15,7 +15,7 @@ namespace ge {
 
 		Logger::Init();
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
-		_threadManager = mem::CreateScope<ThreadManager>(1); // 1 for asset manager add more later for application
+		_threadManager = mem::CreateScope<ThreadManager>(1);
 		renderer::Renderer3D::Init();
 		_editorAssetManager = mem::CreateScope<EditorAssetManager>();
 		_runtimeAssetManager = mem::CreateScope<RuntimeAssetManager>("Assets.pak");
