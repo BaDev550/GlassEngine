@@ -1,6 +1,7 @@
 #pragma once
 #include "GlassEngine/Renderer/RenderObject.h"
 #include "GlassEngine/Renderer/Shader.h"
+#include "GlassEngine/Renderer/Framebuffer.h"
 
 namespace ge::renderer {
 	enum class CullMode {
@@ -9,11 +10,17 @@ namespace ge::renderer {
 		Front
 	};
 
+	enum class DepthMode {
+		None = 0,
+		Less,
+		LessOrEqual
+	};
+
 	struct PipelineSpecification {
 		ge::mem::Ref<Shader> shader = nullptr;
-		// TODO (badev): when framebuffer class is added to ptr into target framebuffer
+		ge::mem::Ref<Framebuffer> targetFramebuffer = nullptr;
 		CullMode cullMode = CullMode::Back;
-		bool depthTest = true;
+		DepthMode depthTest = DepthMode::Less;
 	};
 
 	class Pipeline : public RenderObject {
