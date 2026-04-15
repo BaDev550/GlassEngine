@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Utilities/Time.h"
 #include <format>
 #include <chrono>
 
@@ -71,10 +72,10 @@ namespace ge {
         template<typename... Args>
         std::string FormatMessage(std::format_string<Args...> fmt, Args&&... args) {
             auto tup = std::make_tuple(std::forward<Args>(args)...);
-            return std::apply([&](auto&... a) {
-                return std::vformat(fmt.get(), std::make_format_args(a...));
-                }, tup);
+            return std::apply([&](auto&... a) { return std::vformat(fmt.get(), std::make_format_args(a...)); }, tup);
         }
+
+#define GE_LOG(msg, type, name) std::cout << std::format("[{}][{}][{}]: {}", Time::GetCurrentTime(), name, LogTypeToString(type), msg) << std::endl;
 
         class Logger : public mem::RefCounted {
         public:
@@ -84,31 +85,31 @@ namespace ge {
             template<typename... Args>
             void info(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
-                std::cout << std::format("[time][{}][{}]: {}", _name, LogTypeToString(LL_Info), msg) << std::endl;
+                GE_LOG(msg, LL_Info, _name);
             }
 
             template<typename... Args>
             void trace(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
-                std::cout << std::format("[time][{}][{}]: {}", _name, LogTypeToString(LL_Trace), msg) << std::endl;
+                GE_LOG(msg, LL_Trace, _name);
             }
 
             template<typename... Args>
             void warn(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
-                std::cout << std::format("[time][{}][{}]: {}", _name, LogTypeToString(LL_Warn), msg) << std::endl;
+                GE_LOG(msg, LL_Warn, _name);
             }
 
             template<typename... Args>
             void error(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
-                std::cout << std::format("[time][{}][{}]: {}", _name, LogTypeToString(LL_Error), msg) << std::endl;
+                GE_LOG(msg, LL_Error, _name);
             }
 
             template<typename... Args>
             void critical(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
-                std::cout << std::format("[time][{}][{}]: {}", _name, LogTypeToString(LL_Critical), msg) << std::endl;
+                GE_LOG(msg, LL_Critical, _name);
             }
 
         private:

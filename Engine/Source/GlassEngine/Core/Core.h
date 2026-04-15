@@ -3,6 +3,7 @@
 #include "GlassEngine/Core/Memory.h"
 #include <vector>
 #include <string>
+#include <string_view>
 
 #define GE_ASSERT(x, ...) \
 	if (!(x)) {\
