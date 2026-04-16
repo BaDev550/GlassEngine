@@ -75,7 +75,7 @@ namespace ge {
             return std::apply([&](auto&... a) { return std::vformat(fmt.get(), std::make_format_args(a...)); }, tup);
         }
 
-#define GE_LOG(msg, type, name) std::cout << std::format("[{}][{}][{}]: {}", Time::GetCurrentLocalTimeTime(), name, LogTypeToString(type), msg) << std::endl;
+#define GE_LOG(msg, type, name) std::cout << std::format("[{}][{}][{}]: {}", Time::GetCurrentLocalTime(), name, LogTypeToString(type), msg) << std::endl;
 
         class Logger : public mem::RefCounted {
         public:

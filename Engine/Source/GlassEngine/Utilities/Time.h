@@ -5,7 +5,7 @@
 namespace ge {
 	class Time {
 	public:
-		static std::string GetCurrentLocalTimeTime() {
+		static std::string GetCurrentLocalTime() {
 			auto now = std::chrono::system_clock::now();
 			auto localTime = std::chrono::current_zone()->to_local(now);
 			auto localTimeInSeconds = std::chrono::floor<std::chrono::seconds>(localTime);
