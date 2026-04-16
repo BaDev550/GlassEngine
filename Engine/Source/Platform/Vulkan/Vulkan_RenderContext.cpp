@@ -7,6 +7,8 @@
 #include <exception>
 #include <set>
 
+#define FEATURE_MUST_BE_SUPPORTED(feature) if (feature != VK_TRUE) { GE_GRAPHICS_ERROR("{} must be supported", #feature); is_supported = false; } 
+
 namespace ge::renderer {
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -39,9 +41,10 @@ namespace ge::renderer {
 		delete _allocator;
 		_allocator = nullptr;
 
-		for (auto &manager : _bindlessManagers) {
-			manager.reset();
-		}
+		_readonlyImageBindlessManager.reset();
+		_writableImageBindlessManager.reset();
+		_uniformBufferBindlessManager.reset();
+		_samplerBindlessManager.reset();
 
 		vkDestroyPipelineCache(_device, _pipelineCache, VK_ALLOCATOR_CALLBACKS);
 		vkDestroyCommandPool(_device, _commandPool, VK_ALLOCATOR_CALLBACKS);
@@ -141,6 +144,9 @@ namespace ge::renderer {
 			}
 		}
 
+		if (!_physicalDevice)
+			throw std::runtime_error("there is no supported gpu!");
+
 		FindQueueFamilies();
 
 		uint32_t extCount{};
@@ -152,10 +158,6 @@ namespace ge::renderer {
 		for (const auto& extension : extensions) {
 			const std::string extensionName = extension.extensionName;
 
-			if (extensionName == VK_EXT_MEMORY_BUDGET_EXTENSION_NAME) {
-				_deviceFeatures.memoryBudget = true; supportedExtensions.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
-			}
-
 			if (extensionName == VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME) {
 				_deviceFeatures.hostImageCopy = true; supportedExtensions.push_back(VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME);
 			}
@@ -164,20 +166,12 @@ namespace ge::renderer {
 				_deviceFeatures.unifiedImageLayouts = true; supportedExtensions.push_back(VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME);
 			}
 
-			if (extensionName == VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME) {
-				_deviceFeatures.shaderStencilExport = true; supportedExtensions.push_back(VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME);
-			}
-
 			if (extensionName == VK_KHR_MAINTENANCE_5_EXTENSION_NAME) {
 				_deviceFeatures.maintenance5 = true; supportedExtensions.push_back(VK_KHR_MAINTENANCE_5_EXTENSION_NAME);
 			}
 
 			if (extensionName == VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME) {
 				_deviceFeatures.descriptorHeap = true; supportedExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
-			}
-
-			if (extensionName == VK_EXT_MUTABLE_DESCRIPTOR_TYPE_EXTENSION_NAME) {
-				_deviceFeatures.mutableDescriptorType = true; supportedExtensions.push_back(VK_EXT_MUTABLE_DESCRIPTOR_TYPE_EXTENSION_NAME);
 			}
 		}
 
@@ -232,24 +226,29 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderContext::CreateLogicalDevice() {
+		_deviceExtensions = GetRequiredDeviceExtensions();
+		_deviceExtensions.emplace_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+
 		void* pNext = nullptr;
+
+		VkPhysicalDeviceMaintenance5FeaturesKHR maintenance5{};
+		maintenance5.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_FEATURES_KHR;
+		maintenance5.maintenance5 = true;
+		if (_deviceFeatures.maintenance5)
+		{
+			_deviceExtensions.emplace_back(VK_KHR_MAINTENANCE_5_EXTENSION_NAME);
+			maintenance5.pNext = pNext;
+			pNext = &maintenance5;
+		}
 
 		VkPhysicalDeviceDescriptorHeapFeaturesEXT descriptorHeap{};
 		descriptorHeap.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT;
 		descriptorHeap.descriptorHeap = true;
 		if (_deviceFeatures.descriptorHeap)
 		{
+			_deviceExtensions.emplace_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
 			descriptorHeap.pNext = pNext;
 			pNext = &descriptorHeap;
-		}
-
-		VkPhysicalDeviceMutableDescriptorTypeFeaturesEXT mutableDescriptorType{};
-		mutableDescriptorType.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MUTABLE_DESCRIPTOR_TYPE_FEATURES_EXT;
-		mutableDescriptorType.mutableDescriptorType = true;
-		if (_deviceFeatures.mutableDescriptorType)
-		{
-			mutableDescriptorType.pNext = pNext;
-			pNext = &mutableDescriptorType;
 		}
 
 		VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR unifiedImageLayouts{};
@@ -257,6 +256,7 @@ namespace ge::renderer {
 		unifiedImageLayouts.unifiedImageLayouts = true;
 		if (_deviceFeatures.unifiedImageLayouts)
 		{
+			_deviceExtensions.emplace_back(VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME);
 			unifiedImageLayouts.pNext = pNext;
 			pNext = &unifiedImageLayouts;
 		}
@@ -266,6 +266,7 @@ namespace ge::renderer {
 		imageCopyFeatures.hostImageCopy = true;
 		if (_deviceFeatures.hostImageCopy)
 		{
+			_deviceExtensions.emplace_back(VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME);
 			imageCopyFeatures.pNext = pNext;
 			pNext = &imageCopyFeatures;
 		}
@@ -297,7 +298,6 @@ namespace ge::renderer {
 		features12.descriptorBindingStorageImageUpdateAfterBind = true;
 		features12.descriptorBindingStorageBufferUpdateAfterBind = true;
 		features12.descriptorBindingStorageImageUpdateAfterBind = true;
-		features12.descriptorBindingStorageBufferUpdateAfterBind = true;
 		features12.shaderSampledImageArrayNonUniformIndexing = true;
 		features12.shaderStorageBufferArrayNonUniformIndexing = true;
 		features12.shaderStorageImageArrayNonUniformIndexing = true;
@@ -307,8 +307,8 @@ namespace ge::renderer {
 		features12.descriptorBindingPartiallyBound = true;
 		features12.descriptorIndexing = true;
 		features12.runtimeDescriptorArray = true;
-		// if bufferDeviceAddress enabled bufferDeviceAddressCaptureReplay required for renderdoc, amd pre rdna gpu not support bufferDeviceAddressCaptureReplay
-		// features12.bufferDeviceAddress = true;
+		features12.bufferDeviceAddress = true;
+		features12.uniformBufferStandardLayout = true;
 		features12.hostQueryReset = true;
 		features12.drawIndirectCount = true;
 		features12.vulkanMemoryModel = true;
@@ -360,10 +360,10 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderContext::CreateBindlessManagers() {
-		_bindlessManagers[BindlessIndexReadonlyImage] = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::ReadonlyImage });
-		_bindlessManagers[BindlessIndexWritableImage] = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::WritableImage });
-		_bindlessManagers[BindlessIndexUniformBuffer] = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::UniformBuffer });
-		_bindlessManagers[BindlessIndexSampler] = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::Sampler});
+		_readonlyImageBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::ReadonlyImage });
+		_writableImageBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::WritableImage });
+		_uniformBufferBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::UniformBuffer });
+		_samplerBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::Sampler});
 	}
 
 	bool Vulkan_RenderContext::CheckEnabledLayersSupport() {
@@ -424,62 +424,70 @@ namespace ge::renderer {
 
 	// TODO (dnm): log for unsupported features
 	bool Vulkan_RenderContext::IsPhysicalDeviceSuitable(VkPhysicalDevice device) {
-		void* pNext = nullptr;
+		bool is_supported = true;
 
-		VkPhysicalDeviceVulkan13Features features13;
-		features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-		features13.pNext = pNext;
-		pNext = &features13;
+		// check features
+		{
+			void* pNext = nullptr;
 
-		VkPhysicalDeviceVulkan12Features features12;
-		features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-		features12.pNext = pNext;
-		pNext = &features12;
+			VkPhysicalDeviceVulkan13Features features13;
+			features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+			features13.pNext = pNext;
+			pNext = &features13;
 
-		VkPhysicalDeviceVulkan11Features features11;
-		features11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
-		features11.pNext = pNext;
-		pNext = &features11;
+			VkPhysicalDeviceVulkan12Features features12;
+			features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+			features12.pNext = pNext;
+			pNext = &features12;
 
-		VkPhysicalDeviceFeatures2 features;
-		features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-		features.pNext = pNext;
-		pNext = &features;
+			VkPhysicalDeviceVulkan11Features features11;
+			features11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+			features11.pNext = pNext;
+			pNext = &features11;
 
-		vkGetPhysicalDeviceFeatures2(device, &features);
+			VkPhysicalDeviceFeatures2 features;
+			features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+			features.pNext = pNext;
+			pNext = &features;
 
-		if (features13.synchronization2 != VK_TRUE) return false;
-		if (features13.dynamicRendering != VK_TRUE) return false;
-		if (features13.inlineUniformBlock != VK_TRUE) return false;
-		if (features12.descriptorBindingSampledImageUpdateAfterBind != VK_TRUE) return false;
-		if (features12.descriptorBindingStorageImageUpdateAfterBind != VK_TRUE) return false;
-		if (features12.descriptorBindingStorageBufferUpdateAfterBind != VK_TRUE) return false;
-		if (features12.descriptorBindingVariableDescriptorCount != VK_TRUE) return false;
-		if (features12.shaderSampledImageArrayNonUniformIndexing != VK_TRUE) return false;
-		if (features12.shaderStorageBufferArrayNonUniformIndexing != VK_TRUE) return false;
-		if (features12.shaderStorageImageArrayNonUniformIndexing != VK_TRUE) return false;
-		if (features12.shaderUniformBufferArrayNonUniformIndexing != VK_TRUE) return false;
-		if (features12.descriptorIndexing != VK_TRUE) return false;
-		if (features12.runtimeDescriptorArray != VK_TRUE) return false;
-		// if bufferDeviceAddress enabled bufferDeviceAddressCaptureReplay required for renderdoc, amd pre rdna gpu not support bufferDeviceAddressCaptureReplay
-		// if (features12.bufferDeviceAddress != VK_TRUE) return false;
-		if (features12.hostQueryReset != VK_TRUE) return false;
-		if (features12.drawIndirectCount != VK_TRUE) return false;
-		if (features12.vulkanMemoryModel != VK_TRUE) return false;
-		if (features12.scalarBlockLayout != VK_TRUE) return false;
-		if (features12.separateDepthStencilLayouts != VK_TRUE) return false;
-		if (features11.shaderDrawParameters != VK_TRUE) return false;
-		if (features11.uniformAndStorageBuffer16BitAccess != VK_TRUE) return false;
-		if (features11.storageBuffer16BitAccess != VK_TRUE) return false;
-		if (features.features.pipelineStatisticsQuery != VK_TRUE) return false;
-		if (features.features.samplerAnisotropy != VK_TRUE) return false;
-		if (features.features.tessellationShader != VK_TRUE) return false;
-		if (features.features.geometryShader != VK_TRUE) return false;
-		if (features.features.shaderInt16 != VK_TRUE) return false;
-		if (features.features.textureCompressionBC != VK_TRUE) return false;
-		if (features.features.drawIndirectFirstInstance != VK_TRUE) return false;
+			vkGetPhysicalDeviceFeatures2(device, &features);
 
-		return true;
+			FEATURE_MUST_BE_SUPPORTED(features13.synchronization2)
+			FEATURE_MUST_BE_SUPPORTED(features13.dynamicRendering)
+			FEATURE_MUST_BE_SUPPORTED(features13.inlineUniformBlock)
+			FEATURE_MUST_BE_SUPPORTED(features12.descriptorBindingSampledImageUpdateAfterBind)
+			FEATURE_MUST_BE_SUPPORTED(features12.descriptorBindingStorageImageUpdateAfterBind)
+			FEATURE_MUST_BE_SUPPORTED(features12.descriptorBindingStorageBufferUpdateAfterBind)
+			FEATURE_MUST_BE_SUPPORTED(features12.descriptorBindingUpdateUnusedWhilePending)
+			FEATURE_MUST_BE_SUPPORTED(features12.descriptorBindingVariableDescriptorCount)
+			FEATURE_MUST_BE_SUPPORTED(features12.shaderSampledImageArrayNonUniformIndexing)
+			FEATURE_MUST_BE_SUPPORTED(features12.shaderStorageBufferArrayNonUniformIndexing)
+			FEATURE_MUST_BE_SUPPORTED(features12.shaderStorageImageArrayNonUniformIndexing)
+			FEATURE_MUST_BE_SUPPORTED(features12.shaderUniformBufferArrayNonUniformIndexing)
+			FEATURE_MUST_BE_SUPPORTED(features12.descriptorIndexing)
+			FEATURE_MUST_BE_SUPPORTED(features12.runtimeDescriptorArray)
+			FEATURE_MUST_BE_SUPPORTED(features12.bufferDeviceAddress)
+			FEATURE_MUST_BE_SUPPORTED(features12.hostQueryReset)
+			FEATURE_MUST_BE_SUPPORTED(features12.uniformBufferStandardLayout)
+			FEATURE_MUST_BE_SUPPORTED(features12.drawIndirectCount)
+			FEATURE_MUST_BE_SUPPORTED(features12.vulkanMemoryModel)
+			FEATURE_MUST_BE_SUPPORTED(features12.scalarBlockLayout)
+			FEATURE_MUST_BE_SUPPORTED(features12.separateDepthStencilLayouts)
+			FEATURE_MUST_BE_SUPPORTED(features11.shaderDrawParameters)
+			FEATURE_MUST_BE_SUPPORTED(features11.uniformAndStorageBuffer16BitAccess)
+			FEATURE_MUST_BE_SUPPORTED(features11.storageBuffer16BitAccess)
+			FEATURE_MUST_BE_SUPPORTED(features.features.pipelineStatisticsQuery)
+			FEATURE_MUST_BE_SUPPORTED(features.features.samplerAnisotropy)
+			FEATURE_MUST_BE_SUPPORTED(features.features.tessellationShader)
+			FEATURE_MUST_BE_SUPPORTED(features.features.geometryShader)
+			FEATURE_MUST_BE_SUPPORTED(features.features.shaderInt16)
+			FEATURE_MUST_BE_SUPPORTED(features.features.textureCompressionBC)
+			FEATURE_MUST_BE_SUPPORTED(features.features.drawIndirectFirstInstance)
+		}
+
+		// TODO: check device properties
+
+		return is_supported;
 	}
 
 	void Vulkan_RenderContext::FindQueueFamilies()
@@ -516,37 +524,5 @@ namespace ge::renderer {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 			VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME
 		};
-	}
-
-	// TODO: finish this
-	GEVector<const char*> Vulkan_RenderContext::GetSupportedOptionalDeviceExtensions() {
-		GEVector<const char*> out;
-
-		const GEVector<std::string> optExts{
-			VK_EXT_MEMORY_BUDGET_EXTENSION_NAME,
-			VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME,
-			VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME,
-			VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME,
-			VK_KHR_MAINTENANCE_5_EXTENSION_NAME
-		};
-
-		uint32_t extCount{};
-		vkEnumerateDeviceExtensionProperties(_physicalDevice, nullptr, &extCount, nullptr);
-		GEVector<VkExtensionProperties> extensions(extCount);
-		vkEnumerateDeviceExtensionProperties(_physicalDevice, nullptr, &extCount, extensions.data());
-
-		for (const auto& extension : extensions) {
-			const std::string extensionName = extension.extensionName;
-
-			for (const auto& optExtName : optExts)
-			{
-				if (extensionName == optExtName)
-				{
-					out.push_back(extension.extensionName);
-				}
-			}
-		}
-
-		return out;
 	}
 }

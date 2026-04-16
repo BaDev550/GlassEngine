@@ -17,19 +17,11 @@
 namespace ge::renderer {
 	class Vulkan_BindlessManager;
 
-	static constexpr uint32_t BindlessIndexReadonlyImage = 0;
-	static constexpr uint32_t BindlessIndexWritableImage = 1;
-	static constexpr uint32_t BindlessIndexUniformBuffer = 2;
-	static constexpr uint32_t BindlessIndexSampler = 3;
-
 	struct Vulkan_DeviceFeatures {
 		bool unifiedImageLayouts;
 		bool hostImageCopy;
 		bool maintenance5;
-		bool shaderStencilExport;
-		bool memoryBudget;
 		bool descriptorHeap;
-		bool mutableDescriptorType;
 	};
 
 	class Vulkan_RenderContext final : public RenderContext {
@@ -46,10 +38,10 @@ namespace ge::renderer {
 		[[nodiscard]] VkDescriptorPool GetGlobalDescriptorPool() const noexcept { return _globalDescriptorPool; }
 		[[nodiscard]] Vulkan_DeviceFeatures GetDeviceFeatures() const noexcept { return _deviceFeatures; }
 
-		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_bindlessManagers[BindlessIndexReadonlyImage]; }
-		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_bindlessManagers[BindlessIndexWritableImage]; }
-		[[nodiscard]] auto &GetBindlessManagersUniformBuffer() noexcept { return *_bindlessManagers[BindlessIndexUniformBuffer]; }
-		[[nodiscard]] auto &GetBindlessManagersSampler() noexcept { return *_bindlessManagers[BindlessIndexSampler]; }
+		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_readonlyImageBindlessManager; }
+		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_writableImageBindlessManager; }
+		[[nodiscard]] auto &GetBindlessManagersUniformBuffer() noexcept { return *_uniformBufferBindlessManager; }
+		[[nodiscard]] auto &GetBindlessManagersSampler() noexcept { return *_samplerBindlessManager; }
 
 		[[nodiscard]] VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) const noexcept { return _sampleMap[static_cast<uint16_t>(sample)]; }
 	private:
@@ -94,6 +86,11 @@ namespace ge::renderer {
 		GEVector<const char*> _deviceExtensions{};
 
 		std::array<ge::mem::Scope<Vulkan_BindlessManager>, 4> _bindlessManagers{};
+		ge::mem::Scope<Vulkan_BindlessManager> _readonlyImageBindlessManager;
+		ge::mem::Scope<Vulkan_BindlessManager> _writableImageBindlessManager;
+		ge::mem::Scope<Vulkan_BindlessManager> _uniformBufferBindlessManager;
+		ge::mem::Scope<Vulkan_BindlessManager> _samplerBindlessManager;
+
 		std::array<VkSampleCountFlagBits, 4> _sampleMap{};
 #ifdef _DEBUG
 		const bool _useValidationLayer = true;
