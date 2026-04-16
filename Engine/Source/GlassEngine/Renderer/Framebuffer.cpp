@@ -7,7 +7,7 @@ namespace ge::renderer {
 	mem::Ref<Framebuffer> Framebuffer::Create(const FramebufferSpecification& spec) {
 		switch (RenderAPI::GetAPI())
 		{
-		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Framebuffer>::Create();
+		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Framebuffer>::Create(spec);
 		case GraphicsAPI::DirectX11: return nullptr;
 		case GraphicsAPI::OpenGL: return nullptr;
 		default:
