@@ -20,7 +20,7 @@ namespace ge::renderer {
 		bool IsSwapchain = false;
 	};
 
-	class Framebuffer : public mem::RefCounted {
+	class Framebuffer : public ge::mem::RefCounted {
 	public:
 		virtual void Invalidate(const FramebufferSpecification& spec) = 0;
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
@@ -28,14 +28,14 @@ namespace ge::renderer {
 		uint32_t GetHeight() const { return _specs.height; }
 		uint32_t GetAttachmentCount() const { return static_cast<uint32_t>(_specs.Attachments.Attachments.size()); }
 		GEVector<ImageFormat>& GetAttachments() { return _specs.Attachments.Attachments; }
-		mem::Ref<Texture2D>& GetColorAttachmentTexture(uint32_t index = 0) { return _colorAttachments[index]; };
-		mem::Ref<Texture2D>& GetDepthAttachmentTexture(uint32_t index = 0) { return _depthAttachments[index]; };
+		ge::mem::Ref<Image>& GetColorAttachmentTexture(uint32_t index = 0) { return _colorAttachments[index]; };
+		ge::mem::Ref<Image>& GetDepthAttachmentTexture(uint32_t index = 0) { return _depthAttachments[index]; };
 		const FramebufferSpecification& GetSpecification() const { return _specs; }
 
-		static mem::Ref<Framebuffer> Create(const FramebufferSpecification& spec);
+		static ge::mem::Ref<Framebuffer> Create(const FramebufferSpecification& spec);
 	protected:
-		GEVector<mem::Ref<Texture2D>> _colorAttachments;
-		GEVector<mem::Ref<Texture2D>> _depthAttachments;
+		GEVector<ge::mem::Ref<Image>> _colorAttachments;
+		GEVector<ge::mem::Ref<Image>> _depthAttachments;
 		FramebufferSpecification _specs;
 	};
 }

@@ -14,16 +14,17 @@ namespace ge::renderer {
 		_depthAttachments.clear();
 		if (!_specs.IsSwapchain) {
 			for (const auto& attachment : spec.Attachments.Attachments) {
-				TextureSpec textureSpec{};
-				textureSpec.format = attachment;
-				textureSpec.width = spec.width;
-				textureSpec.height = spec.height;
-				textureSpec.attachment = true;
+				ImageSpec imageSpec{};
+				imageSpec.imageFormat = attachment;
+				imageSpec.extent.x = spec.width;
+				imageSpec.extent.y = spec.height;
 				if (utility::IsDepthFormat(attachment)) {
-					_depthAttachments.emplace_back(Texture2D::Create(textureSpec));
+					imageSpec.usageFlags = ImageUsageFlagsBits::DepthStencilAttachment;
+					_depthAttachments.emplace_back(Image::Create(imageSpec));
 				}
 				else {
-					_colorAttachments.emplace_back(Texture2D::Create(textureSpec));
+					imageSpec.usageFlags = ImageUsageFlagsBits::ColorAttachment;
+					_colorAttachments.emplace_back(Image::Create(imageSpec));
 				}
 			}
 		} // if it is swapchain we got image views from swapchain

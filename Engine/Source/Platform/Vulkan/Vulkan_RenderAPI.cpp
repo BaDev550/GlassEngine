@@ -14,10 +14,10 @@ namespace ge::renderer {
 	void Vulkan_RenderAPI::EndDefaultPass()
 	{
 	}
-	void Vulkan_RenderAPI::DrawVertex(CommandBuffer* cmd)
+	void Vulkan_RenderAPI::DrawVertex()
 	{
 	}
-	void Vulkan_RenderAPI::DrawIndexed(CommandBuffer* cmd)
+	void Vulkan_RenderAPI::DrawIndexed()
 	{
 	}
 }

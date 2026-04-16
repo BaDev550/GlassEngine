@@ -21,11 +21,13 @@ namespace ge {
 
 		uint32_t GetWidth() const { return _specs.width; }
 		uint32_t GetHeight() const { return _specs.height; }
+		uint32_t GetImageIndex();
 		void PollEvents() const;
 		void SetIcon(std::vector<uint8_t> data, uint32_t width, uint32_t height);
 		bool ShoudClose() const;
 
 		renderer::RenderContext& GetRenderContext() { return *_renderContext; }
+		renderer::Swapchain& GetSwapchain() { return *_swapchain; }
 	private:
 		WindowSpecification _specs;
 		GLFWwindow* _handle;

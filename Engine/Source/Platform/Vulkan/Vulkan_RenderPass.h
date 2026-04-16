@@ -9,11 +9,10 @@ namespace ge::renderer {
 		virtual void Begin(uint32_t layer = 0) override;
 		virtual void End(uint32_t layer = 0) override;
 
-		virtual void SetInput(std::string_view name, const ge::mem::Ref<Buffer>& buffer) override;
-		virtual void SetInput(std::string_view name, const ge::mem::Ref<Sampler>& sampler) override;
-		virtual void SetInput(std::string_view name, const ge::mem::Ref<Texture2D>& texture) override;
+		virtual void ISetInput(const ShaderResource& resource, const ge::mem::Ref<Buffer>& buffer) override;
+		virtual void ISetInput(const ShaderResource& resource, const ge::mem::Ref<Sampler>& sampler) override;
+		virtual void ISetInput(const ShaderResource& resource, const ge::mem::Ref<Texture2D>& texture) override;
 	private:
-		ge::mem::Ref<Pipeline> _pipeline;
 		ge::mem::Scope<Vulkan_DescriptorManager> _descriptorManager;
 	};
 }

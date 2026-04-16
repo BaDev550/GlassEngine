@@ -6,7 +6,7 @@
 namespace ge::renderer {
 	RenderStats RenderAPI::_renderStats;
 	GraphicsAPI RenderAPI::_graphicsAPI = GraphicsAPI::Vulkan;
-	mem::Ref<RenderAPI> RenderAPI::Create() {
+	ge::mem::Ref<RenderAPI> RenderAPI::Create() {
 		switch (RenderAPI::GetAPI())
 		{
 		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_RenderAPI>::Create();

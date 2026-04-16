@@ -1,5 +1,4 @@
 #pragma once
-#include "GlassEngine/Renderer/CommandBuffer.h"
 #include "GlassEngine/Renderer/RenderAPI.h"
 #include "ShaderLibrary.h"
 
@@ -13,11 +12,12 @@ namespace ge::renderer {
 		static void EndFrame();
 		static void BeginDefaultPass();
 		static void EndDefaultPass();
-		static void DrawVertex(CommandBuffer* cmd);
-		static void DrawIndexed(CommandBuffer* cmd);
+		static void DrawVertex();
+		static void DrawIndexed();
 
+		static uint32_t GetFrameIndex();
 		static RenderStats GetRenderStats();
 		static ShaderLibrary& GetShaderLibrary(); 
-		static mem::Ref<RenderAPI> GetRenderAPI();
+		static ge::mem::Ref<RenderAPI> GetRenderAPI();
 	};
 }

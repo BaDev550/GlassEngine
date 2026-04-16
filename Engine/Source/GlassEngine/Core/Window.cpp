@@ -29,6 +29,11 @@ namespace ge {
 		glfwTerminate();
 	}
 
+	uint32_t Window::GetImageIndex()
+	{
+		return 0; // TODO (0x): implement :D
+	}
+
 	void Window::PollEvents() const {
 		glfwPollEvents();
 	}

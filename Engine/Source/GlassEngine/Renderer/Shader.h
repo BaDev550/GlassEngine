@@ -18,6 +18,7 @@ namespace ge::renderer {
 	public:
 		virtual ~Shader() = default;
 		virtual void Compile() = 0; 
+		virtual ShaderReflection& GetReflectionData() = 0;
 
 		ShaderStat GetShaderStage() const { return _shaderStage; }
 		bool IsReady() const { return (_shaderStage == ShaderStat::LoadedCompiled); }

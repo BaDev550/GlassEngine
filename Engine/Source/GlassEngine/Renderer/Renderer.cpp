@@ -29,13 +29,18 @@ namespace ge::renderer {
 	void Renderer3D::EndDefaultPass() {
 		g_renderAPI->EndDefaultPass();
 	}
-	void Renderer3D::DrawVertex(CommandBuffer* cmd) {
-		g_renderAPI->DrawVertex(cmd);
+	void Renderer3D::DrawVertex() {
+		g_renderAPI->DrawVertex();
 	}
-	void Renderer3D::DrawIndexed(CommandBuffer* cmd) {
-		g_renderAPI->DrawIndexed(cmd);
+	void Renderer3D::DrawIndexed() {
+		g_renderAPI->DrawIndexed();
 	}
-	
+
+	uint32_t Renderer3D::GetFrameIndex()
+	{
+		return 0;
+	}
+
 	RenderStats Renderer3D::GetRenderStats() { return g_renderAPI->GetRenderStats(); }
 	ShaderLibrary& Renderer3D::GetShaderLibrary() { return *s_data._shaderLibrary; }
 	mem::Ref<RenderAPI> Renderer3D::GetRenderAPI() { return g_renderAPI; }
