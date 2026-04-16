@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Renderer/RenderContext.h"
+#include "GlassEngine/Renderer/Swapchain.h"
 
 struct GLFWwindow;
 namespace ge {
@@ -30,5 +31,6 @@ namespace ge {
 		GLFWwindow* _handle;
 
 		mem::Scope<renderer::RenderContext> _renderContext = nullptr;
+		mem::Scope<renderer::Swapchain> _swapchain = nullptr;
 	};
 }

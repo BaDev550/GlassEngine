@@ -26,7 +26,7 @@ namespace ge::file {
 			return ptr;
 		}
 
-		bool IsStreamGood() const { _offset < _buffer.size(); }
+		bool IsStreamGood() const { return _offset < _buffer.size(); }
 		size_t GetOffset() const { return _offset; }
 		size_t GetRemaining() const { return _buffer.size() - _offset; }
 	private:

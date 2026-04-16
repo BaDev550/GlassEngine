@@ -9,15 +9,13 @@
 namespace ge::renderer {
     static constexpr uint32_t BindlessReadonlyImageSetIndex = 0;
     static constexpr uint32_t BindlessWritableImageSetIndex = 1;
-    static constexpr uint32_t BindlessUniformBufferSetIndex = 2;
-    static constexpr uint32_t BindlessSamplerSetIndex = 3;
-    static constexpr uint32_t UserResourceSetIndex = 4;
+    static constexpr uint32_t BindlessSamplerSetIndex = 2;
+    static constexpr uint32_t UserResourceSetIndex = 3;
 
     static constexpr uint32_t InShaderUserResourceSetIndex = 0;
     static constexpr uint32_t InShaderBindlessReadonlyImageSetIndex = 1;
     static constexpr uint32_t InShaderBindlessWritableImageSetIndex = 2;
-    static constexpr uint32_t InShaderBindlessUniformBufferSetIndex = 3;
-    static constexpr uint32_t InShaderBindlessSamplerSetIndex = 4;
+    static constexpr uint32_t InShaderBindlessSamplerSetIndex = 3;
 
     static constexpr uint32_t SpirvTargetIndex = 0;
     static constexpr uint32_t DxilTargetIndex = 1;
@@ -117,7 +115,6 @@ namespace ge::renderer {
             switch (set->set) {
             case InShaderBindlessReadonlyImageSetIndex: newSetIndex = BindlessReadonlyImageSetIndex; break;
             case InShaderBindlessWritableImageSetIndex: newSetIndex = BindlessWritableImageSetIndex; break;
-            case InShaderBindlessUniformBufferSetIndex: newSetIndex = BindlessUniformBufferSetIndex; break;
             case InShaderBindlessSamplerSetIndex: newSetIndex = BindlessSamplerSetIndex; break;
             case InShaderUserResourceSetIndex: newSetIndex = UserResourceSetIndex; break;
             default: GE_GRAPHICS_WARN("meaningless descriptor set, set = {}", set->set);

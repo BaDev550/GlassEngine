@@ -4,7 +4,7 @@
 namespace ge::renderer {
 	[[nodiscard]] static constexpr uint32_t GetDescriptorCount(ShaderResourceType type) noexcept {
 		switch (type) {
-		case ShaderResourceType::UniformBuffer: return 10'000;
+		case ShaderResourceType::UniformBuffer: GE_ASSERT(ShaderResourceType::UniformBuffer != type, "Vulkan_BindlessManager not support UniformBuffer");
 		case ShaderResourceType::ReadonlyImage: return 200'000;
 		case ShaderResourceType::WritableImage: return 10'000;
 		case ShaderResourceType::Sampler: return 1'000; // this enough, reuse
@@ -28,9 +28,7 @@ namespace ge::renderer {
 			dstPoolCreateInfo.maxSets = 1;
 			dstPoolCreateInfo.poolSizeCount = 1;
 			dstPoolCreateInfo.pPoolSizes = &poolSize;
-			// pre turing gpu's don't have update after bind for uniform buffers
-			dstPoolCreateInfo.flags = _resourceType != ShaderResourceType::UniformBuffer 
-				? VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT : VkDescriptorPoolCreateFlags{};
+			dstPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 			vkCreateDescriptorPool(_renderContext.GetDevice(), &dstPoolCreateInfo, VK_ALLOCATOR_CALLBACKS, &_descriptorPool);
 		}
 
@@ -41,7 +39,7 @@ namespace ge::renderer {
 				| VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT
 				| VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT
 				// pre turing gpu's don't have update after bind for uniform buffers
-				| (_resourceType != ShaderResourceType::UniformBuffer ? VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT : VkDescriptorBindingFlags{})
+				| VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT
 				;
 
 			VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsCreateInfo{};
@@ -60,8 +58,7 @@ namespace ge::renderer {
 			dstLayoutCreateInfo.pBindings = &binding;
 			dstLayoutCreateInfo.bindingCount = 1;
 			// pre turing gpu's don't have update after bind for uniform buffers
-			dstLayoutCreateInfo.flags = _resourceType != ShaderResourceType::UniformBuffer
-				? VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT : VkDescriptorSetLayoutCreateFlags{};
+			dstLayoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
 			dstLayoutCreateInfo.pNext = &bindingFlagsCreateInfo;
 			vkCreateDescriptorSetLayout(_renderContext.GetDevice(), &dstLayoutCreateInfo, VK_ALLOCATOR_CALLBACKS, &_descriptorSetLayout);
 		}
@@ -91,7 +88,7 @@ namespace ge::renderer {
 		VkDescriptorImageInfo imageInfo{};
 		imageInfo.imageLayout = utility::OptimalImageLayout(image.GetDescRef().usageFlags);
 		imageInfo.imageView = image.CreateGetImageView(subresource);
-		return WriteDescriptor(&imageInfo, nullptr);
+		return WriteDescriptor(&imageInfo);
 	}
 
 	uint32_t Vulkan_BindlessManager::AddWritableImage(Vulkan_Image &image, ImageSubresource subresource) {
@@ -100,17 +97,14 @@ namespace ge::renderer {
 		VkDescriptorImageInfo imageInfo{};
 		imageInfo.imageLayout = utility::OptimalImageLayout(image.GetDescRef().usageFlags);
 		imageInfo.imageView = image.CreateGetImageView(subresource);
-		return WriteDescriptor(&imageInfo, nullptr);
+		return WriteDescriptor(&imageInfo);
 	}
 
-	uint32_t Vulkan_BindlessManager::AddUnifromBuffer(Vulkan_Buffer &buffer, uint16_t firstElement, uint16_t elementCount) {
-		// TODO (dnm): write error
-		GE_ASSERT(ShaderResourceType::UniformBuffer == _resourceType, "");
-		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = buffer.GetVkBuffer();
-		bufferInfo.offset = buffer.GetAlighnedElementSize() * firstElement;
-		bufferInfo.range = buffer.GetAlighnedElementSize() * elementCount;
-		return WriteDescriptor(nullptr, &bufferInfo);
+	uint32_t Vulkan_BindlessManager::AddSampler(const Vulkan_Sampler& sampler) {
+		GE_ASSERT(ShaderResourceType::WritableImage == _resourceType, "");
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.sampler = sampler.GetSampler();
+		return WriteDescriptor(&imageInfo);
 	}
 
 	void Vulkan_BindlessManager::DeleteDescriptor(uint32_t index) {
@@ -118,7 +112,7 @@ namespace ge::renderer {
 		_deletedIndex.push_back(index);
 	}
 
-	uint32_t Vulkan_BindlessManager::WriteDescriptor(const VkDescriptorImageInfo* imageInfo, const VkDescriptorBufferInfo* bufferInfo) noexcept {
+	uint32_t Vulkan_BindlessManager::WriteDescriptor(const VkDescriptorImageInfo* imageInfo) noexcept {
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.descriptorCount = 1;
@@ -126,7 +120,7 @@ namespace ge::renderer {
 		write.dstArrayElement = GetIndex();
 		write.dstBinding = 0;
 		write.dstSet = _descriptorSet;
-		write.pBufferInfo = bufferInfo;
+		write.pBufferInfo = nullptr;
 		write.pImageInfo = imageInfo;
 		vkUpdateDescriptorSets(_renderContext.GetDevice(), 1, &write, 0, nullptr);
 		return write.dstArrayElement;

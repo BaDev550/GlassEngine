@@ -43,7 +43,6 @@ namespace ge::renderer {
 
 		_readonlyImageBindlessManager.reset();
 		_writableImageBindlessManager.reset();
-		_uniformBufferBindlessManager.reset();
 		_samplerBindlessManager.reset();
 
 		vkDestroyPipelineCache(_device, _pipelineCache, VK_ALLOCATOR_CALLBACKS);
@@ -362,7 +361,6 @@ namespace ge::renderer {
 	void Vulkan_RenderContext::CreateBindlessManagers() {
 		_readonlyImageBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::ReadonlyImage });
 		_writableImageBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::WritableImage });
-		_uniformBufferBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::UniformBuffer });
 		_samplerBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::Sampler});
 	}
 

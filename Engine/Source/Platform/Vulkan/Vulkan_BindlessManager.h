@@ -2,6 +2,7 @@
 #include "Vulkan_RenderContext.h"
 #include "Vulkan_Image.h"
 #include "Vulkan_Buffer.h"
+#include "Vulkan_Sampler.h"
 
 namespace ge::renderer {
 	struct BindlessManagerSpec {
@@ -15,9 +16,7 @@ namespace ge::renderer {
 
 		uint32_t AddWritableImage(Vulkan_Image &image, ImageSubresource subresource);
 		uint32_t AddReadonlyImage(Vulkan_Image &image, ImageSubresource subresource);
-		uint32_t AddUnifromBuffer(Vulkan_Buffer &buffer, uint16_t firstElement, uint16_t elementCount);
-		// TODO (0x): sampler 
-		uint32_t AddSampler();
+		uint32_t AddSampler(const Vulkan_Sampler &sampler);
 
 		// any type
 		void DeleteDescriptor(uint32_t index);
@@ -26,7 +25,7 @@ namespace ge::renderer {
 		[[nodiscard]] auto GetDstSetLayout() const noexcept { return _descriptorSetLayout; }
 		[[nodiscard]] auto GetDstSet() const noexcept { return _descriptorSet; }
 	private:
-		uint32_t WriteDescriptor(const VkDescriptorImageInfo *imageInfo, const VkDescriptorBufferInfo* bufferInfo) noexcept;
+		uint32_t WriteDescriptor(const VkDescriptorImageInfo *imageInfo) noexcept;
 		uint64_t GetIndex() noexcept;
 		GEVector<uint32_t> _deletedIndex;
 

@@ -8,6 +8,8 @@ namespace ge::renderer {
 	public:
 		Vulkan_Sampler(const SamplerSpec& desc);
 		~Vulkan_Sampler();
+
+		[[nodiscard]] auto GetSampler() const noexcept { return _sampler; }
 	private:
 		VkSampler _sampler;
 	};

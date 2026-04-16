@@ -44,11 +44,22 @@ namespace ge::renderer {
 
 		if (imageView == VK_NULL_HANDLE)
 		{
+			// TODO (dnm):
+			VkImageSubresourceRange vkSubresource{};
+			vkSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			vkSubresource.baseArrayLayer = 0;
+			vkSubresource.baseMipLevel = 0;
+			vkSubresource.layerCount = 1;
+			vkSubresource.baseMipLevel = 1;
+
 			VkImageViewCreateInfo createInfo{};
 			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			createInfo.format = _format;
 			createInfo.image = _image;
-			
+			createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			createInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+			createInfo.subresourceRange = vkSubresource;
+
 			vkCreateImageView(VK_RENDER_CONTEXT->GetDevice(), &createInfo, VK_ALLOCATOR_CALLBACKS, &imageView);
 		}
 

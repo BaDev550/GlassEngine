@@ -16,6 +16,12 @@ namespace ge {
 
 		_renderContext = renderer::RenderContext::Create(_handle);
 		_renderContext->Init();
+		_swapchain = renderer::Swapchain::Create({
+				.extent = {_specs.width, _specs.height},
+				.depthFormat = renderer::ImageFormat::D32,
+				.vsync = true,
+				.srgb = true,
+			}, *_renderContext);	
 	}
 
 	Window::~Window() {

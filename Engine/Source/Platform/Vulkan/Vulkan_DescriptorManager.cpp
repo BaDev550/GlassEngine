@@ -41,12 +41,11 @@ namespace ge::renderer {
 
 		// create pipeline layout
 		{
-			VkDescriptorSetLayout dstSetlayouts[5];
+			VkDescriptorSetLayout dstSetlayouts[4];
 			dstSetlayouts[0] = _renderContext.GetBindlessManagersReadonlyImage().GetDstSetLayout();
 			dstSetlayouts[1] = _renderContext.GetBindlessManagersWritableImage().GetDstSetLayout();
-			dstSetlayouts[2] = _renderContext.GetBindlessManagersUniformBuffer().GetDstSetLayout();
-			dstSetlayouts[3] = _renderContext.GetBindlessManagersSampler().GetDstSetLayout();
-			dstSetlayouts[4] = _descriptorSetLayout;
+			dstSetlayouts[2] = _renderContext.GetBindlessManagersSampler().GetDstSetLayout();
+			dstSetlayouts[3] = _descriptorSetLayout;
 
 			VkPushConstantRange pushConstant{};
 			pushConstant.offset = 0;
@@ -57,7 +56,7 @@ namespace ge::renderer {
 			VkPipelineLayoutCreateInfo createInfo{};
 			createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			createInfo.pSetLayouts = dstSetlayouts;
-			createInfo.setLayoutCount = 5;
+			createInfo.setLayoutCount = 4;
 			createInfo.pushConstantRangeCount = 1;
 			createInfo.pPushConstantRanges = &pushConstant;
 			vkCreatePipelineLayout(_renderContext.GetDevice(), &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipelineLayout);

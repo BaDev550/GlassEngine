@@ -35,12 +35,13 @@ namespace ge::renderer {
 		[[nodiscard]] VkInstance GetInstance() const noexcept { return _instance; }
 		[[nodiscard]] VkPipelineCache GetPipelineCache() const noexcept { return _pipelineCache; }
 		[[nodiscard]] VkDevice GetDevice() const noexcept { return _device; }
+		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const noexcept { return _physicalDevice; }
+		[[nodiscard]] VkSurfaceKHR GetSurface() const noexcept { return _surface; }
 		[[nodiscard]] VkDescriptorPool GetGlobalDescriptorPool() const noexcept { return _globalDescriptorPool; }
 		[[nodiscard]] Vulkan_DeviceFeatures GetDeviceFeatures() const noexcept { return _deviceFeatures; }
 
 		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_readonlyImageBindlessManager; }
 		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_writableImageBindlessManager; }
-		[[nodiscard]] auto &GetBindlessManagersUniformBuffer() noexcept { return *_uniformBufferBindlessManager; }
 		[[nodiscard]] auto &GetBindlessManagersSampler() noexcept { return *_samplerBindlessManager; }
 
 		[[nodiscard]] VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) const noexcept { return _sampleMap[static_cast<uint16_t>(sample)]; }
@@ -85,10 +86,8 @@ namespace ge::renderer {
 		GEVector<const char*> _layers{};
 		GEVector<const char*> _deviceExtensions{};
 
-		std::array<ge::mem::Scope<Vulkan_BindlessManager>, 4> _bindlessManagers{};
 		ge::mem::Scope<Vulkan_BindlessManager> _readonlyImageBindlessManager;
 		ge::mem::Scope<Vulkan_BindlessManager> _writableImageBindlessManager;
-		ge::mem::Scope<Vulkan_BindlessManager> _uniformBufferBindlessManager;
 		ge::mem::Scope<Vulkan_BindlessManager> _samplerBindlessManager;
 
 		std::array<VkSampleCountFlagBits, 4> _sampleMap{};
