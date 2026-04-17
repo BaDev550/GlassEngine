@@ -1,4 +1,5 @@
 #include "Vulkan_Swapchain.h"
+#include "GlassEngine/Renderer/Renderer.h"
 
 namespace ge::renderer {
 	Vulkan_Swapchain::Vulkan_Swapchain(const SwapchainSpec& spec, RenderContext& renderContext)
@@ -124,5 +125,40 @@ namespace ge::renderer {
 				_imageViews.push_back(imageView);
 			}
 		}
+	}
+
+	VkResult Vulkan_Swapchain::Submit(VkCommandBuffer* cmd, uint32_t* imageIndex)
+	{
+		uint32_t frameIndex = Renderer3D::GetFrameIndex();
+		auto renderContext = CastChecked<Vulkan_RenderContext>(&Application::Get()->GetWindow().GetRenderContext());
+		VkSubmitInfo submitInfo{};
+		//VkSemaphore waitSemaphore[] = { _imageAvailableSemaphores[frameIndex] };
+		//VkSemaphore signalSemaphore[] = { _renderFinishedSemaphores[*imageIndex] };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		//submitInfo.pWaitSemaphores = waitSemaphore;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = cmd;
+		submitInfo.signalSemaphoreCount = 1;
+		//submitInfo.pSignalSemaphores = signalSemaphore;
+		//vkResetFences(VK_RENDER_CONTEXT->GetDevice(), 1, &_inFlightFences[frameIndex]);
+		//VkResult submitResult = vkQueueSubmit(renderContext->GetGraphicsQueue(), 1, &submitInfo, _inFlightFences[frameIndex]);
+		//if (submitResult != VK_SUCCESS) {
+		//	return submitResult;
+		//}
+
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.waitSemaphoreCount = 1;
+		//presentInfo.pWaitSemaphores = signalSemaphore;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = &_swapchain;
+		presentInfo.pImageIndices = imageIndex;
+		return vkQueuePresentKHR(renderContext->GetGraphicsQueue(), &presentInfo);
+	}
+
+	bool Vulkan_Swapchain::Swapbuffers(uint32_t* imageIndex)
+	{
+		return false;
 	}
 }

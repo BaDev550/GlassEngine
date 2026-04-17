@@ -24,6 +24,7 @@ namespace ge {
 		uint32_t GetImageIndex();
 		void PollEvents() const;
 		void SetIcon(std::vector<uint8_t> data, uint32_t width, uint32_t height);
+		bool Swapbuffers();
 		bool ShoudClose() const;
 
 		renderer::RenderContext& GetRenderContext() { return *_renderContext; }
@@ -31,6 +32,7 @@ namespace ge {
 	private:
 		WindowSpecification _specs;
 		GLFWwindow* _handle;
+		uint32_t _imageIndex = 0;
 
 		mem::Scope<renderer::RenderContext> _renderContext = nullptr;
 		mem::Scope<renderer::Swapchain> _swapchain = nullptr;

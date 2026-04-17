@@ -1,10 +1,13 @@
 #pragma once
 #include "GlassEngine/Renderer/RenderAPI.h"
 #include "ShaderLibrary.h"
+#include "RenderPass.h"
 
 namespace ge::renderer {
 	class Renderer3D {
 	public:
+		constexpr static uint32_t MaxFramesInFlight = 2;
+
 		static void Init();
 		static void Destroy();
 		
@@ -18,6 +21,7 @@ namespace ge::renderer {
 		static uint32_t GetFrameIndex();
 		static RenderStats GetRenderStats();
 		static ShaderLibrary& GetShaderLibrary(); 
+		static ge::mem::Ref<RenderPass> GetDefaultRenderPass();
 		static ge::mem::Ref<RenderAPI> GetRenderAPI();
 	};
 }

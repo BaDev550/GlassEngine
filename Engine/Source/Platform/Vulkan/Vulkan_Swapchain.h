@@ -11,6 +11,8 @@ namespace ge::renderer {
 		Vulkan_Swapchain(const SwapchainSpec& spec, RenderContext& renderContext);
 		~Vulkan_Swapchain();
 
+		VkResult Submit(VkCommandBuffer* cmd, uint32_t* imageIndex);
+		virtual bool Swapbuffers(uint32_t* imageIndex = nullptr) override;
 		[[nodiscard]] auto GetSwapchain() const noexcept { return _swapchain; }
 		[[nodiscard]] auto GetSemaphores() const noexcept { return std::span(_semaphores); }
 		[[nodiscard]] auto GetImageViews() const noexcept { return std::span(_imageViews); }

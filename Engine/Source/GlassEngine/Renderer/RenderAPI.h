@@ -24,8 +24,6 @@ namespace ge::renderer {
 
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
-		virtual void BeginDefaultPass() = 0;
-		virtual void EndDefaultPass() = 0;
 		virtual void DrawVertex() = 0;
 		virtual void DrawIndexed() = 0;
 

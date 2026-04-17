@@ -39,6 +39,8 @@ namespace ge::renderer {
 		[[nodiscard]] VkSurfaceKHR GetSurface() const noexcept { return _surface; }
 		[[nodiscard]] VkDescriptorPool GetGlobalDescriptorPool() const noexcept { return _globalDescriptorPool; }
 		[[nodiscard]] Vulkan_DeviceFeatures GetDeviceFeatures() const noexcept { return _deviceFeatures; }
+		[[nodiscard]] VkQueue GetGraphicsQueue() const noexcept { return _graphicsQueue; }
+		[[nodiscard]] uint32_t GetGraphicsQueueFamilyIndex() const noexcept { return _graphicsQueueFamilyIndex; }
 
 		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_readonlyImageBindlessManager; }
 		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_writableImageBindlessManager; }

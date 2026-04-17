@@ -11,8 +11,8 @@ namespace ge::renderer {
 	}
 
 	Vulkan_Pipeline::~Vulkan_Pipeline() {
-		vkDestroyPipelineLayout(VK_RENDER_CONTEXT->GetDevice(), _layout, VK_ALLOCATOR_CALLBACKS);
-		vkDestroyPipeline(VK_RENDER_CONTEXT->GetDevice(), _pipeline, VK_ALLOCATOR_CALLBACKS);
+		//vkDestroyPipelineLayout(VK_RENDER_CONTEXT->GetDevice(), _layout, VK_ALLOCATOR_CALLBACKS);
+		//vkDestroyPipeline(VK_RENDER_CONTEXT->GetDevice(), _pipeline, VK_ALLOCATOR_CALLBACKS);
 	}
 
 	void Vulkan_Pipeline::Invalidate() {

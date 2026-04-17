@@ -26,8 +26,4 @@ namespace ge::renderer {
 
 		const ShaderResource* GetShaderResource(std::string_view name);
 	};
-
-	inline void RenderPass::SetInput(std::string_view name, const ge::mem::Ref<Texture>& texture, uint16_t resourceIndex) {
-		SetInput(name, texture->GetImage(), texture->GetSubresource(), resourceIndex);
-	}
 }

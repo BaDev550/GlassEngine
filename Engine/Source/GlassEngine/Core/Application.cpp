@@ -45,6 +45,14 @@ namespace ge {
 
 			for (auto& layer : _layerStack)
 				layer->OnUpdate(0.0f);
+
+			renderer::Renderer3D::BeginFrame();
+
+			renderer::Renderer3D::BeginDefaultPass();
+			
+			renderer::Renderer3D::EndDefaultPass();
+
+			renderer::Renderer3D::EndFrame();
 		}
 		_window->GetRenderContext().Wait();
 	}

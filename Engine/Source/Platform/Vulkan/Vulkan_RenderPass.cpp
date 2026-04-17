@@ -35,7 +35,7 @@ namespace ge::renderer {
 				colorAttachments[i].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				colorAttachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 				colorAttachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-				//extent = swapchain->GetSwapchainExtent();
+				extent = VkExtent2D({ swapchain->GetExtent().x, swapchain->GetExtent().y });
 			}
 			else {
 				auto image = targetFramebuffer->GetColorAttachmentTexture(i).Cast<Vulkan_Image>();
@@ -45,6 +45,7 @@ namespace ge::renderer {
 				colorAttachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 				extent = VkExtent2D({ framebufferSpecs.width, framebufferSpecs.height });
 			}
+			colorAttachments[i].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 			colorAttachments[i].clearValue = VkClearValue({ clearValue.x, clearValue.g, clearValue.b, 1.0f });
 		} // TODO (dnm): image memory barrier
 

@@ -31,7 +31,7 @@ namespace ge {
 
 	uint32_t Window::GetImageIndex()
 	{
-		return 0; // TODO (0x): implement :D
+		return _imageIndex;
 	}
 
 	void Window::PollEvents() const {
@@ -45,6 +45,11 @@ namespace ge {
 		images[0].width = width;
 		images[0].height = height;
 		glfwSetWindowIcon(_handle, 1, images);
+	}
+
+	bool Window::Swapbuffers()
+	{
+		return _swapchain->Swapbuffers(&_imageIndex);
 	}
 
 	bool Window::ShoudClose() const {
