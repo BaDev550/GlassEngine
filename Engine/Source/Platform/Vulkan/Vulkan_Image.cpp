@@ -47,16 +47,16 @@ namespace ge::renderer {
 			// TODO (dnm):
 			VkImageSubresourceRange vkSubresource{};
 			vkSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			vkSubresource.baseArrayLayer = 0;
-			vkSubresource.baseMipLevel = 0;
-			vkSubresource.layerCount = 1;
-			vkSubresource.baseMipLevel = 1;
+			vkSubresource.baseArrayLayer = subresource.baseLayer;
+			vkSubresource.baseMipLevel = subresource.baseMipmap;
+			vkSubresource.layerCount = subresource.layerCount;
+			vkSubresource.baseMipLevel = subresource.baseMipmap;
 
 			VkImageViewCreateInfo createInfo{};
 			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			createInfo.format = _format;
 			createInfo.image = _image;
-			createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			createInfo.viewType = utility::Vulkan_ImageViewType(subresource.type);
 			createInfo.components = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
 			createInfo.subresourceRange = vkSubresource;
 

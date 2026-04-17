@@ -66,7 +66,7 @@ namespace ge::renderer {
 	void Vulkan_DescriptorManager::SetImage(
 		const ShaderResource& resource, Vulkan_Image& image, ImageSubresource subresource, uint16_t resourceIndex) const noexcept {
 		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = utility::OptimalImageLayout(image.GetDescRef().usageFlags);
+		imageInfo.imageLayout = utility::Vulkan_OptimalImageLayout(image.GetDescRef().usageFlags);
 		imageInfo.imageView = image.CreateGetImageView(subresource);
 
 		VkWriteDescriptorSet write{};
@@ -79,6 +79,7 @@ namespace ge::renderer {
 		write.pImageInfo = &imageInfo;
 		vkUpdateDescriptorSets(_renderContext.GetDevice(), 1, &write, 0, nullptr);
 	}
+
 	void Vulkan_DescriptorManager::SetBuffer(
 		const ShaderResource& resource, const Vulkan_Buffer& buffer, uint16_t firstElement, uint16_t elementCount, uint16_t resourceIndex) const noexcept {
 		VkDescriptorBufferInfo bufferInfo{};
@@ -94,6 +95,22 @@ namespace ge::renderer {
 		write.dstBinding = resource.bindingIndex;
 		write.dstSet = _descriptorSet;
 		write.pBufferInfo = &bufferInfo;
+		vkUpdateDescriptorSets(_renderContext.GetDevice(), 1, &write, 0, nullptr);
+	}
+
+	void Vulkan_DescriptorManager::SetSampler(
+		const ShaderResource& resource, const Vulkan_Sampler& sampler, uint16_t resourceIndex) const noexcept {
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.sampler = sampler.GetSampler();
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+		write.dstArrayElement = resourceIndex;
+		write.dstBinding = resource.bindingIndex;
+		write.dstSet = _descriptorSet;
+		write.pImageInfo = &imageInfo;
 		vkUpdateDescriptorSets(_renderContext.GetDevice(), 1, &write, 0, nullptr);
 	}
 }

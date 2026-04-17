@@ -170,7 +170,7 @@ namespace ge::renderer::utility {
 		}
 	}
 
-	[[nodiscard]] constexpr VkImageLayout OptimalImageLayout(ImageUsageFlags flags) noexcept {
+	[[nodiscard]] constexpr VkImageLayout Vulkan_OptimalImageLayout(ImageUsageFlags flags) noexcept {
 		if (flags.Has(ImageUsageFlagsBits::Readonly)) {
 			if (flags.Has(ImageUsageFlagsBits::Writable))
 				return VK_IMAGE_LAYOUT_GENERAL;
@@ -189,6 +189,18 @@ namespace ge::renderer::utility {
 				return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 			else if (flags.Has(ImageUsageFlagsBits::TransferSrc))
 				return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		}
+	}
+
+	[[nodiscard]] constexpr VkImageViewType Vulkan_ImageViewType(ImageSubresourceType type) noexcept {
+		switch (type) {
+		case ImageSubresourceType::e1D: return VK_IMAGE_VIEW_TYPE_1D;
+		case ImageSubresourceType::e1DArray: return VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+		case ImageSubresourceType::e2D: return VK_IMAGE_VIEW_TYPE_2D;
+		case ImageSubresourceType::e2DArray: return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+		case ImageSubresourceType::e3D: return VK_IMAGE_VIEW_TYPE_3D;
+		case ImageSubresourceType::eCube: return VK_IMAGE_VIEW_TYPE_CUBE;
+		case ImageSubresourceType::eCubeArray: return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
 		}
 	}
 }

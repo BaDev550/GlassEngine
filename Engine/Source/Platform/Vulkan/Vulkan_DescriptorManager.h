@@ -3,6 +3,7 @@
 #include <GlassEngine/Renderer/ShaderCompiler.h>
 #include "Vulkan_Image.h"
 #include "Vulkan_Buffer.h"
+#include "Vulkan_Sampler.h"
 
 namespace ge::renderer {
 	class Vulkan_DescriptorManager {
@@ -18,8 +19,8 @@ namespace ge::renderer {
 			const ShaderResource& resource, Vulkan_Image& image, ImageSubresource subresource, uint16_t resourceIndex) const noexcept;
 		void SetBuffer(
 			const ShaderResource& resource, const Vulkan_Buffer& buffer, uint16_t firstElement, uint16_t elementCount, uint16_t resourceIndex) const noexcept;
-		// TODO (0x): sampler 
-		void SetSampler();
+		void SetSampler(
+			const ShaderResource& resource, const Vulkan_Sampler& sampler, uint16_t resourceIndex) const noexcept;
 	private:
 		VkDescriptorSetLayout _descriptorSetLayout{VK_NULL_HANDLE};
 		VkDescriptorSet _descriptorSet{VK_NULL_HANDLE};

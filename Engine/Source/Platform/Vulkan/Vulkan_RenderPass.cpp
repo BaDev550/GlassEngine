@@ -71,18 +71,18 @@ namespace ge::renderer {
 		vkCmdEndRendering(cmd);
 	}
 
-	void Vulkan_RenderPass::ISetInput(const ShaderResource& resource, const ge::mem::Ref<Buffer>& buffer)
+	void Vulkan_RenderPass::ISetInput(const ShaderResource& resource, const ge::mem::Ref<Buffer>& buffer, uint16_t firstElement, uint16_t elementCount, uint16_t resourceIndex)
 	{
-		_descriptorManager->SetBuffer(resource, *buffer.Cast<Vulkan_Buffer>(), 0, buffer->GetDesc().elementCount, 0);
+		_descriptorManager->SetBuffer(resource, *buffer.Cast<Vulkan_Buffer>(), firstElement, elementCount, resourceIndex);
 	}
 
-	void Vulkan_RenderPass::ISetInput(const ShaderResource& resource, const ge::mem::Ref<Sampler>& sampler)
+	void Vulkan_RenderPass::ISetInput(const ShaderResource& resource, const ge::mem::Ref<Sampler>& sampler, uint16_t resourceIndex)
 	{
-		_descriptorManager->SetSampler(resource, *sampler.Cast<Vulkan_Sampler>());
+		_descriptorManager->SetSampler(resource, *sampler.Cast<Vulkan_Sampler>(), resourceIndex);
 	}
 
-	void Vulkan_RenderPass::ISetInput(const ShaderResource& resource, const ge::mem::Ref<Texture2D>& texture)
+	void Vulkan_RenderPass::ISetInput(const ShaderResource& resource, const ge::mem::Ref<Image>& texture, ImageSubresource subresource, uint16_t resourceIndex)
 	{
-		//_descriptorManager->SetImage(resource, *texture->, 0, 1, 0);
+		_descriptorManager->SetImage(resource, *texture.Cast<Vulkan_Image>(), subresource, resourceIndex);
 	}
 }

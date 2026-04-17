@@ -18,24 +18,24 @@ namespace ge::renderer {
 		return nullptr;
 	}
 
-	void RenderPass::SetInput(std::string_view name, const ge::mem::Ref<Buffer>& buffer) {
+	void RenderPass::SetInput(std::string_view name, const ge::mem::Ref<Buffer>& buffer, uint16_t firstElement, uint16_t elementCount, uint16_t resourceIndex) {
 		const auto* decl = GetShaderResource(name);
 		if (decl) {
-			ISetInput(*decl, buffer);
+			ISetInput(*decl, buffer, firstElement, elementCount, resourceIndex);
 		}
 	}
 
-	void RenderPass::SetInput(std::string_view name, const ge::mem::Ref<Sampler>& sampler) {
+	void RenderPass::SetInput(std::string_view name, const ge::mem::Ref<Sampler>& sampler, uint16_t resourceIndex) {
 		const auto* decl = GetShaderResource(name);
 		if (decl) {
-			ISetInput(*decl, sampler);
+			ISetInput(*decl, sampler, resourceIndex);
 		}
 	}
 
-	void RenderPass::SetInput(std::string_view name, const ge::mem::Ref<Texture2D>& texture) { 
+	void RenderPass::SetInput(std::string_view name, const ge::mem::Ref<Image>& image, ImageSubresource subresource, uint16_t resourceIndex) {
 		const auto* decl = GetShaderResource(name);
 		if (decl) {
-			ISetInput(*decl, texture);
+			ISetInput(*decl, image, subresource, resourceIndex);
 		}
 	}
 

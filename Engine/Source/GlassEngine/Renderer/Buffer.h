@@ -31,7 +31,11 @@ namespace ge::renderer {
 			GE_ASSERT(_desc.elementSize != 0, "BufferSpec::elementSize must be greater than 0");
 			GE_ASSERT(_desc.elementCount != 0, "BufferSpec::elementCount must be greater than 0");
 
-			if (_desc.usageFlags.Has(BufferUsageFlagsBits::Uniform)) _desc.elementSize = utility::GetAlignment(_desc.elementSize, 256);
+			if (_desc.usageFlags.Has(BufferUsageFlagsBits::Uniform)) 
+				_alighened_element_size = utility::GetAlignment(_desc.elementSize, 256);
+			else {
+				_alighened_element_size = _desc.elementSize;
+			}
 		}
 		virtual ~Buffer() = default;
 
@@ -43,6 +47,6 @@ namespace ge::renderer {
 	protected:
 		BufferSpec _desc;
 		uint32_t _alighened_element_size;
-		void *_mappedPtr;
+		void* _mappedPtr{};
 	};
 }

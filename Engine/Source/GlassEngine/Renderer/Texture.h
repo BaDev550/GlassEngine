@@ -6,6 +6,7 @@
 #include "GlassEngine/Asset/Asset.h"
 
 namespace ge::renderer {
+	// TODO(0x): this just for Texture2D
 	struct TextureSpec {
 		uint32_t width = 1;
 		uint32_t height = 1;
@@ -21,11 +22,14 @@ namespace ge::renderer {
 		ImageFilter GetImageFilter() const { return _specs.filter; }
 		uint32_t GetWidth() const { return _specs.width; }
 		uint32_t GetHeight() const { return _specs.height; }
-		mem::Ref<Image>& GetImage() { return _image; }
+		ge::mem::Ref<Image>& GetImage() { return _image; }
+		const ge::mem::Ref<Image>& GetImage() const noexcept { return _image; }
+		auto GetSubresource() const noexcept { return _subresource; }
 	protected:
-		Texture(mem::Ref<Image> image, const TextureSpec& specs)
-			: _image(image), _specs(specs) {}
-		mem::Ref<Image> _image = nullptr;
+		Texture(ge::mem::Ref<Image> image, ImageSubresource subresource, const TextureSpec& specs)
+			: _image(image), _subresource(subresource), _specs(specs) { }
+		ge::mem::Ref<Image> _image = nullptr;
+		ImageSubresource _subresource{};
 		TextureSpec _specs;
 	};
 
@@ -35,11 +39,12 @@ namespace ge::renderer {
 		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec);
 		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec, const std::filesystem::path& filePath);
 		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec, const void* data);
+		static ge::mem::Ref<Texture2D> Create(ge::mem::Ref<Image> image, uint16_t layerIndex, uint16_t mipmapIndex);
 		
 		[[nodiscard]] auto& GetData() const noexcept { return _data; }
 		[[nodiscard]] auto& GetData() noexcept { return _data; }
 	private:
-		Texture2D(mem::Ref<Image> image, const TextureSpec& specs) : Texture(image, specs) {}
+		Texture2D(ge::mem::Ref<Image> image, ImageSubresource subresource, const TextureSpec& specs) : Texture(image, subresource, specs) {}
 		std::vector<uint8_t> _data;
 	};
 }

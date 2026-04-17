@@ -16,53 +16,53 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_Pipeline::Invalidate() {
-		PipelineConfig::Default(_config);
-		const auto& shader = _specs.shader.Cast<Vulkan_Shader>();
-		const auto& compiledData = shader->GetCompiledData();
+		//PipelineConfig::Default(_config);
+		//const auto& shader = _specs.shader.Cast<Vulkan_Shader>();
+		//const auto& compiledData = shader->GetCompiledData();
 
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(compiledData.AttribDescriptions.size());
-		vertexInputInfo.pVertexAttributeDescriptions = compiledData.AttribDescriptions.data();
-		vertexInputInfo.pVertexBindingDescriptions = &compiledData.BindingDescription;
-		vertexInputInfo.vertexBindingDescriptionCount = 1;
+		//VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+		//vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		//vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(compiledData.AttribDescriptions.size());
+		//vertexInputInfo.pVertexAttributeDescriptions = compiledData.AttribDescriptions.data();
+		//vertexInputInfo.pVertexBindingDescriptions = &compiledData.BindingDescription;
+		//vertexInputInfo.vertexBindingDescriptionCount = 1;
 
-		VkPipelineShaderStageCreateInfo vertexStageCreateInfo{};
-		vertexStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-		vertexStageCreateInfo.module = shader->GetVertexModule();
-		vertexStageCreateInfo.pName = "main";
+		//VkPipelineShaderStageCreateInfo vertexStageCreateInfo{};
+		//vertexStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+		//vertexStageCreateInfo.module = shader->GetVertexModule();
+		//vertexStageCreateInfo.pName = "main";
 
-		VkPipelineShaderStageCreateInfo fragStageCreateInfo{};
-		fragStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		fragStageCreateInfo.module = shader->GetFragmentModule();
-		fragStageCreateInfo.pName = "main";
-		const VkPipelineShaderStageCreateInfo shaderStageCreateInfos[] = { vertexStageCreateInfo, fragStageCreateInfo };
+		//VkPipelineShaderStageCreateInfo fragStageCreateInfo{};
+		//fragStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		//fragStageCreateInfo.module = shader->GetFragmentModule();
+		//fragStageCreateInfo.pName = "main";
+		//const VkPipelineShaderStageCreateInfo shaderStageCreateInfos[] = { vertexStageCreateInfo, fragStageCreateInfo };
 
-		std::vector<VkDescriptorSetLayout> layouts{};
-		for (auto& [set, layout] : shader->GetDescriptorLayouts())
-			layouts.push_back(layout);
+		//std::vector<VkDescriptorSetLayout> layouts{};
+		//for (auto& [set, layout] : shader->GetDescriptorLayouts())
+		//	layouts.push_back(layout);
 
-		VkPipelineLayoutCreateInfo layoutCreateInfo{};
-		layoutCreateInfo.pSetLayouts = layouts.data();
-		layoutCreateInfo.setLayoutCount = static_cast<uint32_t>(layouts.size());
-		layoutCreateInfo.pushConstantRangeCount = sizeof(glm::mat4);
-		vkCreatePipelineLayout(VK_RENDER_CONTEXT->GetDevice(), &layoutCreateInfo, VK_ALLOCATOR_CALLBACKS, &_layout);
+		//VkPipelineLayoutCreateInfo layoutCreateInfo{};
+		//layoutCreateInfo.pSetLayouts = layouts.data();
+		//layoutCreateInfo.setLayoutCount = static_cast<uint32_t>(layouts.size());
+		//layoutCreateInfo.pushConstantRangeCount = sizeof(glm::mat4);
+		//vkCreatePipelineLayout(VK_RENDER_CONTEXT->GetDevice(), &layoutCreateInfo, VK_ALLOCATOR_CALLBACKS, &_layout);
 
-		VkGraphicsPipelineCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		createInfo.pNext = nullptr;
-		createInfo.stageCount = 2;
-		createInfo.pStages = shaderStageCreateInfos;
-		createInfo.pVertexInputState = &vertexInputInfo;
-		createInfo.pInputAssemblyState = &_config.inputAssembyCreateInfo;
-		createInfo.pViewportState = &_config.viewportStateCreateInfo;
-		createInfo.pRasterizationState = &_config.resterizationStateCreateInfo;
-		createInfo.pMultisampleState = &_config.multisampleStateCreateInfo;
-		createInfo.pDepthStencilState = &_config.depthStencilCreateInfo;
-		createInfo.pColorBlendState = &_config.colorBlendStateCreateInfo;
-		createInfo.pDynamicState = &_config.dynamicStateCreateInfo;
-		createInfo.layout = _layout;
-		vkCreateGraphicsPipelines(VK_RENDER_CONTEXT->GetDevice(), VK_NULL_HANDLE, 1, &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipeline);
+		//VkGraphicsPipelineCreateInfo createInfo{};
+		//createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		//createInfo.pNext = nullptr;
+		//createInfo.stageCount = 2;
+		//createInfo.pStages = shaderStageCreateInfos;
+		//createInfo.pVertexInputState = &vertexInputInfo;
+		//createInfo.pInputAssemblyState = &_config.inputAssembyCreateInfo;
+		//createInfo.pViewportState = &_config.viewportStateCreateInfo;
+		//createInfo.pRasterizationState = &_config.resterizationStateCreateInfo;
+		//createInfo.pMultisampleState = &_config.multisampleStateCreateInfo;
+		//createInfo.pDepthStencilState = &_config.depthStencilCreateInfo;
+		//createInfo.pColorBlendState = &_config.colorBlendStateCreateInfo;
+		//createInfo.pDynamicState = &_config.dynamicStateCreateInfo;
+		//createInfo.layout = _layout;
+		//vkCreateGraphicsPipelines(VK_RENDER_CONTEXT->GetDevice(), VK_NULL_HANDLE, 1, &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipeline);
 	}
 
 	void PipelineConfig::Default(PipelineConfig& config)

@@ -86,7 +86,7 @@ namespace ge::renderer {
 		// TODO (dnm): write error
 		GE_ASSERT(ShaderResourceType::ReadonlyImage == _resourceType, "");
 		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = utility::OptimalImageLayout(image.GetDescRef().usageFlags);
+		imageInfo.imageLayout = utility::Vulkan_OptimalImageLayout(image.GetDescRef().usageFlags);
 		imageInfo.imageView = image.CreateGetImageView(subresource);
 		return WriteDescriptor(&imageInfo);
 	}
@@ -95,7 +95,7 @@ namespace ge::renderer {
 		// TODO (dnm): write error
 		GE_ASSERT(ShaderResourceType::WritableImage == _resourceType, "");
 		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = utility::OptimalImageLayout(image.GetDescRef().usageFlags);
+		imageInfo.imageLayout = utility::Vulkan_OptimalImageLayout(image.GetDescRef().usageFlags);
 		imageInfo.imageView = image.CreateGetImageView(subresource);
 		return WriteDescriptor(&imageInfo);
 	}
