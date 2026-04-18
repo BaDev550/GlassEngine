@@ -50,6 +50,10 @@ namespace ge {
 		for (const auto& list : _commandLists) {
 			for (const auto& cmd : list.commands) {
 				if ((list.name + "." + cmd.name) == commandName) {
+					if (!cmd.usage.empty() && args.empty()) {
+						Log("Usage: " + cmd.usage);
+						return;
+					}
 					cmd.action(args);
 					return;
 				}

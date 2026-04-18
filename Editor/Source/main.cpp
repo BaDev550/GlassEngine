@@ -20,8 +20,8 @@ public:
 				for (const auto& cmd : list.commands) {
 					GE_APPLICATION_INFO("- {}.{}", list.name, cmd.name);
 				}
-			}});
-
+			}
+			});
 	}
 	virtual void OnDetach() override {}
 	virtual void OnUpdate(float deltaTime) override {

@@ -5,14 +5,15 @@
 namespace ge {
 	struct Command {
 		std::string name;
+		std::string usage;
 		std::function<void(const GEVector<std::string>&)> action;
 	};
 
 	struct CommandList {
 		std::string name;
 		GEVector<Command> commands;
-		void AddCommand(const std::string& name, std::function<void(const GEVector<std::string>&)> action) {
-			commands.push_back({ name, action });
+		void AddCommand(const std::string& name, std::function<void(const GEVector<std::string>&)> action, const std::string& usage) {
+			commands.push_back({ name, usage, action });
 		}
 	};
 
@@ -24,16 +25,16 @@ namespace ge {
 			return instance;
 		}
 
-		void AddCommand(const std::string& category, const std::string& name, std::function<void(const GEVector<std::string>&)> action) {
+		void AddCommand(const std::string& category, const std::string& name, std::function<void(const GEVector<std::string>&)> action, const std::string& usage = "") {
 			for (auto& list : _commandLists) {
 				if (list.name == category) {
-					list.AddCommand(name, action);
+					list.AddCommand(name, action, usage);
 					return;
 				}
 			}
 			CommandList newList;
 			newList.name = category;
-			newList.AddCommand(name, action);
+			newList.AddCommand(name, action, usage);
 			_commandLists.push_back(newList);
 		}
 		void Log(const std::string& message) {

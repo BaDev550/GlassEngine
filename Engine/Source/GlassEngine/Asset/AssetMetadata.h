@@ -10,6 +10,18 @@ namespace ge {
 		Failed
 	};
 
+	constexpr std::string AssetLoadingStateToString(AssetLoadingState type) noexcept {
+		switch (type)
+		{
+		case AssetLoadingState::NotLoaded: return "NotLoaded";
+		case AssetLoadingState::Loading: return "Loading";
+		case AssetLoadingState::Loaded: return "Loaded";
+		case AssetLoadingState::Failed: return "Failed";
+		default:
+			return "Unknown";
+		};
+	}
+
 	struct AssetMetadata {
 		AssetHandle handle = GE_INVALID_ASSET_HANDLE;
 		AssetType type = GE_INVALID_ASSET_TYPE;
