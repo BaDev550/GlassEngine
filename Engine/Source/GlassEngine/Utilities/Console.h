@@ -17,6 +17,8 @@ namespace ge {
 		}
 	};
 
+#define GE_ADD_CONSOLE_COMMAND(category, name, action, ...) ge::Console::Get().AddCommand(category, name, action, __VA_ARGS__)
+#define GE_EXECUTE_CONSOLE_COMMAND(command) ge::Console::Get().ProcessCommand(command)
 	class Console {
 	public:
 		static std::string GetMessageFromArgs(const GEVector<std::string>& args) {

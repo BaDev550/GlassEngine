@@ -13,7 +13,7 @@ class EditorLayer : public ge::Layer {
 public:
 	EditorLayer() : ge::Layer("EditorLayer") {}
 	virtual void OnAttach() override {
-		ge::Console::Get().AddCommand("editor", "ping", [](const GEVector<std::string>& args) { GE_APPLICATION_INFO("Pong!"); });
+		GE_ADD_CONSOLE_COMMAND("editor", "ping", [](const GEVector<std::string>& args) { GE_APPLICATION_INFO("Pong!"); });
 	}
 
 	virtual void OnDetach() override {}
@@ -35,7 +35,6 @@ public:
 	EditorApp(const ge::ApplicationSpecification& createInfo) : ge::Application(createInfo) {
 		GE_APPLICATION_INFO("EditorApp created!");
 		PushLayer(new EditorLayer());
-		GetEditorAssetManager().CompileIntoPakFile("Assets.pak");
 	}
 };
 

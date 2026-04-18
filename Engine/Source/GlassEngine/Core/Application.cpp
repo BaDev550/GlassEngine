@@ -24,15 +24,16 @@ namespace ge {
 		renderer::Renderer3D::Init();
 		_imGuiLayer = ImGuiLayer::Create();
 
-		Console::Get().AddCommand("engine", "close", [this](const GEVector<std::string>& args) { _forceClose = true; });
-		Console::Get().AddCommand("engine", "help", [](const GEVector<std::string>& args) {
+		GE_ADD_CONSOLE_COMMAND("engine", "close", [this](const GEVector<std::string>& args) { _forceClose = true; });
+		GE_ADD_CONSOLE_COMMAND("engine", "help", [](const GEVector<std::string>& args) {
 			GE_CORE_INFO("Available commands:");
 			for (const auto& list : ge::Console::Get().GetCommandLists()) {
 				for (const auto& cmd : list.commands) {
 					std::string usageInfo = cmd.usage.empty() ? "" : (" - " + cmd.usage);
 					GE_CORE_INFO("- {}.{}{}", list.name, cmd.name, usageInfo);
 				}
-			}});
+			}
+		});
 	}
 
 	Application::~Application() {
