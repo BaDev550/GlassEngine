@@ -15,25 +15,17 @@ namespace ge {
 
 		Console::Init();
 		Logger::Init();
-		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		_threadManager = mem::CreateScope<ThreadManager>(1);
-		renderer::Renderer3D::Init();
 		_editorAssetManager = mem::CreateScope<EditorAssetManager>();
 		_runtimeAssetManager = mem::CreateScope<RuntimeAssetManager>("Assets.pak");
 		_defaultAssetManager = (_specs.mode == ApplicationMode::Editor) ? 
 			CastChecked<AssetManager>(_editorAssetManager.get()) : 
 			CastChecked<AssetManager>(_runtimeAssetManager.get());
-		_imGuiLayer = ImGuiLayer::Create();
 
-		ImportAssetData assetData{};
-		ge::renderer::TextureSpec textureSpecs{};
-		textureSpecs.filter = ge::renderer::ImageFilter::Linear;
-		textureSpecs.format = ge::renderer::ImageFormat::RGBA8;
-		assetData.textureSpecs = &textureSpecs;
-		GetEditorAssetManager().ImportAssetAsync(assetData, [this](AssetHandle iconHandle) {
-			auto iconAsset = GetEditorAssetManager().GetAsset(iconHandle).Cast<renderer::Texture2D>();
-			_window->SetIcon(iconAsset->GetData(), iconAsset->GetWidth(), iconAsset->GetHeight());
-			}, "Resouces/icon-512.png");
+		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
+		_window->SetIcon("Resouces/icon-512.png");
+		renderer::Renderer3D::Init();
+		_imGuiLayer = ImGuiLayer::Create();
 
 		Console::Get().AddCommand("engine", "close", [this](const GEVector<std::string>& args) { _forceClose = true; });
 		Console::Get().AddCommand("engine", "help", [](const GEVector<std::string>& args) {

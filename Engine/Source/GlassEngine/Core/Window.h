@@ -9,7 +9,7 @@ namespace ge {
 	struct WindowSpecification {
 		GEString title;
 		uint32_t width;
-		uint32_t height; // TODO (0x): add func callback for events
+		uint32_t height;
 	};
 
 	class Window {
@@ -25,6 +25,7 @@ namespace ge {
 		uint32_t GetImageIndex();
 		void PollEvents() const;
 		void SetIcon(std::vector<uint8_t> data, uint32_t width, uint32_t height);
+		void SetIcon(const GEString& iconPath);
 		bool Swapbuffers();
 		bool ShoudClose() const;
 
