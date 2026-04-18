@@ -18,9 +18,6 @@ namespace ge {
 		_threadManager = mem::CreateScope<ThreadManager>(1);
 		_editorAssetManager = mem::CreateScope<EditorAssetManager>();
 		_runtimeAssetManager = mem::CreateScope<RuntimeAssetManager>("Assets.pak");
-		_defaultAssetManager = (_specs.mode == ApplicationMode::Editor) ? 
-			CastChecked<AssetManager>(_editorAssetManager.get()) : 
-			CastChecked<AssetManager>(_runtimeAssetManager.get());
 
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		_window->SetIcon("Resouces/icon-512.png");
@@ -43,6 +40,7 @@ namespace ge {
 		_imGuiLayer = nullptr;
 		renderer::Renderer3D::Destroy();
 		Logger::Destroy();
+		Console::Destroy();
 	}
 
 	void Application::Run() {

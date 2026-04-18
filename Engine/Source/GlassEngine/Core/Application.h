@@ -27,6 +27,8 @@ namespace ge {
 
 	class Application {
 	public:
+		static Application* Get() { return _instance; }
+
 		Application(const ApplicationSpecification& specs);
 		virtual ~Application();
 
@@ -34,12 +36,10 @@ namespace ge {
 		void Close() { _forceClose = true; }
 
 		Window& GetWindow() { return *_window; }
-		ThreadManager& GetThreadManager() { return *_threadManager; }
 		LayerStack& GetLayerStack() { return _layerStack; }
+		ThreadManager& GetThreadManager() { return *_threadManager; }
 		EditorAssetManager& GetEditorAssetManager() { return *_editorAssetManager; }
 		RuntimeAssetManager& GetRuntimeAssetManager() { return *_runtimeAssetManager; }
-		AssetManager& GetDefaultAssetManager() { return *_defaultAssetManager; }
-		static Application* Get() { return _instance; }
 		ApplicationSpecification GetSpecs() const { return _specs; }
 	protected:
 		void PushLayer(Layer* layer) { _layerStack.PushLayer(layer); }
@@ -47,14 +47,13 @@ namespace ge {
 	private:
 		static Application* _instance;
 		ApplicationSpecification _specs;
-		mem::Scope<Window> _window;
 		LayerStack _layerStack;
 		ImGuiLayer* _imGuiLayer;
 
-		AssetManager* _defaultAssetManager;
+		mem::Scope<Window> _window;
+		mem::Scope<ThreadManager> _threadManager;
 		mem::Scope<EditorAssetManager> _editorAssetManager;
 		mem::Scope<RuntimeAssetManager> _runtimeAssetManager;
-		mem::Scope<ThreadManager> _threadManager;
 
 		bool _forceClose = false;
 	};

@@ -15,9 +15,10 @@ public:
 	virtual void OnAttach() override {
 		ge::Console::Get().AddCommand("editor", "ping", [](const GEVector<std::string>& args) { GE_APPLICATION_INFO("Pong!"); });
 	}
+
 	virtual void OnDetach() override {}
 	virtual void OnUpdate(float deltaTime) override {
-		ge::renderer::Renderer3D::BeginDefaultPass();
+		ge::renderer::Renderer3D::BeginDefaultPass(); // TODO (badev): Move this into scene renderer
 
 		ge::renderer::Renderer3D::EndDefaultPass();
 	}

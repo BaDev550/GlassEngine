@@ -6,6 +6,10 @@ namespace ge {
 	void Console::Init() {
 		Get().AddCommand("console", "clear", [](const GEVector<std::string>& args) { Get().ClearLog(); });
 	}
+	void Console::Destroy() {
+		Get().ClearLog();
+		Get()._commandLists.clear();
+	}
 
 	GEVector<std::string> Console::GetCommandMatches(const std::string& partialInput) {
 		GEVector<std::string> matches;

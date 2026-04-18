@@ -29,6 +29,7 @@ namespace ge {
 		}
 
 		static void Init();
+		static void Destroy();
 		static Console& Get() {
 			static Console instance;
 			return instance;
