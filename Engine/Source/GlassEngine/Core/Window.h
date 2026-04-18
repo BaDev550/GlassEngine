@@ -19,6 +19,7 @@ namespace ge {
 		Window& operator=(const Window&) = delete;
 		~Window();
 
+		GLFWwindow* GetHandle() const { return _handle; }
 		uint32_t GetWidth() const { return _specs.width; }
 		uint32_t GetHeight() const { return _specs.height; }
 		uint32_t GetImageIndex();

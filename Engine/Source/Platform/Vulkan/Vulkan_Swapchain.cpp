@@ -8,6 +8,25 @@ namespace ge::renderer {
 		CreateSwapchain(spec);
 	}
 
+	Vulkan_Swapchain::~Vulkan_Swapchain()
+	{
+		auto device = VK_RENDER_CONTEXT->GetDevice();
+
+		vkDeviceWaitIdle(device);
+
+		for (size_t i = 0; i < _imageCount; i++) {
+			vkDestroySemaphore(device, _imageAvailableSemaphores[i], VK_ALLOCATOR_CALLBACKS);
+			vkDestroySemaphore(device, _renderFinishedSemaphores[i], VK_ALLOCATOR_CALLBACKS);
+			vkDestroyFence(device, _inFlightFences[i], VK_ALLOCATOR_CALLBACKS);
+		}
+
+		for (auto imageView : _imageViews) {
+			vkDestroyImageView(device, imageView, VK_ALLOCATOR_CALLBACKS);
+		}
+
+		vkDestroySwapchainKHR(device, _swapchain, VK_ALLOCATOR_CALLBACKS);
+	}
+
 	void Vulkan_Swapchain::CreateSwapchain(const SwapchainSpec& newSpec) {
 		auto getDesired = [] (auto&& desiredList, auto&& searchList, auto notFindValue) -> auto {
 				for (const auto& desiredValue : desiredList)
@@ -125,40 +144,71 @@ namespace ge::renderer {
 				_imageViews.push_back(imageView);
 			}
 		}
+
+		{
+			_imageAvailableSemaphores.resize(_imageCount);
+			_renderFinishedSemaphores.resize(_imageCount);
+			_inFlightFences.resize(_imageCount);
+
+			VkSemaphoreCreateInfo semaphoreInfo{};
+			semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+			VkFenceCreateInfo fenceInfo{};
+			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+			auto device = VK_RENDER_CONTEXT->GetDevice();
+			for (size_t i = 0; i < _imageCount; i++) {
+				vkCreateSemaphore(device, &semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_imageAvailableSemaphores[i]);
+				vkCreateSemaphore(device, &semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_renderFinishedSemaphores[i]);
+				vkCreateFence(device, &fenceInfo, VK_ALLOCATOR_CALLBACKS, &_inFlightFences[i]);
+			}
+		}
 	}
 
 	VkResult Vulkan_Swapchain::Submit(VkCommandBuffer* cmd, uint32_t* imageIndex)
 	{
 		uint32_t frameIndex = Renderer3D::GetFrameIndex();
 		auto renderContext = CastChecked<Vulkan_RenderContext>(&Application::Get()->GetWindow().GetRenderContext());
+
 		VkSubmitInfo submitInfo{};
-		//VkSemaphore waitSemaphore[] = { _imageAvailableSemaphores[frameIndex] };
-		//VkSemaphore signalSemaphore[] = { _renderFinishedSemaphores[*imageIndex] };
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		VkSemaphore waitSemaphores[] = { _imageAvailableSemaphores[frameIndex] };
+		VkSemaphore signalSemaphores[] = { _renderFinishedSemaphores[*imageIndex] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
-		//submitInfo.pWaitSemaphores = waitSemaphore;
+		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = cmd;
 		submitInfo.signalSemaphoreCount = 1;
-		//submitInfo.pSignalSemaphores = signalSemaphore;
-		//vkResetFences(VK_RENDER_CONTEXT->GetDevice(), 1, &_inFlightFences[frameIndex]);
-		//VkResult submitResult = vkQueueSubmit(renderContext->GetGraphicsQueue(), 1, &submitInfo, _inFlightFences[frameIndex]);
-		//if (submitResult != VK_SUCCESS) {
-		//	return submitResult;
-		//}
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		VkResult submitResult = vkQueueSubmit(renderContext->GetGraphicsQueue(), 1, &submitInfo, _inFlightFences[frameIndex]);
+		if (submitResult != VK_SUCCESS) {
+			return submitResult;
+		}
 
 		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.waitSemaphoreCount = 1;
-		//presentInfo.pWaitSemaphores = signalSemaphore;
+		presentInfo.pWaitSemaphores = signalSemaphores;
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = &_swapchain;
 		presentInfo.pImageIndices = imageIndex;
+
 		return vkQueuePresentKHR(renderContext->GetGraphicsQueue(), &presentInfo);
 	}
 
 	bool Vulkan_Swapchain::Swapbuffers(uint32_t* imageIndex)
 	{
-		return false;
+		uint32_t frameIndex = Renderer3D::GetFrameIndex();
+		vkWaitForFences(VK_RENDER_CONTEXT->GetDevice(), 1, &_inFlightFences[frameIndex], VK_TRUE, UINT64_MAX);
+
+		VkResult result = vkAcquireNextImageKHR(VK_RENDER_CONTEXT->GetDevice(), _swapchain, UINT64_MAX, _imageAvailableSemaphores[frameIndex], VK_NULL_HANDLE, imageIndex);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR) { return false; }
+		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { return false; }
+		vkResetFences(VK_RENDER_CONTEXT->GetDevice(), 1, &_inFlightFences[frameIndex]);
+		return true;
 	}
 }

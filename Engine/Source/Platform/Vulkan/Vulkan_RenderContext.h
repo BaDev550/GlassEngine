@@ -12,7 +12,7 @@
 
 #define VK_RENDER_CONTEXT CastChecked<Vulkan_RenderContext>(&_renderContext)
 #define VK_ALLOCATOR VK_RENDER_CONTEXT->GetAllocator()
-#define VK_ALLOCATOR_CALLBACKS &mem::Vulkan_AllocatorCallbacks::GetCallbacks()
+#define VK_ALLOCATOR_CALLBACKS &::ge::renderer::mem::Vulkan_AllocatorCallbacks::GetCallbacks()
 
 namespace ge::renderer {
 	class Vulkan_BindlessManager;

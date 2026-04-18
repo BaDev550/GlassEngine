@@ -3,10 +3,12 @@
 #include <string>
 
 #include "GlassEngine/Layers/LayerStack.h"
+#include "GlassEngine/Layers/ImGuiLayer.h"
 #include "GlassEngine/Utilities/Logger.h"
 #include "GlassEngine/Thread/ThreadManager.h"
 #include "GlassEngine/Core/Window.h"
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Utilities/Console.h"
 
 #include "GlassEngine/Asset/AssetManager.h"
 
@@ -33,6 +35,7 @@ namespace ge {
 
 		Window& GetWindow() { return *_window; }
 		ThreadManager& GetThreadManager() { return *_threadManager; }
+		LayerStack& GetLayerStack() { return _layerStack; }
 		EditorAssetManager& GetEditorAssetManager() { return *_editorAssetManager; }
 		RuntimeAssetManager& GetRuntimeAssetManager() { return *_runtimeAssetManager; }
 		AssetManager& GetDefaultAssetManager() { return *_defaultAssetManager; }
@@ -46,6 +49,7 @@ namespace ge {
 		ApplicationSpecification _specs;
 		mem::Scope<Window> _window;
 		LayerStack _layerStack;
+		ImGuiLayer* _imGuiLayer;
 
 		AssetManager* _defaultAssetManager;
 		mem::Scope<EditorAssetManager> _editorAssetManager;

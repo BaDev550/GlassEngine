@@ -2,6 +2,7 @@
 
 #include "GlassEngine/Core/Memory.h"
 #include "GlassEngine/Utilities/Time.h"
+#include "GlassEngine/Utilities/Console.h"
 #include <format>
 #include <chrono>
 
@@ -75,7 +76,8 @@ namespace ge {
             return std::apply([&](auto&... a) { return std::vformat(fmt.get(), std::make_format_args(a...)); }, tup);
         }
 
-#define GE_LOG(msg, type, name) std::cout << std::format("[{}][{}][{}]: {}", Time::GetCurrentLocalTime(), name, LogTypeToString(type), msg) << std::endl;
+#define GE_FORMAT_LOG_MESSAGE(msg, type, name) std::format("[{}][{}][{}]: {}", Time::GetCurrentLocalTime(), name, LogTypeToString(type), msg)
+#define GE_LOG(msg, type, name) std::cout << GE_FORMAT_LOG_MESSAGE(msg, type, name) << std::endl; ge::Console::Get().Log(msg);
 
         class Logger : public mem::RefCounted {
         public:

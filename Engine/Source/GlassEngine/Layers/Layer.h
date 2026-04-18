@@ -11,6 +11,7 @@ namespace ge {
 		virtual void OnDetach() {}
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnEvent() {}
+		virtual void OnImGuiRender() {}
 		inline const char* GetDebugName() const { return _debugName.c_str(); }
 	private:
 		GEString _debugName = "Layer";

@@ -56,7 +56,7 @@ namespace ge::renderer {
 		uint32_t imageIndex = window.GetImageIndex();
 
 		vkEndCommandBuffer(cmd);
-		VkResult result = swapchain->Submit(nullptr, &imageIndex);
+		VkResult result = swapchain->Submit(&cmd, &imageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
 			//swapchain->ReCreateSwapchain();
 		}

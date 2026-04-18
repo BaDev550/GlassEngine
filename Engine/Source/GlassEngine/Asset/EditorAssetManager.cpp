@@ -7,6 +7,21 @@ namespace ge {
 	EditorAssetManager::EditorAssetManager()
 	{
 		LoadAssetRegistry();
+
+		ge::Console::Get().AddCommand("asset", "loadAsset", [this](const GEVector<std::string>& args) {
+			if (args.empty()) {
+				GE_CORE_ERROR("Usage: loadAsset <assetPath>");
+				return;
+			}
+			ImportAsset(ImportAssetData(), args[0]);
+			});
+		ge::Console::Get().AddCommand("asset", "cookAssets", [this](const GEVector<std::string>& args) {
+			if (args.empty()) {
+				GE_CORE_ERROR("Usage: cookAssets <outputPakFile>");
+				return;
+			}
+			CompileIntoPakFile(args[0]);
+			});
 	}
 
 	mem::Ref<Asset> EditorAssetManager::GetAsset(AssetHandle handle) {

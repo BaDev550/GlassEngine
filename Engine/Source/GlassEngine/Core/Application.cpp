@@ -13,6 +13,7 @@ namespace ge {
 			throw std::runtime_error("Application already exists!");
 		_instance = this;
 
+		Console::Init();
 		Logger::Init();
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		_threadManager = mem::CreateScope<ThreadManager>(1);
@@ -22,6 +23,7 @@ namespace ge {
 		_defaultAssetManager = (_specs.mode == ApplicationMode::Editor) ? 
 			CastChecked<AssetManager>(_editorAssetManager.get()) : 
 			CastChecked<AssetManager>(_runtimeAssetManager.get());
+		_imGuiLayer = ImGuiLayer::Create();
 
 		ImportAssetData assetData{};
 		ge::renderer::TextureSpec textureSpecs{};
@@ -32,9 +34,13 @@ namespace ge {
 			auto iconAsset = GetEditorAssetManager().GetAsset(iconHandle).Cast<renderer::Texture2D>();
 			_window->SetIcon(iconAsset->GetData(), iconAsset->GetWidth(), iconAsset->GetHeight());
 			}, "Resouces/icon-512.png");
+
+		ge::Console::Get().AddCommand("engine", "close", [this](const GEVector<std::string>& args) { _forceClose = true; });
 	}
 
 	Application::~Application() {
+		delete _imGuiLayer;
+		_imGuiLayer = nullptr;
 		renderer::Renderer3D::Destroy();
 		Logger::Destroy();
 	}
@@ -43,16 +49,15 @@ namespace ge {
 		while (!_window->ShoudClose() && !_forceClose) {
 			_window->PollEvents();
 
-			for (auto& layer : _layerStack)
+			ge::renderer::Renderer3D::BeginFrame();
+			for (auto& layer : _layerStack) {
 				layer->OnUpdate(0.0f);
 
-			renderer::Renderer3D::BeginFrame();
-
-			renderer::Renderer3D::BeginDefaultPass();
-			
-			renderer::Renderer3D::EndDefaultPass();
-
-			renderer::Renderer3D::EndFrame();
+				_imGuiLayer->Begin();
+				layer->OnImGuiRender();
+				_imGuiLayer->End();
+			}
+			ge::renderer::Renderer3D::EndFrame();
 		}
 		_window->GetRenderContext().Wait();
 	}

@@ -72,6 +72,7 @@ target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURR
 target_link_libraries(Engine
 	PUBLIC
 		glfw
+        imgui
 		Vulkan::Vulkan
         slang::slang
         GPUOpen::VulkanMemoryAllocator
