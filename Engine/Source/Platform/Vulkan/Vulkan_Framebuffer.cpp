@@ -19,11 +19,11 @@ namespace ge::renderer {
 				imageSpec.extent.x = spec.width;
 				imageSpec.extent.y = spec.height;
 				if (utility::IsDepthFormat(attachment)) {
-					imageSpec.usageFlags = ImageUsageFlagsBits::DepthStencilAttachment;
+					imageSpec.usageFlags |= ImageUsageFlagsBits::DepthStencilAttachment;
 					_depthAttachments.emplace_back(Image::Create(imageSpec));
 				}
 				else {
-					imageSpec.usageFlags = ImageUsageFlagsBits::ColorAttachment;
+					imageSpec.usageFlags |= ImageUsageFlagsBits::ColorAttachment;
 					_colorAttachments.emplace_back(Image::Create(imageSpec));
 				}
 			}

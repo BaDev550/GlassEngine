@@ -9,7 +9,7 @@ namespace ge {
 			auto now = std::chrono::system_clock::now();
 			auto localTime = std::chrono::current_zone()->to_local(now);
 			auto localTimeInSeconds = std::chrono::floor<std::chrono::seconds>(localTime);
-			return std::format("{:%Y-%m-%d %H:%M:%S}", localTimeInSeconds);
+			return std::format("{:%Y-%m-%d %H.%M.%S}", localTimeInSeconds);
 		}
 	};
 }

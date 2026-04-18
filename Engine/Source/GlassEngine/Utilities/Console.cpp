@@ -5,6 +5,23 @@
 namespace ge {
 	void Console::Init() {
 		Get().AddCommand("console", "clear", [](const GEVector<GEString>& args) { Get().ClearLog(); });
+		Get().AddCommand("console", "get_logs", [](const GEVector<GEString>& args) {
+			GEVector<std::string> messages = GE_GLOBAL_SINK->GetMessages();
+			for (const auto& msg : messages) {
+				GE_CORE_TRACE("{}", msg);
+			}
+		});
+		Get().AddCommand("console", "dump", [](const GEVector<GEString>& args) {
+			GE_GLOBAL_SINK->Dump(args[0].c_str());
+		}, "console.dump <filepath>");
+		Get().AddCommand("console", "help", [](const GEVector<GEString>& args) {
+			GE_CORE_INFO("Available commands:");
+			for (const auto& list : ge::Console::Get().GetCommandLists()) {
+				for (const auto& cmd : list.commands) {
+					GEString usageInfo = cmd.usage.empty() ? "" : (" - " + cmd.usage);
+					GE_CORE_INFO("- {}.{}{}", list.name, cmd.name, usageInfo);
+				}
+			}});
 	}
 	void Console::Destroy() {
 		Get().ClearLog();

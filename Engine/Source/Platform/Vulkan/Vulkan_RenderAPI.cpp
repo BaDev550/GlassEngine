@@ -41,6 +41,7 @@ namespace ge::renderer {
 		Application::Get()->GetWindow().Swapbuffers();
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
 		vkResetCommandPool(VK_RENDER_CONTEXT->GetDevice(), frame.commandPool, 0);
 		vkBeginCommandBuffer(frame.commandBuffer, &beginInfo);

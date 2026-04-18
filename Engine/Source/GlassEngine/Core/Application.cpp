@@ -25,18 +25,12 @@ namespace ge {
 		_imGuiLayer = ImGuiLayer::Create();
 
 		GE_ADD_CONSOLE_COMMAND("engine", "close", [this](const GEVector<GEString>& args) { _forceClose = true; });
-		GE_ADD_CONSOLE_COMMAND("engine", "help", [](const GEVector<GEString>& args) {
-			GE_CORE_INFO("Available commands:");
-			for (const auto& list : ge::Console::Get().GetCommandLists()) {
-				for (const auto& cmd : list.commands) {
-					GEString usageInfo = cmd.usage.empty() ? "" : (" - " + cmd.usage);
-					GE_CORE_INFO("- {}.{}{}", list.name, cmd.name, usageInfo);
-				}
-			}
-		});
 	}
 
 	Application::~Application() {
+#ifdef GE_APPLICATION_DUMP_LOG_ON_CLOSE
+		GE_GLOBAL_SINK->Dump("Log_" + Time::GetCurrentLocalTime() + ".txt");
+#endif
 		delete _imGuiLayer;
 		_imGuiLayer = nullptr;
 		renderer::Renderer3D::Destroy();

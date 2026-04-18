@@ -5,6 +5,9 @@
 #include "GlassEngine/Utilities/Console.h"
 #include <format>
 #include <chrono>
+#include <initializer_list>
+#include <sstream>
+#include <fstream>
 
 #ifdef _DEBUG
 #define GE_USE_APPLICATION_AND_STD_CONSOLE
@@ -29,6 +32,7 @@
 #define GE_SCRIPT_INFO(...) ge::Logger::GetScriptingLogger()->info(__VA_ARGS__)
 #define GE_SCRIPT_WARN(...) ge::Logger::GetScriptingLogger()->warn(__VA_ARGS__)
 #define GE_SCRIPT_ERROR(...) ge::Logger::GetScriptingLogger()->error(__VA_ARGS__)
+#define GE_GLOBAL_SINK ge::Logger::GetGlobalSink()
 #else 
 #define GE_USE_APPLICATION_CONSOLE
 #define GE_CORE_TRACE(...)
@@ -89,66 +93,103 @@ namespace ge {
 #else
 #define GE_LOG(msg, type, name) std::cout << GE_FORMAT_LOG_MESSAGE(msg, type, name) << std::endl;
 #endif
+#define GE_LOG_TO_SINK(msg, type, name, sink) if(sink) sink->Log(GE_FORMAT_LOG_MESSAGE(msg, type, name), type);
+
+        class Sink : public mem::RefCounted {
+        public:
+            Sink(const std::string& name, const GEVector<logLevel>& acceptedLevels) : _name(name), _acceptedLevels(acceptedLevels) {}
+            void Log(const std::string& message, logLevel level) {
+                if (std::find(_acceptedLevels.begin(), _acceptedLevels.end(), level) != _acceptedLevels.end()) {
+                    _messages.push_back(message);
+                }
+			}
+            void Clear() {
+                _messages.clear();
+			}
+            void Dump(const std::string& filepath) {
+                std::ofstream file(filepath); // TODO (badev): create its own class
+                for (const auto& msg : _messages) {
+                    file << msg << '\n';
+				}
+                file.close();
+            }
+			GEVector<std::string> GetMessages() const { return _messages; }
+        private:
+			std::string _name;
+			GEVector<logLevel> _acceptedLevels;
+			GEVector<std::string> _messages;
+        };
 
         class Logger : public mem::RefCounted {
         public:
             Logger(const char* name) : _name(name) {}
+			Logger(const char* name, mem::Ref<Sink> sink) : _name(name), _sink(sink) {}
             ~Logger() = default;
 
             template<typename... Args>
             void info(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
                 GE_LOG(msg, LL_Info, _name);
+				GE_LOG_TO_SINK(msg, LL_Info, _name, _sink);
             }
 
             template<typename... Args>
             void trace(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
                 GE_LOG(msg, LL_Trace, _name);
+                GE_LOG_TO_SINK(msg, LL_Trace, _name, _sink);
             }
 
             template<typename... Args>
             void warn(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
                 GE_LOG(msg, LL_Warn, _name);
+                GE_LOG_TO_SINK(msg, LL_Warn, _name, _sink);
             }
 
             template<typename... Args>
             void error(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
                 GE_LOG(msg, LL_Error, _name);
+                GE_LOG_TO_SINK(msg, LL_Error, _name, _sink);
             }
 
             template<typename... Args>
             void critical(std::format_string<Args...> fmt, Args&&... args) {
                 auto msg = FormatMessage(fmt, std::forward<Args>(args)...);
                 GE_LOG(msg, LL_Critical, _name);
+                GE_LOG_TO_SINK(msg, LL_Critical, _name, _sink);
             }
 
         private:
             const char* _name;
+			mem::Ref<Sink> _sink = nullptr;
         };
     }
 
     class Logger {
     public:
         static void Init() {
-            s_coreLogger = mem::Ref<log::Logger>::Create("CORE");
-            s_graphicsLogger = mem::Ref<log::Logger>::Create("GRAPHICS");
-            s_applicationLogger = mem::Ref<log::Logger>::Create("APPLICATION");
-            s_scriptingLogger = mem::Ref<log::Logger>::Create("SCRIPT");
+			s_globalSink = mem::Ref<log::Sink>::Create("GlobalSink", GEVector<log::logLevel>{ log::LL_Info, log::LL_Trace, log::LL_Warn, log::LL_Error, log::LL_Critical });
+            s_coreLogger = mem::Ref<log::Logger>::Create("CORE", s_globalSink);
+            s_graphicsLogger = mem::Ref<log::Logger>::Create("GRAPHICS", s_globalSink);
+            s_applicationLogger = mem::Ref<log::Logger>::Create("APPLICATION", s_globalSink);
+            s_scriptingLogger = mem::Ref<log::Logger>::Create("SCRIPT", s_globalSink);
         }
         static void Destroy() {
             s_coreLogger = nullptr;
             s_graphicsLogger = nullptr;
             s_applicationLogger = nullptr;
             s_scriptingLogger = nullptr;
+			s_globalSink = nullptr;
         }
+        inline static mem::Ref<log::Sink>& GetGlobalSink() { return s_globalSink; }
         inline static mem::Ref<log::Logger>& GetCoreLogger() { return s_coreLogger; }
         inline static mem::Ref<log::Logger>& GetGraphicsLogger() { return s_graphicsLogger; }
         inline static mem::Ref<log::Logger>& GetApplicationLogger() { return s_applicationLogger; }
         inline static mem::Ref<log::Logger>& GetScriptingLogger() { return s_scriptingLogger; }
     private:
+		static inline mem::Ref<log::Sink> s_globalSink = nullptr;
         static inline mem::Ref<log::Logger> s_coreLogger = nullptr;
         static inline mem::Ref<log::Logger> s_graphicsLogger = nullptr;
         static inline mem::Ref<log::Logger> s_applicationLogger = nullptr;
