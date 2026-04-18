@@ -8,20 +8,20 @@ namespace ge {
 	{
 		LoadAssetRegistry();
 
-		ge::Console::Get().AddCommand("asset", "loadAsset", [this](const GEVector<std::string>& args) { ImportAsset(ImportAssetData(), args[0]); }, "loadAsset <assetPath>");
-		ge::Console::Get().AddCommand("asset", "cookAssets", [this](const GEVector<std::string>& args) { CompileIntoPakFile(args[0]);}, "cookAssets <outputPakFile>");
-		ge::Console::Get().AddCommand("asset", "clearRegistry", [this](const GEVector<std::string>& args) {
+		Console::Get().AddCommand("asset", "loadAsset", [this](const GEVector<std::string>& args) { ImportAsset(ImportAssetData(), args[0]); }, "loadAsset <assetPath>");
+		Console::Get().AddCommand("asset", "cookAssets", [this](const GEVector<std::string>& args) { CompileIntoPakFile(args[0]);}, "cookAssets <outputPakFile>");
+		Console::Get().AddCommand("asset", "clearRegistry", [this](const GEVector<std::string>& args) {
 			_assetRegistry.clear();
 			SaveAssetRegistry();
 			GE_CORE_INFO("Asset registry cleared");
 			});
-		ge::Console::Get().AddCommand("asset", "printRegistry", [this](const GEVector<std::string>& args) {
+		Console::Get().AddCommand("asset", "printRegistry", [this](const GEVector<std::string>& args) {
 			GE_CORE_INFO("Asset Registry:");
 			for (const auto& [handle, mtd] : _assetRegistry) {
 				GE_CORE_INFO("- Handle: {}, Path: {}, Type: {}, State: {}", handle.ToString(), mtd.path.string(), AssetTypeToString(mtd.type), AssetLoadingStateToString(mtd.state));
 			}
 			});
-		ge::Console::Get().AddCommand("asset", "printLoadedAssets", [this](const GEVector<std::string>& args) {
+		Console::Get().AddCommand("asset", "printLoadedAssets", [this](const GEVector<std::string>& args) {
 			GE_CORE_INFO("Loaded Assets:");
 			for (const auto& [handle, asset] : _loadedAssets) {
 				GE_CORE_INFO("- Handle: {}, Type: {}", handle.ToString(), AssetTypeToString(asset->GetAssetType()));

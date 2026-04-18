@@ -14,14 +14,6 @@ public:
 	EditorLayer() : ge::Layer("EditorLayer") {}
 	virtual void OnAttach() override {
 		ge::Console::Get().AddCommand("editor", "ping", [](const GEVector<std::string>& args) { GE_APPLICATION_INFO("Pong!"); });
-		ge::Console::Get().AddCommand("editor", "help", [](const GEVector<std::string>& args) { 
-			GE_APPLICATION_INFO("Available commands:");
-			for (const auto& list : ge::Console::Get().GetCommandLists()) {
-				for (const auto& cmd : list.commands) {
-					GE_APPLICATION_INFO("- {}.{}", list.name, cmd.name);
-				}
-			}
-			});
 	}
 	virtual void OnDetach() override {}
 	virtual void OnUpdate(float deltaTime) override {

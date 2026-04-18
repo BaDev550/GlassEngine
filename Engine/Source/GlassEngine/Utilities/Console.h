@@ -19,6 +19,15 @@ namespace ge {
 
 	class Console {
 	public:
+		static std::string GetMessageFromArgs(const GEVector<std::string>& args) {
+			std::string fullMessage = "";
+			for (size_t i = 0; i < args.size(); ++i) {
+				fullMessage += args[i];
+				if (i != args.size() - 1) fullMessage += " ";
+			}
+			return fullMessage;
+		}
+
 		static void Init();
 		static Console& Get() {
 			static Console instance;
