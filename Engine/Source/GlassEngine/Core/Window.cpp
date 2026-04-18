@@ -23,7 +23,7 @@ namespace ge {
 				.srgb = true,
 			}, *_renderContext);	
 
-		Console::Get().AddCommand("window", "setTitle", [this](const GEVector<std::string>& args) { glfwSetWindowTitle(_handle, Console::GetMessageFromArgs(args).c_str()); }, "setTitle <title>");
+		GE_ADD_CONSOLE_COMMAND("window", "setTitle", [this](const GEVector<GEString>& args) { glfwSetWindowTitle(_handle, Console::GetMessageFromArgs(args).c_str()); }, "setTitle <title>");
 	}
 
 	Window::~Window() {

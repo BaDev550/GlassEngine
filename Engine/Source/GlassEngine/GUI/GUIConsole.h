@@ -42,7 +42,7 @@ namespace ge::gui {
 				ImGuiInputTextFlags_CallbackEdit;
 
 			if (ImGui::InputText("##input", _inputBuffer, IM_ARRAYSIZE(_inputBuffer), inputFlags, &TextEditCallbackStub, (void*)this)) {
-				std::string command(_inputBuffer);
+				GEString command(_inputBuffer);
 				if (!command.empty()) {
 					GE_CORE_INFO("> {}", command);
 					ge::Console::Get().ProcessCommand(command);
@@ -68,7 +68,7 @@ namespace ge::gui {
 		}
 	private:
 		void DrawAutoCompleteList(bool& reclaimFocus) {
-			GEVector<std::string> matches = ge::Console::Get().GetCommandMatches(_inputBuffer);
+			GEVector<GEString> matches = ge::Console::Get().GetCommandMatches(_inputBuffer);
 
 			if (!matches.empty()) {
 				ImVec2 pos = ImGui::GetItemRectMin();
@@ -99,7 +99,7 @@ namespace ge::gui {
 				_historyPos = -1;
 			}
 			else if (data->EventFlag == ImGuiInputTextFlags_CallbackCompletion) {
-				GEVector<std::string> matches = ge::Console::Get().GetCommandMatches(data->Buf);
+				GEVector<GEString> matches = ge::Console::Get().GetCommandMatches(data->Buf);
 				if (!matches.empty()) {
 					int matchIndex = (_autoCompletePos >= 0 && _autoCompletePos < matches.size()) ? _autoCompletePos : 0;
 					data->DeleteChars(0, data->BufTextLen);
@@ -108,7 +108,7 @@ namespace ge::gui {
 				}
 			}
 			else if (data->EventFlag == ImGuiInputTextFlags_CallbackHistory) {
-				GEVector<std::string> matches = ge::Console::Get().GetCommandMatches(data->Buf);
+				GEVector<GEString> matches = ge::Console::Get().GetCommandMatches(data->Buf);
 				if (data->BufTextLen > 0 && !matches.empty()) {
 					if (data->EventKey == ImGuiKey_UpArrow) {
 						_autoCompletePos--;
@@ -151,7 +151,7 @@ namespace ge::gui {
 		bool _scrollToBottom = false;
 		size_t _lastMessageCount = 0;
 
-		GEVector<std::string> _history;
+		GEVector<GEString> _history;
 		int _historyPos = -1;
 		int _autoCompletePos = -1;
 	};

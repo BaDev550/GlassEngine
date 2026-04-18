@@ -4,24 +4,24 @@
 
 namespace ge {
 	void Console::Init() {
-		Get().AddCommand("console", "clear", [](const GEVector<std::string>& args) { Get().ClearLog(); });
+		Get().AddCommand("console", "clear", [](const GEVector<GEString>& args) { Get().ClearLog(); });
 	}
 	void Console::Destroy() {
 		Get().ClearLog();
 		Get()._commandLists.clear();
 	}
 
-	GEVector<std::string> Console::GetCommandMatches(const std::string& partialInput) {
-		GEVector<std::string> matches;
-		std::string searchTarget = partialInput;
+	GEVector<GEString> Console::GetCommandMatches(const GEString& partialInput) {
+		GEVector<GEString> matches;
+		GEString searchTarget = partialInput;
 		size_t spacePos = partialInput.find(' ');
-		if (spacePos != std::string::npos) {
+		if (spacePos != GEString::npos) {
 			searchTarget = partialInput.substr(0, spacePos);
 		}
 
 		for (const auto& list : _commandLists) {
 			for (const auto& cmd : list.commands) {
-				std::string fullCmd = list.name + "." + cmd.name;
+				GEString fullCmd = list.name + "." + cmd.name;
 				if (fullCmd.find(searchTarget) == 0) {
 					matches.push_back(fullCmd);
 				}
@@ -30,14 +30,14 @@ namespace ge {
 		return matches;
 	}
 
-	void Console::ProcessCommand(const std::string& input) {
+	void Console::ProcessCommand(const GEString& input) {
 		if (input.empty()) return;
 		std::istringstream iss(input);
-		std::string commandName;
+		GEString commandName;
 		iss >> commandName;
 
-		GEVector<std::string> args;
-		std::string arg;
+		GEVector<GEString> args;
+		GEString arg;
 		while (iss >> arg) {
 			args.push_back(arg);
 		}

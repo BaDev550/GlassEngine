@@ -13,7 +13,7 @@ class EditorLayer : public ge::Layer {
 public:
 	EditorLayer() : ge::Layer("EditorLayer") {}
 	virtual void OnAttach() override {
-		GE_ADD_CONSOLE_COMMAND("editor", "ping", [](const GEVector<std::string>& args) { GE_APPLICATION_INFO("Pong!"); });
+		GE_ADD_CONSOLE_COMMAND("editor", "ping", [](const GEVector<GEString>& args) { GE_APPLICATION_INFO("Pong!"); });
 	}
 
 	virtual void OnDetach() override {}

@@ -7,6 +7,7 @@
 #include <chrono>
 
 #ifdef _DEBUG
+#define GE_USE_APPLICATION_AND_STD_CONSOLE
 #define GE_CORE_TRACE(...) ge::Logger::GetCoreLogger()->trace(__VA_ARGS__)
 #define GE_CORE_INFO(...) ge::Logger::GetCoreLogger()->info(__VA_ARGS__)
 #define GE_CORE_WARN(...) ge::Logger::GetCoreLogger()->warn(__VA_ARGS__)
@@ -29,6 +30,7 @@
 #define GE_SCRIPT_WARN(...) ge::Logger::GetScriptingLogger()->warn(__VA_ARGS__)
 #define GE_SCRIPT_ERROR(...) ge::Logger::GetScriptingLogger()->error(__VA_ARGS__)
 #else 
+#define GE_USE_APPLICATION_CONSOLE
 #define GE_CORE_TRACE(...)
 #define GE_CORE_INFO(...)
 #define GE_CORE_WARN(...)
@@ -77,7 +79,16 @@ namespace ge {
         }
 
 #define GE_FORMAT_LOG_MESSAGE(msg, type, name) std::format("[{}][{}][{}]: {}", Time::GetCurrentLocalTime(), name, LogTypeToString(type), msg)
-#define GE_LOG(msg, type, name) std::cout << GE_FORMAT_LOG_MESSAGE(msg, type, name) << std::endl; ge::Console::Get().Log(msg);
+#ifdef GE_USE_APPLICATION_CONSOLE
+    #define GE_LOG(msg, type, name) ge::Console::Get().Log(GEString(GE_FORMAT_LOG_MESSAGE(msg, type, name).data(), GE_FORMAT_LOG_MESSAGE(msg, type, name).size()));
+#elif defined(GE_USE_APPLICATION_AND_STD_CONSOLE)
+#define GE_LOG(msg, type, name) \
+    std::string formattedString = GE_FORMAT_LOG_MESSAGE(msg, type, name); \
+    std::cout << formattedString << std::endl; \
+    ge::Console::Get().Log(GEString(formattedString.data(), formattedString.size()));
+#else
+#define GE_LOG(msg, type, name) std::cout << GE_FORMAT_LOG_MESSAGE(msg, type, name) << std::endl;
+#endif
 
         class Logger : public mem::RefCounted {
         public:
