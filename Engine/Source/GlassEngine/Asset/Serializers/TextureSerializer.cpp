@@ -56,6 +56,7 @@ namespace ge {
         textureSpecs.width = width;
         textureSpecs.height = height;
         textureSpecs.format = renderer::ImageFormat::RGBA8;
+        textureSpecs.filter = renderer::ImageFilter::Linear;
 
         size_t dataSize = width * height * STBI_rgb_alpha;
         GEVector<uint8_t> pixelData(dataSize);
@@ -85,6 +86,8 @@ namespace ge {
         }
         specs.width = width;
         specs.height = height;
+        specs.format = renderer::ImageFormat::RGBA8;
+		specs.filter = renderer::ImageFilter::Linear;
 
         size_t dataSize = width * height * STBI_rgb_alpha; // STBI_rgb_alpha TEMP
         const uint8_t* pixelData = in.ReadPtr(dataSize);

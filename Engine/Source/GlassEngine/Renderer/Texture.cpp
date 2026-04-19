@@ -53,7 +53,7 @@ namespace ge::renderer {
 		else
 			createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 
-		auto texture = ge::mem::Ref<Texture2D>(new Texture2D(Image::Create(createDesc), ImageSubresource{}, spec));
+		auto texture = ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
 		texture->_data = std::vector<uint8_t>(dataPtr, dataPtr + dataSize);
 		// Renderer3D::GetRenderAPI()->LoadDataToTexture2D({}, *texture, data, dataSize);
 		return texture;

@@ -41,6 +41,10 @@ namespace ge {
 		EditorAssetManager& GetEditorAssetManager() { return *_editorAssetManager; }
 		RuntimeAssetManager& GetRuntimeAssetManager() { return *_runtimeAssetManager; }
 		ApplicationSpecification GetSpecs() const { return _specs; }
+		AssetManager* GetAssetManager() { // TODO (0x): a problem is when user/engine select runtime mode the editor resources still is created and loaded to the vector!!!
+			if (_specs.mode == ApplicationMode::Editor) return _editorAssetManager.get();
+			else return _runtimeAssetManager.get();
+		}
 	protected:
 		void PushLayer(Layer* layer) { _layerStack.PushLayer(layer); }
 		void PushOverlay(Layer* overlay) { _layerStack.PushOverlay(overlay); }

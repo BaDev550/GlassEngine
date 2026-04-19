@@ -35,6 +35,7 @@ namespace ge::renderer {
 
 	class Texture2D : public Texture, public Asset {
 	public:
+		Texture2D(ge::mem::Ref<Image> image, ImageSubresource subresource, const TextureSpec& specs) : Texture(image, subresource, specs) {}
 		virtual ~Texture2D() = default;
 		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec);
 		static ge::mem::Ref<Texture2D> Create(const TextureSpec& spec, const std::filesystem::path& filePath);
@@ -43,8 +44,10 @@ namespace ge::renderer {
 		
 		[[nodiscard]] auto& GetData() const noexcept { return _data; }
 		[[nodiscard]] auto& GetData() noexcept { return _data; }
+
+		static AssetType GetStaticAssetType() { return AssetType::Texture; }
+		virtual AssetType GetAssetType() const override { return GetStaticAssetType(); }
 	private:
-		Texture2D(ge::mem::Ref<Image> image, ImageSubresource subresource, const TextureSpec& specs) : Texture(image, subresource, specs) {}
 		std::vector<uint8_t> _data;
 	};
 }

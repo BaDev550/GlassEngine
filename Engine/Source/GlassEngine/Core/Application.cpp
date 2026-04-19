@@ -17,7 +17,7 @@ namespace ge {
 		Logger::Init();
 		_threadManager = mem::CreateScope<ThreadManager>(1);
 		_editorAssetManager = mem::CreateScope<EditorAssetManager>();
-		_runtimeAssetManager = mem::CreateScope<RuntimeAssetManager>("Assets.pak");
+		_runtimeAssetManager = mem::CreateScope<RuntimeAssetManager>("assets.pak", "assets_manifest.bin");
 
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		_window->SetIcon("Resources/icon-512.png");

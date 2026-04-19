@@ -9,7 +9,9 @@ namespace ge {
 		LoadAssetRegistry();
 
 		GE_ADD_CONSOLE_COMMAND("asset", "loadAsset", [this](const GEVector<GEString>& args) { ImportAsset(ImportAssetData(), args[0]); }, "loadAsset <assetPath>");
-		GE_ADD_CONSOLE_COMMAND("asset", "cookAssets", [this](const GEVector<GEString>& args) { CompileIntoPakFile(args[0]); }, "cookAssets <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND("asset", "cookAssets", [this](const GEVector<GEString>& args) { CookAssets(args[0]); }, "cookAssets <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND("asset", "compileAssetsToPAK", [this](const GEVector<GEString>& args) { CompileIntoPakFile(args[0]); }, "compileAssetsToPAK <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND("asset", "compileAssetsToManifest", [this](const GEVector<GEString>& args) { CompileIntoManifest(args[0]); }, "compileAssetsToManifest <outputPakFile>");
 		GE_ADD_CONSOLE_COMMAND("asset", "clearRegistry", [this](const GEVector<GEString>& args) {
 			_assetRegistry.clear();
 			SaveAssetRegistry();
@@ -27,6 +29,30 @@ namespace ge {
 				GE_CORE_INFO("- Handle: {}, Type: {}", handle.ToString(), AssetTypeToString(asset->GetAssetType()));
 			}
 			});
+	}
+
+	mem::Ref<Asset> EditorAssetManager::GetOrImportAsset(std::filesystem::path sourcePath, ImportAssetData asset, std::filesystem::path targetPath, AssetHandle handle) {
+		if (handle != GE_INVALID_ASSET_HANDLE) {
+			if (AssetLoaded(handle))
+				return _loadedAssets.at(handle);
+			else
+				return LoadAssetFromFile(handle);
+		}
+		else if (!sourcePath.empty()) {
+			auto mtd = GetMetadata(sourcePath);
+			if (mtd.IsValid()) {
+				if (mtd.IsLoaded())
+					return _loadedAssets.at(mtd.handle);
+				else
+					return LoadAssetFromFile(mtd.handle);
+			}
+			else {
+				AssetHandle newHandle = ImportAsset(asset, sourcePath, targetPath);
+				if (newHandle != GE_INVALID_ASSET_HANDLE)
+					return LoadAssetFromFile(newHandle);
+			}
+		}
+		return nullptr;
 	}
 
 	mem::Ref<Asset> EditorAssetManager::GetAsset(AssetHandle handle) {
@@ -146,6 +172,28 @@ namespace ge {
 			out.WriteData(reinterpret_cast<const char*>(&mtd.type), sizeof(AssetType));
 		}
 		GE_CORE_INFO("PAK File created at {}", outPath.string());
+	}
+
+	void EditorAssetManager::CompileIntoManifest(const std::filesystem::path& outPath)
+	{
+		file::Writer out(outPath);
+		size_t assetCount = _assetRegistry.size();
+		out.WriteData(reinterpret_cast<const char*>(&assetCount), sizeof(size_t));
+		for (const auto& [handle, mtd] : _assetRegistry) {
+			std::string pathStr = GetPathWithoutExtension(mtd.path);
+			uint32_t pathLength = static_cast<uint32_t>(pathStr.size());
+			out.WriteData(reinterpret_cast<const char*>(&pathLength), sizeof(uint32_t));
+			out.WriteData(pathStr.c_str(), pathLength);
+			out.WriteData(reinterpret_cast<const char*>(&handle), sizeof(AssetHandle));
+		}
+	}
+
+	void EditorAssetManager::CookAssets(const std::filesystem::path& outPath)
+	{
+		CompileIntoPakFile(outPath);
+		std::filesystem::path manifestPath = outPath.parent_path() / (outPath.stem().string() + "_manifest");
+		manifestPath.replace_extension(".bin");
+		CompileIntoManifest(manifestPath);
 	}
 
 	bool EditorAssetManager::AssetInRegistry(AssetHandle handle) { return _assetRegistry.contains(handle); }
