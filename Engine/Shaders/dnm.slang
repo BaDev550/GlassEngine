@@ -2,7 +2,12 @@
 
 Texture2D texture;
 
+[shader("vertex")]
+float4 Vert() : SV_Position {
+    return float4(0);
+}
+
 [shader("fragment")]
-float4 dnm(uint index: _1, int3 coord: _2) : SV_Target {
-    return getDescriptorFromHandle<Texture2D>(index).Load(coord) + texture.Load(coord);
+float4 Frag() : SV_Target {
+    return float4(0);
 }
