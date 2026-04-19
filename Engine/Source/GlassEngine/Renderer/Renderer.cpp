@@ -37,7 +37,7 @@ namespace ge::renderer {
 
 		GE_ADD_CONSOLE_COMMAND("r", "reload_shaders", [](const GEVector<GEString>& args) { GetShaderLibrary().ReloadAll(); });
 		GE_ADD_CONSOLE_COMMAND("r", "reload_shader", [](const GEVector<GEString>& args) { GetShaderLibrary().ReloadShader(GEString(args[0])); }, "reload_shader <name>");
-		GetShaderLibrary().AddShader("TestShader", "");
+		GetShaderLibrary().AddShader("dnm");
 	}
 
 	void Renderer3D::Destroy() {

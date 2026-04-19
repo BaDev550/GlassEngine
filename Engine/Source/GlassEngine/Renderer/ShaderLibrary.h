@@ -6,12 +6,13 @@
 namespace ge::renderer {
 	class ShaderLibrary {
 	public:
-		ge::mem::Ref<Shader>& AddShader(const GEString& name, const GEString& shaderPath) {
+		ge::mem::Ref<Shader>& AddShader(const GEString& shaderName) {
 			ShaderData _shaderData;
-			CompileShader(shaderPath, name, _shaderData);
-			_loadedShaders[name] = Shader::Create(name, std::move(_shaderData));
-			return _loadedShaders[name];
+			CompileShader("Shaders/", shaderName, _shaderData);
+			_loadedShaders[shaderName] = Shader::Create(shaderName, std::move(_shaderData));
+			return _loadedShaders[shaderName];
 		}
+
 		ge::mem::Ref<Shader>& GetShader(const GEString& name) { return _loadedShaders[name]; }
 		void ReloadShader(const GEString& name) {
 			if (_loadedShaders.find(name) != _loadedShaders.end()) {
