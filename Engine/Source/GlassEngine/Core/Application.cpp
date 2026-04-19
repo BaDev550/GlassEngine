@@ -15,6 +15,7 @@ namespace ge {
 
 		Console::Init();
 		Logger::Init();
+		profile::Profiler::Init();
 		_threadManager = mem::CreateScope<ThreadManager>(1);
 		_editorAssetManager = mem::CreateScope<EditorAssetManager>();
 		_runtimeAssetManager = mem::CreateScope<RuntimeAssetManager>("assets.pak", "assets_manifest.bin");
@@ -24,7 +25,8 @@ namespace ge {
 		renderer::Renderer3D::Init();
 		_imGuiLayer = ImGuiLayer::Create();
 
-		GE_ADD_CONSOLE_COMMAND("engine", "close", [this](const GEVector<GEString>& args) { _forceClose = true; });
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "close", [this](const GEVector<GEString>& args) { _forceClose = true; });
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "writeProfile", [](const GEVector<GEString>& args) { profile::utils::WriteEventsToFile(profile::Profiler::Get().GetEvents(), args[0]);}, "writeProfile <filePath>");
 	}
 
 	Application::~Application() {
@@ -34,6 +36,7 @@ namespace ge {
 		delete _imGuiLayer;
 		_imGuiLayer = nullptr;
 		renderer::Renderer3D::Destroy();
+		profile::Profiler::Destroy();
 		Logger::Destroy();
 		Console::Destroy();
 	}

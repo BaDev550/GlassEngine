@@ -35,6 +35,8 @@ namespace ge {
 
     // Texture serializer
     mem::Ref<Asset> TextureSerializer::DeserializeFromFile(const AssetMetadata& mtd) {
+        GE_PROFILE_SCOPE(("TextureSerializer::DeserializeFromFile " + mtd.path.string()).c_str());
+
         file::Reader in(mtd.path);
         if (!in.IsStreamGood()) {
             GE_CORE_ERROR("TextureSerializer could not open file: {}", mtd.path.string());

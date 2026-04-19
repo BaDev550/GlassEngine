@@ -57,6 +57,7 @@ namespace ge::renderer {
 
 	void Vulkan_RenderContext::Init()
 	{
+		GE_PROFILE_SCOPE("Create::RHI_Vulkan_Context");
 		try {
 			CreateVulkanAllocator();
 			CreateInstance();

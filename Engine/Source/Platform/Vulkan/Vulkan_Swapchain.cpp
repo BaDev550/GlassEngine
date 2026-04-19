@@ -28,6 +28,8 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_Swapchain::CreateSwapchain(const SwapchainSpec& newSpec) {
+		GE_PROFILE_SCOPE("Create::RHI_Vulkan_Swapchain");
+
 		auto getDesired = [] (auto&& desiredList, auto&& searchList, auto notFindValue) -> auto {
 				for (const auto& desiredValue : desiredList)
 					for (const auto& value : searchList)

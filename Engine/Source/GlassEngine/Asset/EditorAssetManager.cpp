@@ -8,22 +8,25 @@ namespace ge {
 	{
 		LoadAssetRegistry();
 
-		GE_ADD_CONSOLE_COMMAND("asset", "loadAsset", [this](const GEVector<GEString>& args) { ImportAsset(ImportAssetData(), args[0]); }, "loadAsset <assetPath>");
-		GE_ADD_CONSOLE_COMMAND("asset", "cookAssets", [this](const GEVector<GEString>& args) { CookAssets(args[0]); }, "cookAssets <outputPakFile>");
-		GE_ADD_CONSOLE_COMMAND("asset", "compileAssetsToPAK", [this](const GEVector<GEString>& args) { CompileIntoPakFile(args[0]); }, "compileAssetsToPAK <outputPakFile>");
-		GE_ADD_CONSOLE_COMMAND("asset", "compileAssetsToManifest", [this](const GEVector<GEString>& args) { CompileIntoManifest(args[0]); }, "compileAssetsToManifest <outputPakFile>");
-		GE_ADD_CONSOLE_COMMAND("asset", "clearRegistry", [this](const GEVector<GEString>& args) {
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_EDITOR_ASSETMANAGER_CATAGORY, "cookAssets", [this](const GEVector<GEString>& args) { CookAssets(args[0]); }, "cookAssets <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_EDITOR_ASSETMANAGER_CATAGORY, "compileAssetsToPAK", [this](const GEVector<GEString>& args) { CompileIntoPakFile(args[0]); }, "compileAssetsToPAK <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_EDITOR_ASSETMANAGER_CATAGORY, "compileAssetsToManifest", [this](const GEVector<GEString>& args) { CompileIntoManifest(args[0]); }, "compileAssetsToManifest <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_EDITOR_ASSETMANAGER_CATAGORY, "loadAsset", [this](const GEVector<GEString>& args) { 
+			AssetHandle handle = ImportAsset(ImportAssetData(), args[0]); 
+			GE_CORE_INFO("Asset Loaded: {} Handle: {}", args[0], handle.ToString());
+			}, "loadAsset <assetPath>");
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_EDITOR_ASSETMANAGER_CATAGORY, "clearRegistry", [this](const GEVector<GEString>& args) {
 			_assetRegistry.clear();
 			SaveAssetRegistry();
 			GE_CORE_INFO("Asset registry cleared");
 			});
-		GE_ADD_CONSOLE_COMMAND("asset", "printRegistry", [this](const GEVector<GEString>& args) {
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_EDITOR_ASSETMANAGER_CATAGORY, "printRegistry", [this](const GEVector<GEString>& args) {
 			GE_CORE_INFO("Asset Registry:");
 			for (const auto& [handle, mtd] : _assetRegistry) {
 				GE_CORE_INFO("- Handle: {}, Path: {}, Type: {}, State: {}", handle.ToString(), mtd.path.string(), AssetTypeToString(mtd.type), AssetLoadingStateToString(mtd.state));
 			}
 			});
-		GE_ADD_CONSOLE_COMMAND("asset", "printLoadedAssets", [this](const GEVector<GEString>& args) {
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_EDITOR_ASSETMANAGER_CATAGORY, "printLoadedAssets", [this](const GEVector<GEString>& args) {
 			GE_CORE_INFO("Loaded Assets:");
 			for (const auto& [handle, asset] : _loadedAssets) {
 				GE_CORE_INFO("- Handle: {}, Type: {}", handle.ToString(), AssetTypeToString(asset->GetAssetType()));
@@ -122,6 +125,7 @@ namespace ge {
 			GE_CORE_ERROR("Failed to open asset file: {}", mtd.path.string());
 			return nullptr;
 		}
+		GE_PROFILE_SCOPE(("EditorAssetManager::LoadAssetFromFile " + mtd.path.string()).c_str());
 
 		mem::Ref<Asset> asset = nullptr;
 		if (asset = _importer->DeserializeFromFile(mtd)) {
@@ -138,6 +142,8 @@ namespace ge {
 
 	void EditorAssetManager::CompileIntoPakFile(const std::filesystem::path& outPath)
 	{
+		GE_PROFILE_SCOPE("EditorAssetManager::CompileIntoPakFile");
+
 		file::Writer out(outPath);
 		size_t assetCount = _assetRegistry.size();
 		out.WriteData(reinterpret_cast<const char*>(&assetCount), sizeof(size_t));
@@ -176,6 +182,8 @@ namespace ge {
 
 	void EditorAssetManager::CompileIntoManifest(const std::filesystem::path& outPath)
 	{
+		GE_PROFILE_SCOPE("EditorAssetManager::CompileIntoManifest");
+
 		file::Writer out(outPath);
 		size_t assetCount = _assetRegistry.size();
 		out.WriteData(reinterpret_cast<const char*>(&assetCount), sizeof(size_t));

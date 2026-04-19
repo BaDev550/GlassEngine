@@ -9,6 +9,7 @@
 #include "GlassEngine/Core/Window.h"
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Utilities/Console.h"
+#include "GlassEngine/Utilities/Profiler.h"
 
 #include "GlassEngine/Asset/AssetManager.h"
 

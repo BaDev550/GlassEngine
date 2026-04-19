@@ -9,10 +9,13 @@ namespace ge {
 			GE_ASSERT(glfwInit(), "Failed to initialize GLFW");
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		}
-		_handle = glfwCreateWindow(_specs.width, _specs.height, _specs.title.c_str(), NULL, NULL);
-		glfwMakeContextCurrent(_handle);
-		glfwSetWindowUserPointer(_handle, &_specs);
-		GE_CORE_INFO("Window created!");
+		{
+			GE_PROFILE_SCOPE("CreatingWindow");
+			_handle = glfwCreateWindow(_specs.width, _specs.height, _specs.title.c_str(), NULL, NULL);
+			glfwMakeContextCurrent(_handle);
+			glfwSetWindowUserPointer(_handle, &_specs);
+			GE_CORE_INFO("Window created!");
+		}
 
 		_renderContext = renderer::RenderContext::Create(_handle);
 		_renderContext->Init();

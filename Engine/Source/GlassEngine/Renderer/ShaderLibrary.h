@@ -7,6 +7,8 @@ namespace ge::renderer {
 	class ShaderLibrary {
 	public:
 		ge::mem::Ref<Shader>& AddShader(const GEString& shaderName) {
+			GE_PROFILE_SCOPE(("RHI_Shader::Compile " + shaderName).c_str());
+
 			ShaderData _shaderData;
 			CompileShader("Shaders/", shaderName, _shaderData);
 			_loadedShaders[shaderName] = Shader::Create(shaderName, std::move(_shaderData));

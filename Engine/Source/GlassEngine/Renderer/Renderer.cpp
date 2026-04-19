@@ -10,6 +10,8 @@ namespace ge::renderer {
 	static uint32_t g_frameIndex = 0;
 
 	void Renderer3D::Init() {
+		GE_PROFILE_SCOPE("Renderer3D::Init");
+
 		g_renderAPI = RenderAPI::Create();
 		s_data._shaderLibrary = mem::CreateScope<ShaderLibrary>();
 
