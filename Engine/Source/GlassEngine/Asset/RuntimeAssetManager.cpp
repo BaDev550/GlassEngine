@@ -7,19 +7,19 @@ namespace ge {
 		LoadManifest(assetManifestPath);
 		LoadAssetsFromPak(assetPakPath);
 
-		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_RUNTIME_ASSETMANAGER_CATAGORY, "printRegistry", [this](const GEVector<GEString>& args) {
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "printRegistry", [this](const GEVector<GEString>& args) {
 			GE_CORE_INFO("Asset Registry:");
 			for (const auto& [handle, mtd] : _assetRegistry) {
 				GE_CORE_INFO("- Handle: {}, Offset: {}, Size: {}, Type: {}", handle.ToString(), mtd.offset, mtd.size, AssetTypeToString(mtd.type));
 			}
 			});
-		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_RUNTIME_ASSETMANAGER_CATAGORY, "printManifestFile", [this](const GEVector<GEString>& args) {
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "printManifestFile", [this](const GEVector<GEString>& args) {
 			GE_CORE_INFO("Assets:");
 			for (const auto& [path, assetHandle] : _assetManifest) {
 				GE_CORE_INFO("- Path: {}, Handle: {}", path, assetHandle.ToString());
 			}
 			});
-		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_RUNTIME_ASSETMANAGER_CATAGORY, "printLoadedAssets", [this](const GEVector<GEString>& args) {
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "printLoadedAssets", [this](const GEVector<GEString>& args) {
 			GE_CORE_INFO("Loaded Assets:");
 			for (const auto& [handle, asset] : _loadedAssets) {
 				GE_CORE_INFO("- Handle: {}, Type: {}", handle.ToString(), AssetTypeToString(asset->GetAssetType()));

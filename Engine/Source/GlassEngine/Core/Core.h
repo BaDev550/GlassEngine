@@ -4,8 +4,7 @@
 #include <string>
 #include <string_view>
 
-#define GE_CONSOLE_EDITOR_ASSETMANAGER_CATAGORY "ae"
-#define GE_CONSOLE_RUNTIME_ASSETMANAGER_CATAGORY "ar"
+#define GE_CONSOLE_ASSETMANAGER_CATAGORY "asset"
 #define GE_CONSOLE_ENGINE_CATAGORY "engine"
 
 #define GE_ASSERT(x, ...) \
