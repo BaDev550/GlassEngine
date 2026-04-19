@@ -20,7 +20,7 @@ namespace ge {
 		_runtimeAssetManager = mem::CreateScope<RuntimeAssetManager>("Assets.pak");
 
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
-		_window->SetIcon("Resouces/icon-512.png");
+		_window->SetIcon("Resources/icon-512.png");
 		renderer::Renderer3D::Init();
 		_imGuiLayer = ImGuiLayer::Create();
 

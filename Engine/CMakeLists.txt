@@ -6,9 +6,8 @@ set_target_properties(Engine PROPERTIES
 
 find_package(Vulkan)
 set(slang_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/slang/cmake")
+set(SPIRV_REFLECT_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/SPIRV-Reflect/spirv_reflect.cpp")
 find_package(slang)
-find_library(Vulkan_SHADERC NAMES shaderc_shared HINTS "$ENV{VULKAN_SDK}/Lib")
-find_library(Vulkan_SHADERC_UTILS NAMES shaderc_util HINTS "$ENV{VULKAN_SDK}/Lib")
 
 # GLFW
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -31,7 +30,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
     GIT_TAG docking
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
-)
+) 
 FetchContent_MakeAvailable(imgui)
 if(NOT TARGET imgui)
     add_library(imgui STATIC
@@ -60,7 +59,7 @@ FetchContent_MakeAvailable(vma)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
-target_sources(Engine PRIVATE ${ENGINE_SOURCES})
+target_sources(Engine PRIVATE ${ENGINE_SOURCES} ${SPIRV_REFLECT_SOURCE})
 target_include_directories(Engine 
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}/Source
@@ -76,6 +75,4 @@ target_link_libraries(Engine
 		Vulkan::Vulkan
         slang::slang
         GPUOpen::VulkanMemoryAllocator
-        ${Vulkan_SHADERC}
-        ${Vulkan_SHADERC_UTILS}
 )

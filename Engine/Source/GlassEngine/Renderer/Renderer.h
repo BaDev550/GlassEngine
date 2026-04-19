@@ -3,6 +3,7 @@
 #include "RenderPass.h"
 
 namespace ge::renderer {
+	class ShaderLibrary;
 	class Renderer3D {
 	public:
 		constexpr static uint32_t MaxFramesInFlight = 2;
@@ -19,6 +20,7 @@ namespace ge::renderer {
 
 		static uint32_t GetFrameIndex();
 		static RenderStats GetRenderStats();
+		static ShaderLibrary& GetShaderLibrary();
 		static ge::mem::Ref<RenderPass> GetDefaultRenderPass();
 		static ge::mem::Ref<RenderAPI> GetRenderAPI();
 	};
