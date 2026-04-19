@@ -41,7 +41,7 @@ namespace ge::renderer {
 
 	const ShaderResource* RenderPass::GetShaderResource(std::string_view name)
 	{
-		auto& compiledData = _pipeline->GetShader()->GetReflectionData();
+		auto& compiledData = _pipeline->GetShader()->GetReflection();
 		GEString nameStr(name);
 		if (compiledData.resources.find(nameStr) == compiledData.resources.end())
 			return nullptr;

@@ -157,7 +157,8 @@ namespace ge::renderer {
 
 	struct ShaderData {
 		ShaderReflection reflection;
-		std::vector<char> byteCode;
+		GEVector<char> spirvByteCode;
+		std::unordered_map<GEString, GEVector<char>> dxilByteCodes;
 	};
 
 	namespace utility {

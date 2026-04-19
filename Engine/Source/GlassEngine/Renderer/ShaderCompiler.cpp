@@ -94,7 +94,7 @@ namespace ge::renderer {
         };
     }
 
-    static std::vector<char> GetSpirvCode(Slang::ComPtr<slang::IComponentType> linkedProgram) {
+    static GEVector<char> GetSpirvCode(Slang::ComPtr<slang::IComponentType> linkedProgram) {
         Slang::ComPtr<slang::IBlob> blob;
         {
             Slang::ComPtr<slang::IBlob> diagnosticsBlob;
@@ -107,7 +107,7 @@ namespace ge::renderer {
 
         uint32_t count;
         reflect.EnumerateDescriptorSets(&count, nullptr);
-        std::vector<SpvReflectDescriptorSet*> dstSets(count);
+        GEVector<SpvReflectDescriptorSet*> dstSets(count);
         reflect.EnumerateDescriptorSets(&count, dstSets.data());
         for (auto* set : dstSets)
         {
@@ -127,9 +127,9 @@ namespace ge::renderer {
     }
 
     // TODO: complate this func
-    static std::vector<char> GetDxilCode(Slang::ComPtr<slang::IComponentType> linkedProgram, uint32_t entryPointCount) {
+    static GEVector<char> GetDxilCode(Slang::ComPtr<slang::IComponentType> linkedProgram, uint32_t entryPointCount) {
         GE_ASSERT(false, "Not completed func!!!")
-        std::vector<char> out{};
+        GEVector<char> out{};
         {
             Slang::ComPtr<slang::IBlob> blob;
             for (const auto entryPointIndex : Counter(entryPointCount))
@@ -149,11 +149,11 @@ namespace ge::renderer {
         return out;
     }
 
-	void ShaderCompiler::CompileShaders(std::span<const std::string> shaderNames) {
-		Slang::ComPtr<slang::IGlobalSession> globalSession;
-		Slang::ComPtr<slang::ISession> session;
+    bool CompileShader(const std::filesystem::path& shaderDir, std::string_view shaderName, ShaderData& shaderData) {
+        Slang::ComPtr<slang::IGlobalSession> globalSession;
+        Slang::ComPtr<slang::ISession> session;
 
-		slang::createGlobalSession(globalSession.writeRef());
+        slang::createGlobalSession(globalSession.writeRef());
         slang::SessionDesc sessionDesc = {};
 
         std::array<slang::TargetDesc, 2> targetDesc;
@@ -177,89 +177,78 @@ namespace ge::renderer {
 
         globalSession->createSession(sessionDesc, session.writeRef());
 
-        // TODO (0x): use multithread
-        for (const auto& shaderName : shaderNames) {
-            const auto shaderPath = _shaderDir / (shaderName + ".slang");
-            if (!std::filesystem::exists(shaderPath)) {
-                GE_GRAPHICS_WARN("Shader not found: ", shaderName);
-                continue;
-            }
+        const auto shaderPath = shaderDir / (GEString(shaderName) + ".slang");
+        if (!std::filesystem::exists(shaderPath)) {
+            GE_GRAPHICS_WARN("Shader not found: ", shaderName);
+            return false;
+        }
 
-            Slang::ComPtr<slang::IModule> slang_module;
-            {
-                Slang::ComPtr<slang::IBlob> diagnosticsBlob;
+        Slang::ComPtr<slang::IModule> slang_module;
+        {
+            Slang::ComPtr<slang::IBlob> diagnosticsBlob;
 
-                slang_module = session->loadModuleFromSourceString(
-                    shaderName.c_str(),
-                    shaderPath.string().c_str(),
-                    ReadShaderFile(shaderPath).c_str(),
-                    diagnosticsBlob.writeRef()
-                );
+            slang_module = session->loadModuleFromSourceString(
+                shaderName.data(),
+                shaderPath.string().c_str(),
+                ReadShaderFile(shaderPath).c_str(),
+                diagnosticsBlob.writeRef()
+            );
 
-                if (!slang_module) {
-                    GE_GRAPHICS_WARN("Shader module loading error: {}",
-                        std::string_view(static_cast<const char*>(diagnosticsBlob->getBufferPointer()), diagnosticsBlob->getBufferSize()));
-                    continue;
-                }
-            }
-
-            std::vector<slang::IComponentType*> componentTypes = {
-                slang_module,
-            };
-
-            std::vector<Slang::ComPtr<slang::IEntryPoint>> entryPoints(slang_module->getDefinedEntryPointCount());
-            for (const auto i : Counter(slang_module->getDefinedEntryPointCount())) {
-                slang_module->getDefinedEntryPoint(i, entryPoints[i].writeRef());
-                componentTypes.emplace_back(entryPoints[i]);
-            }
-
-            Slang::ComPtr<slang::IComponentType> composedProgram;
-            {
-                Slang::ComPtr<slang::IBlob> diagnosticsBlob;
-                session->createCompositeComponentType(
-                    componentTypes.data(),
-                    componentTypes.size(),
-                    composedProgram.writeRef(),
-                    diagnosticsBlob.writeRef());
-                if (diagnosticsBlob) {
-                    GE_GRAPHICS_WARN("Shader Compose error: {}",
-                        std::string_view(static_cast<const char*>(diagnosticsBlob->getBufferPointer()), diagnosticsBlob->getBufferSize()));
-                    continue;
-                }
-            }
-
-            Slang::ComPtr<slang::IComponentType> linkedProgram;
-            {
-                Slang::ComPtr<slang::IBlob> diagnosticsBlob;
-                SlangResult result = composedProgram->link(
-                        linkedProgram.writeRef(),
-                        diagnosticsBlob.writeRef());
-                if (diagnosticsBlob) {
-                    GE_GRAPHICS_WARN("Shader linking error: {}",
-                        std::string_view((char*)diagnosticsBlob->getBufferPointer(),
-                            diagnosticsBlob->getBufferSize()));
-                    continue;
-                }
-            }
-
-            try {
-                ShaderData shaderData;
-                shaderData.reflection = GetReflection(linkedProgram->getLayout());
-                switch (RenderAPI::GetAPI())
-                {
-                case GraphicsAPI::Vulkan: shaderData.byteCode = GetSpirvCode(linkedProgram);
-                case GraphicsAPI::DirectX11: GE_CORE_ERROR("Shader compiler don't support D3D11 backend");
-                case GraphicsAPI::DirectX12: GE_CORE_ERROR("Shader compiler don't support D3D12 backend");
-                case GraphicsAPI::OpenGL: GE_CORE_ERROR("Shader compiler don't support OpenGL backend");
-                default:
-                    GE_CORE_ERROR("Failed to select api");
-                    break;
-                }
-                _shaderDatas[shaderName] = shaderData;
-            }
-            catch (const std::exception& e) {
-                GE_GRAPHICS_WARN("shader compile error, shader: {}, error: {}", shaderName, e.what());
+            if (!slang_module) {
+                GE_GRAPHICS_WARN("Shader module loading error: {}",
+                    std::string_view(static_cast<const char*>(diagnosticsBlob->getBufferPointer()), diagnosticsBlob->getBufferSize()));
+                return false;
             }
         }
-	}
+
+        GEVector<slang::IComponentType*> componentTypes = {
+            slang_module,
+        };
+
+        GEVector<Slang::ComPtr<slang::IEntryPoint>> entryPoints(slang_module->getDefinedEntryPointCount());
+        for (const auto i : Counter(slang_module->getDefinedEntryPointCount())) {
+            slang_module->getDefinedEntryPoint(i, entryPoints[i].writeRef());
+            componentTypes.emplace_back(entryPoints[i]);
+        }
+
+        Slang::ComPtr<slang::IComponentType> composedProgram;
+        {
+            Slang::ComPtr<slang::IBlob> diagnosticsBlob;
+            session->createCompositeComponentType(
+                componentTypes.data(),
+                componentTypes.size(),
+                composedProgram.writeRef(),
+                diagnosticsBlob.writeRef());
+            if (diagnosticsBlob) {
+                GE_GRAPHICS_WARN("Shader Compose error: {}",
+                    std::string_view(static_cast<const char*>(diagnosticsBlob->getBufferPointer()), diagnosticsBlob->getBufferSize()));
+                return false;
+            }
+        }
+
+        Slang::ComPtr<slang::IComponentType> linkedProgram;
+        {
+            Slang::ComPtr<slang::IBlob> diagnosticsBlob;
+            SlangResult result = composedProgram->link(
+                linkedProgram.writeRef(),
+                diagnosticsBlob.writeRef());
+            if (diagnosticsBlob) {
+                GE_GRAPHICS_WARN("Shader linking error: {}",
+                    std::string_view((char*)diagnosticsBlob->getBufferPointer(),
+                        diagnosticsBlob->getBufferSize()));
+                return false;
+            }
+        }
+
+        try {
+            shaderData.reflection = GetReflection(linkedProgram->getLayout());
+            shaderData.spirvByteCode = GetSpirvCode(linkedProgram);
+            //shaderData.dxilByteCodes = GetSpirvCode(linkedProgram);
+            return true;
+        }
+        catch (const std::exception& e) {
+            GE_GRAPHICS_WARN("shader compile error, shader: {}, error: {}", shaderName, e.what());
+            return false;
+        }
+    }
 }
