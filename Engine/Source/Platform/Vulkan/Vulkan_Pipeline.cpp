@@ -8,7 +8,6 @@
 namespace ge::renderer {
 	Vulkan_Pipeline::Vulkan_Pipeline(const PipelineSpec& specs)
 		: Pipeline(specs), _descriptorManager(*(new Vulkan_DescriptorManager(*VK_RENDER_CONTEXT, specs.shader->GetReflection()))) {
-		_specs = specs;
 		Invalidate();
 	}
 
