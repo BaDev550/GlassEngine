@@ -161,6 +161,48 @@ namespace ge::renderer {
 		std::unordered_map<GEString, GEVector<char>> dxilByteCodes;
 	};
 
+
+	enum class CullMode : uint8_t {
+		None = 0,
+		Back,
+		Front
+	};
+
+	enum class DepthMode : uint8_t {
+		None = 0,
+		Less,
+		LessOrEqual
+	};
+
+	enum class PrimitiveTopology : uint8_t {
+		PointList,
+		LineList,
+		LineStrip,
+		TriangleList,
+		TriangleStrip
+	};
+
+	enum class PolygonMode : uint8_t {
+		Fill,
+		Wireframe
+	};
+
+	enum class VertexInputRate : uint8_t {
+		Vertex,
+		Instance
+	};
+
+	enum class StencilOp : uint8_t {
+		Keep,
+		Zero,
+		Replace,
+		IncramentAndClamp,
+		DecrementAndClamp,
+		Invert,
+		IncramentAndWarp,
+		DecrementAndWarp,
+	};
+
 	namespace utility {
 		[[nodiscard]] constexpr std::string_view ToString(ShaderResourceType type) {
 			switch (type) {

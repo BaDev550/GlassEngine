@@ -203,4 +203,49 @@ namespace ge::renderer::utility {
 		case ImageSubresourceType::eCubeArray: return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
 		}
 	}
+
+	[[nodiscard]] constexpr VkVertexInputRate Vulkan_GetVertexInputRate(VertexInputRate inputRate) noexcept {
+		switch (inputRate) {
+		case VertexInputRate::Vertex: return VK_VERTEX_INPUT_RATE_VERTEX;
+		case VertexInputRate::Instance: return VK_VERTEX_INPUT_RATE_INSTANCE;
+		}
+	}
+
+	[[nodiscard]] constexpr VkPrimitiveTopology Vulkan_GetPrimitiveTopology(PrimitiveTopology topology) noexcept {
+		switch (topology) {
+		case PrimitiveTopology::PointList:     return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+		case PrimitiveTopology::LineList:      return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+		case PrimitiveTopology::LineStrip:     return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+		case PrimitiveTopology::TriangleList:  return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		case PrimitiveTopology::TriangleStrip: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+		}
+	}
+
+	[[nodiscard]] constexpr VkPolygonMode Vulkan_GetPolygonMode(PolygonMode polygonMode) noexcept {
+		switch (polygonMode) {
+		case PolygonMode::Fill:      return VK_POLYGON_MODE_FILL;
+		case PolygonMode::Wireframe: return VK_POLYGON_MODE_LINE;
+		}
+	}
+
+	[[nodiscard]] constexpr VkCullModeFlags Vulkan_GetCullMode(CullMode cullMode) noexcept {
+		switch (cullMode) {
+		case CullMode::None:  return VK_CULL_MODE_NONE;
+		case CullMode::Back:  return VK_CULL_MODE_BACK_BIT;
+		case CullMode::Front: return VK_CULL_MODE_FRONT_BIT;
+		}
+	}
+
+	[[nodiscard]] constexpr VkStencilOp Vulkan_GetStencilOp(StencilOp stencilOp) noexcept {
+		switch (stencilOp) {
+		case StencilOp::Keep:              return VK_STENCIL_OP_KEEP;
+		case StencilOp::Zero:              return VK_STENCIL_OP_ZERO;
+		case StencilOp::Replace:           return VK_STENCIL_OP_REPLACE;
+		case StencilOp::IncramentAndClamp: return VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+		case StencilOp::DecrementAndClamp: return VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+		case StencilOp::Invert:            return VK_STENCIL_OP_INVERT;
+		case StencilOp::IncramentAndWarp:  return VK_STENCIL_OP_INCREMENT_AND_WRAP;
+		case StencilOp::DecrementAndWarp:  return VK_STENCIL_OP_DECREMENT_AND_WRAP;
+		}
+	}
 }

@@ -4,33 +4,72 @@
 #include "GlassEngine/Renderer/Framebuffer.h"
 
 namespace ge::renderer {
-	enum class CullMode {
-		None = 0,
-		Back,
-		Front
+	struct VertexAttribute {
+		VertexFormat format;
+		uint8_t offset;
+		uint8_t location;
+		uint8_t binding;
 	};
 
-	enum class DepthMode {
-		None = 0,
-		Less,
-		LessOrEqual
+	struct VertexBinding {
+		uint16_t stride;
+		uint8_t binding;
+		VertexInputRate inputRate;
 	};
 
-	struct PipelineSpecification {
+	struct StencilOpState {
+		StencilOp depthFailOp;
+		StencilOp failOp;
+		StencilOp passOp;
+		CompareOp compareOp;
+	};
+
+	struct InputAssemblySpec {
+		GEVector<VertexAttribute> vertexAttributes;
+		GEVector<VertexBinding> vertexBindings;
+		PrimitiveTopology topology;
+	};
+
+	struct ResterizerSpec {
+		PolygonMode polygonMode;
+		CullMode cullMode;
+		ImageSampleCount sampleCount;
+	};
+
+	struct DepthStencilSpec {
+		CompareOp depthTestCompareOp;
+		StencilOpState stencilFrontOp;
+		StencilOpState stencilBackOp;
+		uint8_t stencilWriteMask;
+		uint8_t stencilCompareMask;
+		bool depthTestEnable;
+		bool depthWriteEnable;
+		bool stencilTestEnable;
+	};
+
+	// TODO (dnm): more detailed spec
+	struct BlendSpec {
+		bool blendEnabled;
+	};
+
+	struct PipelineSpec {
+		InputAssemblySpec inputAssemblySpec;
+		ResterizerSpec resterizerSpec;
+		DepthStencilSpec depthStencilSpec;
+		BlendSpec blendSpec;
 		ge::mem::Ref<Shader> shader = nullptr;
 		ge::mem::Ref<Framebuffer> targetFramebuffer = nullptr;
-		CullMode cullMode = CullMode::Back;
-		DepthMode depthTest = DepthMode::Less;
 	};
 
 	class Pipeline : public RenderObject {
 	public:
+		Pipeline(const PipelineSpec& spec) : _specs(spec) {}
 		virtual ~Pipeline() = default;
-		PipelineSpecification GetSpecification() const { return _specs; }
+		PipelineSpec GetSpecification() const { return _specs; }
 		ge::mem::Ref<Shader>& GetShader() { return _specs.shader; }
 
-		static ge::mem::Ref<Pipeline> Create(const PipelineSpecification& specs);
+		static ge::mem::Ref<Pipeline> Create(const PipelineSpec& specs);
 	protected:
-		PipelineSpecification _specs;
+		PipelineSpec _specs;
 	};
 }

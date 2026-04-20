@@ -4,7 +4,7 @@
 #include "Platform/Vulkan/Vulkan_Pipeline.h"
 
 namespace ge::renderer {
-	ge::mem::Ref<Pipeline> Pipeline::Create(const PipelineSpecification& specs)
+	ge::mem::Ref<Pipeline> Pipeline::Create(const PipelineSpec& specs)
 	{
 		switch (RenderAPI::GetAPI())
 		{

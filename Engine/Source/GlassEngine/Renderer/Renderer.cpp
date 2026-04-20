@@ -20,7 +20,7 @@ namespace ge::renderer {
 			framebufferSpec.IsSwapchain = true;
 			framebufferSpec.clearColor = { 1.0f, 1.0f, 1.0f };
 			mem::Ref<Framebuffer> _defaultFramebuffer = Framebuffer::Create(framebufferSpec);
-			PipelineSpecification pipelineSpec{};
+			PipelineSpec pipelineSpec{};
 			pipelineSpec.shader = nullptr;
 			pipelineSpec.targetFramebuffer = _defaultFramebuffer;
 			mem::Ref<Pipeline> _defaultPipeline = Pipeline::Create(pipelineSpec);
