@@ -47,6 +47,8 @@ namespace ge::renderer {
 
 		vkDestroyPipelineCache(_device, _pipelineCache, VK_ALLOCATOR_CALLBACKS);
 		vkDestroyCommandPool(_device, _commandPool, VK_ALLOCATOR_CALLBACKS);
+		vkDestroyDescriptorSetLayout(_device, _globalDescriptorSetLayout, VK_ALLOCATOR_CALLBACKS);
+		vkDestroyPipelineLayout(_device, _globalPipelineLayout, VK_ALLOCATOR_CALLBACKS);
 		vkDestroyDescriptorPool(_device, _globalDescriptorPool, VK_ALLOCATOR_CALLBACKS);
 
 		vkDestroyDevice(_device, VK_ALLOCATOR_CALLBACKS);
@@ -64,7 +66,7 @@ namespace ge::renderer {
 			CreateSurface();
 			PickPhysicalDevice();
 			CreateLogicalDevice();
-			CreateBindlessManagers();
+			CreatePipelineLayoutAndBindlessManagers();
 		}
 		catch (const std::exception& e) {
 			GE_GRAPHICS_ERROR("{}", e.what());
@@ -370,13 +372,7 @@ namespace ge::renderer {
 		createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 		vkCreatePipelineCache(_device, &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipelineCache);
 	}
-
-	void Vulkan_RenderContext::CreateBindlessManagers() {
-		_readonlyImageBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::ReadonlyImage });
-		_writableImageBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::WritableImage });
-		_samplerBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::Sampler});
-	}
-
+	
 	bool Vulkan_RenderContext::CheckEnabledLayersSupport() {
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -398,38 +394,85 @@ namespace ge::renderer {
 		return true;
 	}
 
-	void Vulkan_RenderContext::CreateGlobalDescriptorPool() {
+	void Vulkan_RenderContext::CreatePipelineLayoutAndBindlessManagers() {
+		_readonlyImageBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::ReadonlyImage });
+		_writableImageBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::WritableImage });
+		_samplerBindlessManager = ge::mem::CreateScope<Vulkan_BindlessManager>(*this, BindlessManagerSpec{ ShaderResourceType::Sampler });
+
 		// create dst pool
 		{
 			GEVector<VkDescriptorPoolSize> poolSizes{};
 			poolSizes.emplace_back(
-				VK_DESCRIPTOR_TYPE_SAMPLER,
-				1024
-			);
-			poolSizes.emplace_back(
-				VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-				1024
-			);
-			poolSizes.emplace_back(
-				VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-				1024
-			);
-			poolSizes.emplace_back(
-				VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-				1024
-			);
-			poolSizes.emplace_back(
 				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-				1024
+				10
 			);
 
 			VkDescriptorPoolCreateInfo dstPoolCreateInfo{};
 			dstPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			dstPoolCreateInfo.maxSets = 1024;
+			dstPoolCreateInfo.maxSets = 1;
 			dstPoolCreateInfo.poolSizeCount = poolSizes.size();
 			dstPoolCreateInfo.pPoolSizes = poolSizes.data();
 			dstPoolCreateInfo.flags = VkDescriptorPoolCreateFlags{};
 			vkCreateDescriptorPool(_device, &dstPoolCreateInfo, VK_ALLOCATOR_CALLBACKS, &_globalDescriptorPool);
+		}
+
+		{
+			GEVector<VkDescriptorSetLayoutBinding> bindings;
+			bindings.emplace_back(
+				0,
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				1,
+				VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT
+			);
+
+			VkDescriptorSetLayoutCreateInfo dstLayoutCreateInfo{};
+			dstLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			dstLayoutCreateInfo.bindingCount = bindings.size();
+			dstLayoutCreateInfo.pBindings = bindings.data();
+			vkCreateDescriptorSetLayout(_device, &dstLayoutCreateInfo, VK_ALLOCATOR_CALLBACKS, &_globalDescriptorSetLayout);
+		}
+
+		{
+			VkDescriptorSetAllocateInfo allocInfo{};
+			allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			allocInfo.pSetLayouts = &_globalDescriptorSetLayout;
+			allocInfo.descriptorSetCount = 1;
+			allocInfo.descriptorPool = _globalDescriptorPool;
+
+			vkAllocateDescriptorSets(_device, &allocInfo, &_globalDescriptorSet);
+		}
+
+		{
+			VkDescriptorSetAllocateInfo allocInfo{};
+			allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			allocInfo.pSetLayouts = &_globalDescriptorSetLayout;
+			allocInfo.descriptorSetCount = 1;
+			allocInfo.descriptorPool = _globalDescriptorPool;
+
+			vkAllocateDescriptorSets(_device, &allocInfo, &_globalDescriptorSet);
+		}
+
+		{
+			VkPushConstantRange pushConstant{};
+			pushConstant.offset = 0;
+			// anv, radv, and offical nvidia driver support 256byte push constant
+			pushConstant.size = 128; // TODO (dnm): change with 256 when using linux
+			pushConstant.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+
+			VkDescriptorSetLayout setLayouts[4]{
+				_readonlyImageBindlessManager->GetDstSetLayout(),
+				_writableImageBindlessManager->GetDstSetLayout(),
+				_samplerBindlessManager->GetDstSetLayout(),
+				_globalDescriptorSetLayout
+			};
+
+			VkPipelineLayoutCreateInfo createInfo{};
+			createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+			createInfo.pSetLayouts = setLayouts;
+			createInfo.setLayoutCount = 4;
+			createInfo.pushConstantRangeCount = 1;
+			createInfo.pPushConstantRanges = &pushConstant;
+			vkCreatePipelineLayout(_device, &createInfo, VK_ALLOCATOR_CALLBACKS, &_globalPipelineLayout);
 		}
 	}
 
@@ -535,5 +578,16 @@ namespace ge::renderer {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 			VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME
 		};
+	}
+
+	void Vulkan_RenderContext::BindDescriptorSets(VkCommandBuffer commandBuffer) const noexcept {
+		const VkDescriptorSet descriptorSets[4]{
+			_readonlyImageBindlessManager->GetDstSet(),
+			_writableImageBindlessManager->GetDstSet(),
+			_samplerBindlessManager->GetDstSet(),
+			_globalDescriptorSet
+		};
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _globalPipelineLayout, 0, 4, descriptorSets, 0, nullptr);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _globalPipelineLayout, 0, 4, descriptorSets, 0, nullptr);
 	}
 }

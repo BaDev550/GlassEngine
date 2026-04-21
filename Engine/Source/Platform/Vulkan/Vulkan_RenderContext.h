@@ -46,6 +46,9 @@ namespace ge::renderer {
 		[[nodiscard]] virtual uint32_t IGetWritableImageHandle(Image& image, ImageSubresource subresource) override;
 		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) override;
 
+		[[nodiscard]] VkPipelineLayout GetGlobalPipelineLayout() const noexcept { return _globalPipelineLayout; }
+		[[nodiscard]] void BindDescriptorSets(VkCommandBuffer commandBuffer) const noexcept;
+
 		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_readonlyImageBindlessManager; }
 		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_writableImageBindlessManager; }
 		[[nodiscard]] auto &GetBindlessManagersSampler() noexcept { return *_samplerBindlessManager; }
@@ -63,8 +66,7 @@ namespace ge::renderer {
 		bool CheckEnabledLayersSupport();
 		bool IsPhysicalDeviceSuitable(VkPhysicalDevice device);
 		void FindQueueFamilies();
-		void CreateBindlessManagers();
-		void CreateGlobalDescriptorPool();
+		void CreatePipelineLayoutAndBindlessManagers();
 		GEVector<const char*> GetRequiredInstanceExtensions();
 		GEVector<const char*> GetRequiredDeviceExtensions();
 		GEVector<const char*> GetSupportedOptionalDeviceExtensions();
@@ -79,7 +81,11 @@ namespace ge::renderer {
 		VkCommandPool _commandPool = VK_NULL_HANDLE;
 		VkDebugUtilsMessengerEXT _debugMessenger = VK_NULL_HANDLE;
 		VkPipelineCache _pipelineCache = VK_NULL_HANDLE;
-		VkDescriptorPool _globalDescriptorPool = VK_NULL_HANDLE; // for user descriptors
+
+		VkDescriptorPool _globalDescriptorPool = VK_NULL_HANDLE; // for engine global datas, dont change
+		VkDescriptorSet _globalDescriptorSet = VK_NULL_HANDLE; // for engine global datas, dont change
+		VkDescriptorSetLayout _globalDescriptorSetLayout = VK_NULL_HANDLE; // for engine global datas, dont change
+		VkPipelineLayout _globalPipelineLayout = VK_NULL_HANDLE;
 
 		uint32_t _graphicsQueueFamilyIndex{};
 		VkQueue _graphicsQueue = VK_NULL_HANDLE;

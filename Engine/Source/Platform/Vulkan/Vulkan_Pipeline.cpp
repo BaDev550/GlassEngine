@@ -8,7 +8,7 @@
 
 namespace ge::renderer {
 	Vulkan_Pipeline::Vulkan_Pipeline(const PipelineSpec& specs)
-		: Pipeline(specs), _descriptorManager(*(new Vulkan_DescriptorManager(*VK_RENDER_CONTEXT, specs.shader->GetReflection()))) {
+		: Pipeline(specs) {
 		Invalidate();
 	}
 
@@ -158,7 +158,7 @@ namespace ge::renderer {
 		createInfo.pDepthStencilState = &depthStencilState;
 		createInfo.pColorBlendState = &colorBlendState;
 		createInfo.pDynamicState = &dynamicState;
-		createInfo.layout = _descriptorManager.GetPipelineLayout();
-		vkCreateGraphicsPipelines(VK_RENDER_CONTEXT->GetDevice(), VK_NULL_HANDLE, 1, &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipeline);
+		createInfo.layout = VK_RENDER_CONTEXT->GetGlobalPipelineLayout();
+		vkCreateGraphicsPipelines(VK_RENDER_CONTEXT->GetDevice(), VK_RENDER_CONTEXT->GetPipelineCache(), 1, &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipeline);
 	}
 }
