@@ -1,6 +1,4 @@
-#include "GE.slang"
-
-Texture2D texture;
+import GE;
 
 [shader("vertex")]
 float4 Vert() : SV_Position {
@@ -9,5 +7,5 @@ float4 Vert() : SV_Position {
 
 [shader("fragment")]
 float4 Frag() : SV_Target {
-    return float4(0);
+    return GetBindless<ReadonlyImage2D>(0).Load(int3(0,0,0));
 }
