@@ -20,16 +20,6 @@ namespace ge::renderer {
 		uint16_t mipmapCount = 1;
 	};
 
-	struct ImageSubresource {
-		uint16_t baseLayer = 0;
-		uint16_t layerCount = 1;
-		uint8_t baseMipmap = 0;
-		uint8_t mipmapCount = 1;
-		ImageSubresourceType type = ImageSubresourceType::e2D;
-
-		auto operator<=>(const ImageSubresource&) const = default;
-	};
-
 	class Image : public RenderObject {
 	public:
 		[[nodiscard]] static ge::mem::Ref<Image> Create(const ImageSpec& desc);

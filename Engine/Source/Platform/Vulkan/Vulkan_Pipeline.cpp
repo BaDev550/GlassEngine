@@ -1,6 +1,7 @@
 #include "gepch.h"
 #include "Vulkan_Pipeline.h"
 #include "Vulkan_Shader.h"
+#include "Vulkan_Image.h"
 
 #include <glm/glm.hpp>
 #include <GlassEngine/Utilities/Counter.h>
@@ -124,7 +125,7 @@ namespace ge::renderer {
 		colorBlendState.attachmentCount = colorBlendAttachmentStates.size();
 		colorBlendState.pAttachments = colorBlendAttachmentStates.data();
 
-		GEVector dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+		GEVector<VkDynamicState> dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
 		if (_specs.depthStencilSpec.stencilTestEnable)
 			dynamicStates.push_back(VK_DYNAMIC_STATE_STENCIL_REFERENCE);
 
@@ -141,8 +142,8 @@ namespace ge::renderer {
 		VkPipelineRenderingCreateInfo renderingInfo{};
 		renderingInfo.colorAttachmentCount = colorAttachmentFormats.size();
 		renderingInfo.pColorAttachmentFormats = colorAttachmentFormats.data();
-		//renderingInfo.depthAttachmentFormat = 0;
-		//renderingInfo.stencilAttachmentFormat = 0;
+		renderingInfo.depthAttachmentFormat = _specs.targetFramebuffer->GetDepthAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
+		renderingInfo.stencilAttachmentFormat = _specs.targetFramebuffer->GetDepthAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
 
 		VkGraphicsPipelineCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

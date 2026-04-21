@@ -14,9 +14,9 @@ namespace ge::renderer {
 		Vulkan_BindlessManager(Vulkan_RenderContext& renderContext, const BindlessManagerSpec &spec);
 		~Vulkan_BindlessManager();
 
-		uint32_t AddWritableImage(Vulkan_Image &image, ImageSubresource subresource);
-		uint32_t AddReadonlyImage(Vulkan_Image &image, ImageSubresource subresource);
-		uint32_t AddSampler(const Vulkan_Sampler &sampler);
+		[[nodiscard]] uint32_t AddWritableImage(Vulkan_Image &image, ImageSubresource subresource);
+		[[nodiscard]] uint32_t AddReadonlyImage(Vulkan_Image &image, ImageSubresource subresource);
+		[[nodiscard]] uint32_t AddSampler(const Vulkan_Sampler &sampler);
 
 		// any type
 		void DeleteDescriptor(uint32_t index);

@@ -42,6 +42,10 @@ namespace ge::renderer {
 		[[nodiscard]] VkQueue GetGraphicsQueue() const noexcept { return _graphicsQueue; }
 		[[nodiscard]] uint32_t GetGraphicsQueueFamilyIndex() const noexcept { return _graphicsQueueFamilyIndex; }
 
+		[[nodiscard]] virtual uint32_t IGetReadonlyImageHandle(Image& image, ImageSubresource subresource) override;
+		[[nodiscard]] virtual uint32_t IGetWritableImageHandle(Image& image, ImageSubresource subresource) override;
+		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) override;
+
 		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_readonlyImageBindlessManager; }
 		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_writableImageBindlessManager; }
 		[[nodiscard]] auto &GetBindlessManagersSampler() noexcept { return *_samplerBindlessManager; }

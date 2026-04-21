@@ -12,6 +12,7 @@ namespace ge::renderer {
 		~Vulkan_Image();
 
 		[[nodiscard]] VkImage GetImage() noexcept { return _image; }
+		[[nodiscard]] VkFormat GetFormat() noexcept { return _format; }
 		[[nodiscard]] VkImageView CreateGetImageView(ImageSubresource subresource) noexcept;
 	private:
 		VkImage _image;

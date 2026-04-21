@@ -76,6 +76,18 @@ namespace ge::renderer {
 		vkQueueWaitIdle(_graphicsQueue);
 	}
 
+	uint32_t Vulkan_RenderContext::IGetReadonlyImageHandle(Image& image, ImageSubresource subresource) {
+		return _readonlyImageBindlessManager->AddReadonlyImage(static_cast<Vulkan_Image&>(image), subresource);
+	}
+
+	uint32_t Vulkan_RenderContext::IGetWritableImageHandle(Image& image, ImageSubresource subresource) {
+		return _writableImageBindlessManager->AddReadonlyImage(static_cast<Vulkan_Image&>(image), subresource);
+	}
+
+	uint32_t Vulkan_RenderContext::IGetSamplerHandle(Sampler& sampler) {
+		return _samplerBindlessManager->AddSampler(static_cast<Vulkan_Sampler&>(sampler));
+	}
+
 	void Vulkan_RenderContext::CreateVulkanAllocator() {
 		mem::Vulkan_AllocatorCallbacks::InitCallbacks();
 		_allocator = new mem::Vulkan_Allocator();

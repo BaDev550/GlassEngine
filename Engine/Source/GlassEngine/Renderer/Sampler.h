@@ -22,7 +22,11 @@ namespace ge::renderer {
 	public:
 		[[nodiscard]] static ge::mem::Ref<Sampler> Create(const SamplerSpec& desc);
 		explicit Sampler(const SamplerSpec& desc);
+
+		[[nodiscard]] uint32_t GetHandle();
 	protected:
 		SamplerSpec _desc;
+	private:
+		uint32_t _handle{ static_cast<uint32_t>(-1) };
 	};
 }

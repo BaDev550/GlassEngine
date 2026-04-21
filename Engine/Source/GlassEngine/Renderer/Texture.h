@@ -25,12 +25,14 @@ namespace ge::renderer {
 		ge::mem::Ref<Image>& GetImage() { return _image; }
 		const ge::mem::Ref<Image>& GetImage() const noexcept { return _image; }
 		auto GetSubresource() const noexcept { return _subresource; }
+		[[nodiscard]] uint32_t GetHandle();
 	protected:
 		Texture(ge::mem::Ref<Image> image, ImageSubresource subresource, const TextureSpec& specs)
 			: _image(image), _subresource(subresource), _specs(specs) { }
 		ge::mem::Ref<Image> _image = nullptr;
 		ImageSubresource _subresource{};
 		TextureSpec _specs;
+		uint32_t _handle{ static_cast<uint32_t>(-1) };
 	};
 
 	class Texture2D : public Texture, public Asset {

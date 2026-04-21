@@ -3,6 +3,13 @@
 #include "Platform/Vulkan/Vulkan_Sampler.h"
 
 namespace ge::renderer {
+	uint32_t Sampler::GetHandle() {
+		//if (_handle == static_cast<uint32_t>(-1)) {
+		//	_handle = _renderContext.GetSamplerHandle(*this);
+		//}
+		return _handle;
+	}
+
 	ge::mem::Ref<Sampler> Sampler::Create(const SamplerSpec& desc)
 	{
 		switch (RenderAPI::GetAPI())

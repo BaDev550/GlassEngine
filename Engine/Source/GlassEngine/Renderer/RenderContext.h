@@ -1,15 +1,27 @@
 #pragma once
 #include "GlassEngine/Core/Memory.h"
+#include "Types.h"
 
 struct GLFWwindow;
 
 namespace ge::renderer {
+	class Image;
+	class Sampler;
+
 	class RenderContext {
 	public:
 		virtual ~RenderContext() = default;
 		virtual void Init() = 0;
 		virtual void Wait() = 0;
 
+		[[nodiscard]] uint32_t GetReadonlyImageHandle(Image& image, ImageSubresource subresource);
+		[[nodiscard]] uint32_t GetWritableImageHandle(Image& image, ImageSubresource subresource);
+		[[nodiscard]] uint32_t GetSamplerHandle(Sampler& sampler);
+
 		static ge::mem::Scope<RenderContext> Create(GLFWwindow* window);
+	protected:
+		[[nodiscard]] virtual uint32_t IGetReadonlyImageHandle(Image& image, ImageSubresource subresource) = 0;
+		[[nodiscard]] virtual uint32_t IGetWritableImageHandle(Image& image, ImageSubresource subresource) = 0;
+		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) = 0;
 	};
 }

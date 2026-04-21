@@ -4,6 +4,22 @@
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
 
 namespace ge::renderer {
+	uint32_t RenderContext::GetReadonlyImageHandle(Image& image, ImageSubresource subresource) {
+		GE_ASSERT(image.GetDescRef().usageFlags.Has(ImageUsageFlagsBits::Readonly), "image must br have readonly usage bit");
+
+		return IGetReadonlyImageHandle(image, subresource);
+	}
+
+	uint32_t RenderContext::GetWritableImageHandle(Image& image, ImageSubresource subresource) {
+		GE_ASSERT(image.GetDescRef().usageFlags.Has(ImageUsageFlagsBits::Writable), "image must br have readonly usage bit");
+
+		return IGetWritableImageHandle(image, subresource);
+	}
+
+	uint32_t RenderContext::GetSamplerHandle(Sampler& sampler) {
+		return IGetSamplerHandle(sampler);
+	}
+
 	ge::mem::Scope<RenderContext> RenderContext::Create(GLFWwindow* window) {
 		switch (RenderAPI::GetAPI())
 		{

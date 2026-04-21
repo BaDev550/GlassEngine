@@ -5,6 +5,13 @@
 #include "stb_image.h"
 
 namespace ge::renderer {
+	uint32_t Texture::GetHandle() {
+		if (_handle == static_cast<uint32_t>(-1)) {
+			_handle = _renderContext.GetReadonlyImageHandle(*_image, _subresource);
+		}
+		return _handle;
+	}
+
 	ge::mem::Ref<Texture2D> Texture2D::Create(const TextureSpec& spec)
 	{
 		ImageSpec createDesc{};

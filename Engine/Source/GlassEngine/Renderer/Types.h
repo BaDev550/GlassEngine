@@ -162,6 +162,16 @@ namespace ge::renderer {
 	};
 
 
+	struct ImageSubresource {
+		uint16_t baseLayer = 0;
+		uint16_t layerCount = 1;
+		uint8_t baseMipmap = 0;
+		uint8_t mipmapCount = 1;
+		ImageSubresourceType type = ImageSubresourceType::e2D;
+
+		auto operator<=>(const ImageSubresource&) const = default;
+	};
+
 	enum class CullMode : uint8_t {
 		None = 0,
 		Back,
