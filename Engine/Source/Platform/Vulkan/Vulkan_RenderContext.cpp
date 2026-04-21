@@ -245,6 +245,17 @@ namespace ge::renderer {
 
 		void* pNext = nullptr;
 
+#ifdef _DEBUG
+		VkPhysicalDeviceRobustness2FeaturesEXT robustness2{};
+		robustness2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
+		robustness2.nullDescriptor = true;
+		robustness2.robustBufferAccess2 = true;
+		robustness2.robustImageAccess2 = true;
+		_deviceExtensions.emplace_back(VK_EXT_ROBUSTNESS_2_EXTENSION_NAME);
+		robustness2.pNext = pNext;
+		pNext = &robustness2;
+#endif
+
 		VkPhysicalDeviceMaintenance5FeaturesKHR maintenance5{};
 		maintenance5.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_FEATURES_KHR;
 		maintenance5.maintenance5 = true;
