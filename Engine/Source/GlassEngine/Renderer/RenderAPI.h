@@ -33,6 +33,8 @@ namespace ge::renderer {
 		static inline GraphicsAPI GetAPI() { return _graphicsAPI; }
 		static void SetAPI(GraphicsAPI api) { _graphicsAPI = api; }
 		static ge::mem::Ref<RenderAPI> Create();
+
+		virtual void SetDebugName(GEString name) const noexcept final {}
 	protected:
 		static RenderStats _renderStats;
 		static GraphicsAPI _graphicsAPI;

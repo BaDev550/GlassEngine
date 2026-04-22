@@ -11,6 +11,8 @@ namespace ge::renderer {
 
 		void Invalidate();
 		[[nodiscard]] VkPipeline GetPipeline() const noexcept { return _pipeline; }
+
+		virtual void SetDebugName(GEString name) const noexcept override;
 	private:
 		VkPipeline _pipeline;
 	};

@@ -10,6 +10,7 @@ namespace ge::renderer {
 		~Vulkan_Sampler();
 
 		[[nodiscard]] auto GetSampler() const noexcept { return _sampler; }
+		virtual void SetDebugName(GEString name) const noexcept override;
 	private:
 		VkSampler _sampler;
 	};

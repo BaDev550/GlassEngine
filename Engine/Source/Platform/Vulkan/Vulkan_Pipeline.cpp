@@ -161,4 +161,14 @@ namespace ge::renderer {
 		createInfo.layout = VK_RENDER_CONTEXT->GetGlobalPipelineLayout();
 		vkCreateGraphicsPipelines(VK_RENDER_CONTEXT->GetDevice(), VK_RENDER_CONTEXT->GetPipelineCache(), 1, &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipeline);
 	}
+
+	void Vulkan_Pipeline::SetDebugName(GEString name) const noexcept {
+		VkDebugUtilsObjectNameInfoEXT nameInfo;
+		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+		nameInfo.objectHandle = reinterpret_cast<uint64_t>(_pipeline);
+		nameInfo.objectType = VK_OBJECT_TYPE_PIPELINE;
+		nameInfo.pObjectName = name.c_str();
+
+		vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+	}
 }

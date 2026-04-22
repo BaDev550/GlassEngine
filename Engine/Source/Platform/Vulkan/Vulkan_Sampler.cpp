@@ -25,4 +25,14 @@ namespace ge::renderer {
 
 		vkCreateSampler(VK_RENDER_CONTEXT->GetDevice(), &createInfo, VK_ALLOCATOR_CALLBACKS, &_sampler);
 	}
+
+	void Vulkan_Sampler::SetDebugName(GEString name) const noexcept {
+		VkDebugUtilsObjectNameInfoEXT nameInfo;
+		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+		nameInfo.objectHandle = reinterpret_cast<uint64_t>(_sampler);
+		nameInfo.objectType = VK_OBJECT_TYPE_SAMPLER;
+		nameInfo.pObjectName = name.c_str();
+
+		vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+	}
 }

@@ -13,6 +13,7 @@ namespace ge::renderer {
 		}
 
 		[[nodiscard]] VkShaderModule GetShaderModule() const noexcept { return _shaderModule; }
+		virtual void SetDebugName(GEString name) const noexcept override;
 	private:
 		VkShaderModule _shaderModule;
 	};

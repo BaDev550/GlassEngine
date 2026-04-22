@@ -26,6 +26,10 @@ namespace ge::renderer {
 		const ge::mem::Ref<Image>& GetImage() const noexcept { return _image; }
 		auto GetSubresource() const noexcept { return _subresource; }
 		[[nodiscard]] uint32_t GetHandle();
+
+		virtual void SetDebugName(GEString name) const noexcept override final {
+			_image->SetDebugName(name);
+		}
 	protected:
 		Texture(ge::mem::Ref<Image> image, ImageSubresource subresource, const TextureSpec& specs)
 			: _image(image), _subresource(subresource), _specs(specs) { }

@@ -8,6 +8,8 @@
 #include <set>
 
 #define FEATURE_MUST_BE_SUPPORTED(feature) if (feature != VK_TRUE) { GE_GRAPHICS_ERROR("{} must be supported", #feature); is_supported = false; } 
+// TODO (dnm): better name
+#define VK_SET_EXT_FUNC(name) name = (PFN_##name)vkGetInstanceProcAddr(_instance, #name);
 
 namespace ge::renderer {
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -19,21 +21,6 @@ namespace ge::renderer {
 		if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
 			GE_GRAPHICS_ERROR("validation layer: {}", pCallbackData->pMessage);
 		return VK_FALSE;
-	}
-	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
-		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-		if (func != nullptr) {
-			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-		}
-		else {
-			return VK_ERROR_EXTENSION_NOT_PRESENT;
-		}
-	}
-	static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger) {
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-		if (func != nullptr) {
-			func(instance, debugMessenger, VK_ALLOCATOR_CALLBACKS);
-		}
 	}
 
 	Vulkan_RenderContext::Vulkan_RenderContext(GLFWwindow* window) : _window(window) {}
@@ -53,7 +40,7 @@ namespace ge::renderer {
 
 		vkDestroyDevice(_device, VK_ALLOCATOR_CALLBACKS);
 		vkDestroySurfaceKHR(_instance, _surface, VK_ALLOCATOR_CALLBACKS);
-		DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger);
+		vkDestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, VK_ALLOCATOR_CALLBACKS);
 		vkDestroyInstance(_instance, VK_ALLOCATOR_CALLBACKS);
 	}
 
@@ -121,6 +108,13 @@ namespace ge::renderer {
 		createInfo.ppEnabledExtensionNames = instanceExtensions.data();
 		if (vkCreateInstance(&createInfo, VK_ALLOCATOR_CALLBACKS, &_instance) != VK_SUCCESS)
 			throw std::runtime_error("Failed to create vulkan instance");
+
+		{
+			VK_SET_EXT_FUNC(vkSetDebugUtilsObjectNameEXT);
+			VK_SET_EXT_FUNC(vkCreateDebugUtilsMessengerEXT);
+			VK_SET_EXT_FUNC(vkDestroyDebugUtilsMessengerEXT);
+		}
+
 		GE_GRAPHICS_INFO("Vulkan instance created");
 	}
 
@@ -139,7 +133,7 @@ namespace ge::renderer {
 		createInfo.pfnUserCallback = debugCallback;
 		createInfo.pUserData = nullptr;
 		createInfo.pNext = validation_features;
-		if (CreateDebugUtilsMessengerEXT(_instance, &createInfo, VK_ALLOCATOR_CALLBACKS, &_debugMessenger) != VK_SUCCESS) {
+		if (vkCreateDebugUtilsMessengerEXT(_instance, &createInfo, VK_ALLOCATOR_CALLBACKS, &_debugMessenger) != VK_SUCCESS) {
 			throw std::runtime_error("failed to set up debug messenger!");
 		}
 	}

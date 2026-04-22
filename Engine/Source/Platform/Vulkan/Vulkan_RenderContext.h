@@ -13,9 +13,14 @@
 #define VK_RENDER_CONTEXT CastChecked<Vulkan_RenderContext>(&_renderContext)
 #define VK_ALLOCATOR VK_RENDER_CONTEXT->GetAllocator()
 #define VK_ALLOCATOR_CALLBACKS &::ge::renderer::mem::Vulkan_AllocatorCallbacks::GetCallbacks()
+#define VK_DEFINE_EXT_FUNC(name) inline PFN_##name name
 
 namespace ge::renderer {
 	class Vulkan_BindlessManager;
+
+	VK_DEFINE_EXT_FUNC(vkSetDebugUtilsObjectNameEXT);
+	VK_DEFINE_EXT_FUNC(vkCreateDebugUtilsMessengerEXT);
+	VK_DEFINE_EXT_FUNC(vkDestroyDebugUtilsMessengerEXT);
 
 	struct Vulkan_DeviceFeatures {
 		bool unifiedImageLayouts;

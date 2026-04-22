@@ -28,4 +28,14 @@ namespace ge::renderer {
 	Vulkan_Buffer::~Vulkan_Buffer() {
 		VK_ALLOCATOR.DestroyBuffer(_buffer, _allocation);
 	}
+
+	void Vulkan_Buffer::SetDebugName(GEString name) const noexcept {
+		VkDebugUtilsObjectNameInfoEXT nameInfo;
+		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+		nameInfo.objectHandle = reinterpret_cast<uint64_t>(_buffer);
+		nameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
+		nameInfo.pObjectName = name.c_str();
+
+		vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+	}
 }

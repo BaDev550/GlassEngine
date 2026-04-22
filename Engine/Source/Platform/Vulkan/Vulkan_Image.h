@@ -14,6 +14,8 @@ namespace ge::renderer {
 		[[nodiscard]] VkImage GetImage() noexcept { return _image; }
 		[[nodiscard]] VkFormat GetFormat() noexcept { return _format; }
 		[[nodiscard]] VkImageView CreateGetImageView(ImageSubresource subresource) noexcept;
+
+		virtual void SetDebugName(GEString name) const noexcept override;
 	private:
 		VkImage _image;
 		VmaAllocation _allocation;
