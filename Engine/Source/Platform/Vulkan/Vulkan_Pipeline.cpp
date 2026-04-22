@@ -2,6 +2,7 @@
 #include "Vulkan_Pipeline.h"
 #include "Vulkan_Shader.h"
 #include "Vulkan_Image.h"
+#include "Vulkan_Swapchain.h"
 
 #include <glm/glm.hpp>
 #include <GlassEngine/Utilities/Counter.h>
@@ -18,6 +19,7 @@ namespace ge::renderer {
 
 	void Vulkan_Pipeline::Invalidate() {
 		const auto& shader = _specs.shader.Cast<Vulkan_Shader>();
+		bool isSwapchain = _specs.targetFramebuffer->GetSpecification().IsSwapchain;
 
 		GEVector<VkVertexInputAttributeDescription> vertexAttribDescs{};
 		for (const auto vertAttrib : _specs.inputAssemblySpec.vertexAttributes) {
@@ -46,11 +48,13 @@ namespace ge::renderer {
 		vertexInputInfo.pVertexBindingDescriptions = vertexBindingDescs.data();
 
 		VkPipelineShaderStageCreateInfo vertexStageCreateInfo{};
+		vertexStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		vertexStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 		vertexStageCreateInfo.module = shader->GetShaderModule();
 		vertexStageCreateInfo.pName = "VertMain";
 
 		VkPipelineShaderStageCreateInfo fragStageCreateInfo{};
+		fragStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		fragStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 		fragStageCreateInfo.module = shader->GetShaderModule();
 		fragStageCreateInfo.pName = "FragMain";
@@ -106,8 +110,28 @@ namespace ge::renderer {
 		depthStencilState.back.failOp = utility::Vulkan_GetStencilOp(_specs.depthStencilSpec.stencilBackOp.failOp);
 		depthStencilState.back.passOp = utility::Vulkan_GetStencilOp(_specs.depthStencilSpec.stencilBackOp.passOp);
 
-		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates{};
-		for ([[maybe_unused]] auto _ : Counter(_specs.targetFramebuffer->GetAttachmentCount())) {
+		GEVector<VkDynamicState> dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+		if (_specs.depthStencilSpec.stencilTestEnable)
+			dynamicStates.push_back(VK_DYNAMIC_STATE_STENCIL_REFERENCE);
+
+		VkPipelineDynamicStateCreateInfo dynamicState{};
+		dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		dynamicState.pDynamicStates = dynamicStates.data();
+		dynamicState.dynamicStateCount = dynamicStates.size();
+
+		GEVector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates{};
+		VkPipelineColorBlendStateCreateInfo colorBlendState{};
+		GEVector<VkFormat> colorAttachmentFormats;
+		GEVector<VkFormat> colorFormat;
+		VkFormat depthFormat = VK_FORMAT_UNDEFINED;
+		VkFormat stencilFormat = VK_FORMAT_UNDEFINED;
+		uint32_t colorAttachmentCount = 0;
+		if (isSwapchain) {
+			auto swapchain = CastChecked<Vulkan_Swapchain>(&Application::Get()->GetWindow().GetSwapchain());
+			colorFormat.push_back(swapchain->GetSwapchainFormat());
+			depthFormat = VK_FORMAT_D24_UNORM_S8_UINT;
+			stencilFormat = VK_FORMAT_D24_UNORM_S8_UINT;
+			colorAttachmentCount = 1;
 			colorBlendAttachmentStates.emplace_back(
 				_specs.blendSpec.blendEnabled,
 				VK_BLEND_FACTOR_SRC_ALPHA,
@@ -118,32 +142,42 @@ namespace ge::renderer {
 				VK_BLEND_OP_ADD,
 				VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
 			);
+			colorBlendState.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+			colorBlendState.attachmentCount = colorBlendAttachmentStates.size();
+			colorBlendState.pAttachments = colorBlendAttachmentStates.data();
 		}
+		else {
+			for ([[maybe_unused]] auto _ : Counter(_specs.targetFramebuffer->GetAttachmentCount())) {
+				colorBlendAttachmentStates.emplace_back(
+					_specs.blendSpec.blendEnabled,
+					VK_BLEND_FACTOR_SRC_ALPHA,
+					VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+					VK_BLEND_OP_ADD,
+					VK_BLEND_FACTOR_ONE,
+					VK_BLEND_FACTOR_ZERO,
+					VK_BLEND_OP_ADD,
+					VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
+				);
+			}
+			colorBlendState.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+			colorBlendState.attachmentCount = colorBlendAttachmentStates.size();
+			colorBlendState.pAttachments = colorBlendAttachmentStates.data();
 
-		VkPipelineColorBlendStateCreateInfo colorBlendState{};
-		colorBlendState.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-		colorBlendState.attachmentCount = colorBlendAttachmentStates.size();
-		colorBlendState.pAttachments = colorBlendAttachmentStates.data();
-
-		GEVector<VkDynamicState> dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
-		if (_specs.depthStencilSpec.stencilTestEnable)
-			dynamicStates.push_back(VK_DYNAMIC_STATE_STENCIL_REFERENCE);
-
-		VkPipelineDynamicStateCreateInfo dynamicState{};
-		dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynamicState.pDynamicStates = dynamicStates.data();
-		dynamicState.dynamicStateCount = dynamicStates.size();
-
-		GEVector<VkFormat> colorAttachmentFormats;
-		for (const auto format : _specs.targetFramebuffer->GetAttachments()) {
-			colorAttachmentFormats.push_back(utility::Vulkan_GetImageFormat(format));
+			for (const auto format : _specs.targetFramebuffer->GetAttachments()) {
+				colorAttachmentFormats.push_back(utility::Vulkan_GetImageFormat(format));
+			}
+			colorFormat = colorAttachmentFormats;
+			depthFormat = _specs.targetFramebuffer->GetDepthAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
+			stencilFormat = _specs.targetFramebuffer->GetDepthAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
+			colorAttachmentCount = colorAttachmentFormats.size();
 		}
 
 		VkPipelineRenderingCreateInfo renderingInfo{};
-		renderingInfo.colorAttachmentCount = colorAttachmentFormats.size();
-		renderingInfo.pColorAttachmentFormats = colorAttachmentFormats.data();
-		renderingInfo.depthAttachmentFormat = _specs.targetFramebuffer->GetDepthAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
-		renderingInfo.stencilAttachmentFormat = _specs.targetFramebuffer->GetDepthAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
+		renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+		renderingInfo.colorAttachmentCount = colorAttachmentCount;
+		renderingInfo.pColorAttachmentFormats = colorFormat.data();
+		renderingInfo.depthAttachmentFormat = depthFormat;
+		renderingInfo.stencilAttachmentFormat = stencilFormat;
 
 		VkGraphicsPipelineCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

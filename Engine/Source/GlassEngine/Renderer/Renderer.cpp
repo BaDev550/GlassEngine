@@ -15,18 +15,6 @@ namespace ge::renderer {
 		g_renderAPI = RenderAPI::Create();
 		s_data._shaderLibrary = mem::CreateScope<ShaderLibrary>();
 
-		{
-			FramebufferSpecification framebufferSpec{};
-			framebufferSpec.IsSwapchain = true;
-			framebufferSpec.clearColor = { 1.0f, 1.0f, 1.0f };
-			mem::Ref<Framebuffer> _defaultFramebuffer = Framebuffer::Create(framebufferSpec);
-			PipelineSpec pipelineSpec{};
-			pipelineSpec.shader = nullptr;
-			pipelineSpec.targetFramebuffer = _defaultFramebuffer;
-			mem::Ref<Pipeline> _defaultPipeline = Pipeline::Create(pipelineSpec);
-			g_defaultRenderPass = RenderPass::Create(_defaultPipeline);
-		}
-
 		GE_ADD_CONSOLE_COMMAND("r", "wireframe", [](const GEVector<GEString>& args) {
 			bool enable = (args[0] == "1" || args[0] == "true");
 			GE_GRAPHICS_INFO("Wireframe: {}", enable);
@@ -40,6 +28,18 @@ namespace ge::renderer {
 		GE_ADD_CONSOLE_COMMAND("r", "reload_shaders", [](const GEVector<GEString>& args) { GetShaderLibrary().ReloadAll(); });
 		GE_ADD_CONSOLE_COMMAND("r", "reload_shader", [](const GEVector<GEString>& args) { GetShaderLibrary().ReloadShader(GEString(args[0])); }, "reload_shader <name>");
 		GetShaderLibrary().AddShader("dnm");
+
+		{
+			FramebufferSpecification framebufferSpec{};
+			framebufferSpec.IsSwapchain = true;
+			framebufferSpec.clearColor = { 1.0f, 1.0f, 1.0f };
+			mem::Ref<Framebuffer> _defaultFramebuffer = Framebuffer::Create(framebufferSpec);
+			PipelineSpec pipelineSpec{};
+			pipelineSpec.shader = GetShaderLibrary().GetShader("dnm");
+			pipelineSpec.targetFramebuffer = _defaultFramebuffer;
+			mem::Ref<Pipeline> _defaultPipeline = Pipeline::Create(pipelineSpec);
+			g_defaultRenderPass = RenderPass::Create(_defaultPipeline);
+		}
 	}
 
 	void Renderer3D::Destroy() {
