@@ -245,6 +245,7 @@ namespace ge::renderer {
 		robustness2.nullDescriptor = true;
 		robustness2.robustBufferAccess2 = true;
 		robustness2.robustImageAccess2 = true;
+
 		_deviceExtensions.emplace_back(VK_EXT_ROBUSTNESS_2_EXTENSION_NAME);
 		robustness2.pNext = pNext;
 		pNext = &robustness2;
@@ -343,7 +344,9 @@ namespace ge::renderer {
 		features.features.shaderInt16 = true;
 		features.features.textureCompressionBC = true;
 		features.features.drawIndirectFirstInstance = true;
-
+#ifdef _DEBUG
+		features.features.robustBufferAccess = true;
+#endif
 		constexpr float queuePriority = 1.0f;
 
 		VkDeviceQueueCreateInfo queueCreateInfo{};
