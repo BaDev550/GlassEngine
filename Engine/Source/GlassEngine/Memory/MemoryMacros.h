@@ -23,7 +23,3 @@
 	})
 	#define GE_ALIGNED_FREE(ptr) free(ptr)
 #endif
-
-void* alignedMalloc(size_t size, size_t alignment) {
-	return GE_ALIGNED_ALLOC(size, alignment);
-}
