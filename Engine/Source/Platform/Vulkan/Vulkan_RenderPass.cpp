@@ -185,7 +185,8 @@ namespace ge::renderer {
 		auto& targetFramebuffer = pipelineData.targetFramebuffer;
 		auto& framebufferSpecs = targetFramebuffer->GetSpecification();
 		auto& window = Application::Get()->GetWindow();
-		glm::vec3 clearValue = framebufferSpecs.clearColor;
+		glm::vec3 clearValue{1.0f, 1.0f, 1.0f};
+		float depthClearValue{1.0f};
 
 		uint32_t activeAttachmentCount = framebufferSpecs.IsSwapchain ? 1 : targetFramebuffer->GetAttachmentCount();
 		GEVector<VkRenderingAttachmentInfo> colorAttachments(activeAttachmentCount);
@@ -217,6 +218,7 @@ namespace ge::renderer {
 				targetImage = image->GetImage();
 				targetFormat = utility::Vulkan_GetImageFormat(image->GetDesc().imageFormat);
 				extent = VkExtent2D({ framebufferSpecs.width, framebufferSpecs.height });
+				clearValue = framebufferSpecs.Attachments[i].clearColor;
 				Utils::ImageMemBarrier(cmd, targetImage, targetFormat, 1, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
 			}
 			colorAttachments[i].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;

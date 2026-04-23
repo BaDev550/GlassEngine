@@ -3,24 +3,32 @@
 #include "Vulkan_Framebuffer.h"
 
 namespace ge::renderer {
-	Vulkan_Framebuffer::Vulkan_Framebuffer(const FramebufferSpecification& spec) {
+	Vulkan_Framebuffer::Vulkan_Framebuffer(const FramebufferSpec& spec) {
 		_specs = spec;
 		Invalidate(spec);
 	}
 
-	void Vulkan_Framebuffer::Invalidate(const FramebufferSpecification& spec)
+	void Vulkan_Framebuffer::Invalidate(const FramebufferSpec& spec)
 	{
 		_colorAttachments.clear();
-		_depthAttachments.clear();
 		if (!_specs.IsSwapchain) {
-			for (const auto& attachment : spec.Attachments.Attachments) {
+			for (const auto& attachment : spec.Attachments) {
+				if (attachment.existingImage) {
+					if (utility::IsDepthStencilFormat(attachment.existingImage->GetDesc().imageFormat)) {
+						_depthStencilAttachment = attachment.existingImage;
+					}
+					else {
+						_colorAttachments.emplace_back(attachment.existingImage);
+					}
+					continue;
+				}
 				ImageSpec imageSpec{};
-				imageSpec.imageFormat = attachment;
+				imageSpec.imageFormat = attachment.Format;
 				imageSpec.extent.x = spec.width;
 				imageSpec.extent.y = spec.height;
-				if (utility::IsDepthFormat(attachment)) {
+				if (utility::IsDepthStencilFormat(attachment.Format)) {
 					imageSpec.usageFlags |= ImageUsageFlagsBits::DepthStencilAttachment;
-					_depthAttachments.emplace_back(Image::Create(imageSpec));
+					_depthStencilAttachment = Image::Create(imageSpec);
 				}
 				else {
 					imageSpec.usageFlags |= ImageUsageFlagsBits::ColorAttachment;

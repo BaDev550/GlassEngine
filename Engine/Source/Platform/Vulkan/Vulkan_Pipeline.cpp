@@ -164,12 +164,12 @@ namespace ge::renderer {
 			colorBlendState.attachmentCount = colorBlendAttachmentStates.size();
 			colorBlendState.pAttachments = colorBlendAttachmentStates.data();
 
-			for (const auto format : _specs.targetFramebuffer->GetAttachments()) {
-				colorAttachmentFormats.push_back(utility::Vulkan_GetImageFormat(format));
+			for (const auto attachment : _specs.targetFramebuffer->GetAttachments()) {
+				colorAttachmentFormats.push_back(utility::Vulkan_GetImageFormat(attachment.Format));
 			}
 			colorFormat = colorAttachmentFormats;
-			depthFormat = _specs.targetFramebuffer->GetDepthAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
-			stencilFormat = _specs.targetFramebuffer->GetDepthAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
+			depthFormat = _specs.targetFramebuffer->GetDepthStencilAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
+			stencilFormat = _specs.targetFramebuffer->GetDepthStencilAttachmentTexture().Cast<Vulkan_Image>()->GetFormat();
 			colorAttachmentCount = colorAttachmentFormats.size();
 		}
 

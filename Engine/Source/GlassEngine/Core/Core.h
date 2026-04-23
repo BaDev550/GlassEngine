@@ -30,7 +30,7 @@ using GEVector = std::vector<T, ge::mem::GE_Allocator<T>>;
 template<typename T, typename U>
 using GEUnorderedMap = std::unordered_map<T, U, std::hash<T>, std::equal_to<T>, ge::mem::GE_Allocator<std::pair<const T, U>>>;
 template<typename T, typename U>
-using GEMap = std::map<T, U, std::equal_to<T>, ge::mem::GE_Allocator<std::pair<const T, U>>>;
+using GEMap = std::map<T, U, std::less<T>, ge::mem::GE_Allocator<std::pair<const T, U>>>;
 
 template<typename T>
 static T* CastChecked(void* ptr) {

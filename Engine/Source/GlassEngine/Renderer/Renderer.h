@@ -3,6 +3,12 @@
 #include "RenderPass.h"
 
 namespace ge::renderer {
+	struct RenderConfig { // TODO (0x): make this more complete this is just for testing
+		bool Bloom = false;
+		bool DepthOfField = false;
+		bool MotionBlur = false;
+	};
+
 	class ShaderLibrary;
 	class Renderer3D {
 	public:

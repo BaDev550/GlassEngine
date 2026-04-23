@@ -4,7 +4,7 @@
 #include "Platform/Vulkan/Vulkan_Framebuffer.h"
 
 namespace ge::renderer {
-	ge::mem::Ref<Framebuffer> Framebuffer::Create(const FramebufferSpecification& spec) {
+	ge::mem::Ref<Framebuffer> Framebuffer::Create(const FramebufferSpec& spec) {
 		switch (RenderAPI::GetAPI())
 		{
 		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Framebuffer>::Create(spec);

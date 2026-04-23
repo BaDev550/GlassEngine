@@ -30,9 +30,8 @@ namespace ge::renderer {
 		GetShaderLibrary().AddShader("dnm");
 
 		{
-			FramebufferSpecification framebufferSpec{};
+			FramebufferSpec framebufferSpec{};
 			framebufferSpec.IsSwapchain = true;
-			framebufferSpec.clearColor = { 1.0f, 1.0f, 1.0f };
 			mem::Ref<Framebuffer> _defaultFramebuffer = Framebuffer::Create(framebufferSpec);
 			PipelineSpec pipelineSpec{};
 			pipelineSpec.shader = GetShaderLibrary().GetShader("dnm");
