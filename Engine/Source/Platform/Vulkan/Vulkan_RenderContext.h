@@ -3,7 +3,7 @@
 
 #include "GlassEngine/Renderer/RenderContext.h"
 #include "GlassEngine/Core/Core.h"
-#include "GlassEngine/Core/memory.h"
+#include "GlassEngine/Core/Memory.h"
 #include "Vulkan_Allocator.h"
 #include "Vulkan_Types.h"
 #include <optional>
@@ -52,7 +52,7 @@ namespace ge::renderer {
 		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) override;
 
 		[[nodiscard]] VkPipelineLayout GetGlobalPipelineLayout() const noexcept { return _globalPipelineLayout; }
-		[[nodiscard]] void BindDescriptorSets(VkCommandBuffer commandBuffer) const noexcept;
+		void BindDescriptorSets(VkCommandBuffer commandBuffer) const noexcept;
 
 		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_readonlyImageBindlessManager; }
 		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_writableImageBindlessManager; }

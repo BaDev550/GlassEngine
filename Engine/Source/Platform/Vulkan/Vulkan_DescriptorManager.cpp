@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Vulkan_DescriptorManager.h"
 #include "Vulkan_BindlessManager.h"
 #include <ranges>

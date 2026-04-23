@@ -1,8 +1,11 @@
 #pragma once
 #include <iostream>
 #include <atomic>
+#include <cstring>
+#include <memory>
 
 #define GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE 0
+
 namespace ge::mem {
 	struct AllocationMetrics {
 		size_t totalAllocated = 0;
@@ -23,14 +26,31 @@ namespace ge::mem {
 #if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
 			std::cout << "[MEMORY] Allocated with aligment: " << size << " " << alignment << std::endl;
 #endif
+#ifdef _WIN32
 			return _aligned_malloc(size, alignment);
+#else
+			void* ptr = nullptr;
+			if (posix_memalign(&ptr, alignment, size) != 0) return nullptr;
+			return ptr;
+#endif
 		}
-		static void* GE_ReallocateAligned(void* orginalBlock, size_t size, size_t alignment) {
+		static void* GE_ReallocateAligned(void* originalBlock, size_t size, size_t alignment) {
 			s_allocationMetrics.totalAllocated += size;
 #if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
 			std::cout << "[MEMORY] Reallocated: " << orginalBlock << " " << size << std::endl;
 #endif
-			return _aligned_realloc(orginalBlock, size, alignment);
+#ifdef _WIN32
+			return _aligned_realloc(originalBlock, size, alignment);
+#else
+			void* newPtr = nullptr;
+			// this code probably claude shit
+			if (posix_memalign(&newPtr, alignment, size) != 0) return nullptr;
+			if (originalBlock) {
+				std::memcpy(newPtr, originalBlock, size);
+				free(originalBlock);
+			}
+			return newPtr;
+#endif
 		}
 		static void GE_FreeAligned(void* block, size_t size, size_t aligment) {
 			if (block == nullptr) {
@@ -43,7 +63,11 @@ namespace ge::mem {
 #if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
 			std::cout << "[MEMORY] Freed: " << size << std::endl;
 #endif
-			return _aligned_free(block);
+#ifdef _WIN32
+			_aligned_free(block);
+#else
+			free(block);
+#endif
 		}
 		static void GE_Free(void* block, size_t size) {
 			if (block == nullptr) {
@@ -74,6 +98,14 @@ namespace ge::mem {
 		void deallocate(T* p, std::size_t n) noexcept {
 			allocFuncs::GE_Free(p, n * sizeof(T));
 		}
+
+		template <typename U>
+		// TODO (0x): complate this
+		bool operator==(const GE_Allocator<U>&) const noexcept { return true; }
+
+		template <typename U>
+		// TODO (0x): complate this
+		bool operator!=(const GE_Allocator<U>&) const noexcept { return false; }
 	};
 
 	class RefCounted { // Base class for all mem::Ref objects

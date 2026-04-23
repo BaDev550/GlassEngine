@@ -8,10 +8,10 @@ namespace ge::renderer {
 		case ShaderResourceType::ReadonlyImage: return 200'000;
 		case ShaderResourceType::WritableImage: return 10'000;
 		case ShaderResourceType::Sampler: return 1'000; // this enough, reuse
-		case ShaderResourceType::ReadonlyBuffer: 
-			GE_ASSERT(ShaderResourceType::ReadonlyBuffer != type, "Vulkan_BindlessManager not support ReadonlyBuffer, use bda") return 0;
-		case ShaderResourceType::WritableBuffer: 
-			GE_ASSERT(ShaderResourceType::WritableBuffer != type, "Vulkan_BindlessManager not support WritableBuffer, use bda") return 0;
+		case ShaderResourceType::ReadonlyBuffer:
+			GE_ASSERT(ShaderResourceType::ReadonlyBuffer != type, "Vulkan_BindlessManager not support ReadonlyBuffer, use bda"); return 0;
+		case ShaderResourceType::WritableBuffer:
+			GE_ASSERT(ShaderResourceType::WritableBuffer != type, "Vulkan_BindlessManager not support WritableBuffer, use bda"); return 0;
 		}
 	}
 
@@ -34,7 +34,7 @@ namespace ge::renderer {
 
 		// create dst set layout
 		{
-			const VkDescriptorBindingFlags bindingFlags 
+			const VkDescriptorBindingFlags bindingFlags
 				= VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT
 				| VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT
 				| VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT

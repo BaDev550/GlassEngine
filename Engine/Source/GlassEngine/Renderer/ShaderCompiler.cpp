@@ -2,9 +2,9 @@
 #include "ShaderCompiler.h"
 #include <GlassEngine/Utilities/Counter.h>
 #include <spirv_reflect.h>
-#include <slang/slang.h>
-#include <slang/slang-com-ptr.h>
-#include <slang/slang-com-helper.h>
+#include <slang.h>
+#include <slang-com-ptr.h>
+#include <slang-com-helper.h>
 
 namespace ge::renderer {
     static constexpr uint32_t BindlessReadonlyImageSetIndex = 0;
@@ -128,7 +128,7 @@ namespace ge::renderer {
 
     // TODO: complate this func
     static GEVector<char> GetDxilCode(Slang::ComPtr<slang::IComponentType> linkedProgram, uint32_t entryPointCount) {
-        GE_ASSERT(false, "Not completed func!!!")
+        GE_ASSERT(false, "Not completed func!!!");
         GEVector<char> out{};
         {
             Slang::ComPtr<slang::IBlob> blob;

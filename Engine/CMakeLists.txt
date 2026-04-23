@@ -67,7 +67,10 @@ target_include_directories(Engine
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SPIRV-Reflect
 )
 target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Source/gepch.h>")
-
+target_compile_definitions(
+    Engine PRIVATE
+    $<$<CONFIG:Debug>:_DEBUG>
+)
 target_link_libraries(Engine
 	PUBLIC
 		glfw

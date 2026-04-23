@@ -11,6 +11,7 @@
 // TODO (dnm): better name
 #define VK_SET_EXT_FUNC(name) name = (PFN_##name)vkGetInstanceProcAddr(_instance, #name);
 
+// VK_EXT_device_memory_report
 namespace ge::renderer {
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

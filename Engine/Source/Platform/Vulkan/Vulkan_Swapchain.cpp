@@ -54,7 +54,7 @@ namespace ge::renderer {
 			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VK_RENDER_CONTEXT->GetPhysicalDevice(), VK_RENDER_CONTEXT->GetSurface(), &surfaceCapabilities);
 
 			_imageCount = 3;
-			_imageCount = std::clamp(_imageCount, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount);
+			_imageCount = std::clamp(_imageCount, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount ? surfaceCapabilities.maxImageCount : UINT32_MAX);
 			currentTransform = surfaceCapabilities.currentTransform;
 		}
 

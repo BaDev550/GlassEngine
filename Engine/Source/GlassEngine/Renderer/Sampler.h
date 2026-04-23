@@ -21,7 +21,7 @@ namespace ge::renderer {
 	class Sampler : public RenderObject {
 	public:
 		[[nodiscard]] static ge::mem::Ref<Sampler> Create(const SamplerSpec& desc);
-		explicit Sampler(const SamplerSpec& desc);
+		explicit Sampler(const SamplerSpec& desc) : _desc(desc) {} 
 
 		[[nodiscard]] uint32_t GetHandle();
 	protected:

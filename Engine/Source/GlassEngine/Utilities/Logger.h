@@ -47,12 +47,14 @@
 #define GE_GRAPHICS_TRACE(...)
 #define GE_GRAPHICS_INFO(...)
 #define GE_GRAPHICS_WARN(...)
-#define GE_GRAPCHICS_ERROR(...)
+#define GE_GRAPHICS_ERROR(...)
 #define GE_GRAPHICS_CRITICAL(...)
 #define GE_SCRIPT_TRACE(...)
 #define GE_SCRIPT_INFO(...)
 #define GE_SCRIPT_WARN(...)
 #define GE_SCRIPT_ERROR(...)
+// TODO (0x): fix this
+#define GE_GLOBAL_SINK ge::Logger::GetGlobalSink()
 #endif
 
 namespace ge {

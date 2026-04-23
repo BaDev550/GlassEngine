@@ -7,10 +7,16 @@
 #define GE_CONSOLE_ASSETMANAGER_CATAGORY "asset"
 #define GE_CONSOLE_ENGINE_CATAGORY "engine"
 
-#define GE_ASSERT(x, ...) \
-	if (!(x)) {\
-		std::cout << __VA_ARGS__ << std::endl; \
-		__debugbreak(); }
+#ifdef _WIN32
+    #define GE_DEBUGBREAK() __debugbreak()
+#else
+    #include <csignal>
+    #define GE_DEBUGBREAK() raise(SIGTRAP)
+#endif
+
+#define GE_ASSERT(condition, msg) \
+    do { if (!(condition)) { GE_DEBUGBREAK(); } } while(0)
+	
 #define BIT(x) 1 << x
 
 template<typename T>
