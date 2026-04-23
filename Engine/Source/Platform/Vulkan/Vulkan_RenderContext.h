@@ -34,9 +34,11 @@ namespace ge::renderer {
 		bool partiallyBoundForSampler; // TODO (dnm): maybe has performance impact, need to test
 		bool partiallyBoundForSampledImage; // TODO (dnm): maybe has performance impact, need to test
 		bool partiallyBoundForStorageImage; // TODO (dnm): maybe has performance impact, need to test
-
-		std::array<VkSampleCountFlagBits, 4> _sampleMap{};
 	};
+
+	constexpr uint32_t VULKAN_SAMPLED_IMAGE_COUNT = 200'000;
+	constexpr uint32_t VULKAN_STORAGE_IMAGE_COUNT = 20'000;
+	constexpr uint32_t VULKAN_SAMPLER_COUNT = 1'000;
 
 	class Vulkan_RenderContext final : public RenderContext {
 	public:

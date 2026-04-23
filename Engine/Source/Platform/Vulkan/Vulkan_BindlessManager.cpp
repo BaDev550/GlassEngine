@@ -1,3 +1,4 @@
+#include "Platform/Vulkan/Vulkan_RenderContext.h"
 #include "gepch.h"
 #include "Vulkan_BindlessManager.h"
 
@@ -5,9 +6,22 @@ namespace ge::renderer {
 	[[nodiscard]] static constexpr uint32_t GetDescriptorCount(ShaderResourceType type) noexcept {
 		switch (type) {
 		case ShaderResourceType::UniformBuffer: GE_ASSERT(ShaderResourceType::UniformBuffer != type, "Vulkan_BindlessManager not support UniformBuffer");
-		case ShaderResourceType::ReadonlyImage: return 200'000;
-		case ShaderResourceType::WritableImage: return 10'000;
-		case ShaderResourceType::Sampler: return 1'000; // this is enough, reuse
+		case ShaderResourceType::ReadonlyImage: return VULKAN_SAMPLED_IMAGE_COUNT;
+		case ShaderResourceType::WritableImage: return VULKAN_STORAGE_IMAGE_COUNT;
+		case ShaderResourceType::Sampler: return VULKAN_SAMPLER_COUNT; // this is enough, reuse
+		case ShaderResourceType::ReadonlyBuffer:
+			GE_ASSERT(ShaderResourceType::ReadonlyBuffer != type, "Vulkan_BindlessManager not support ReadonlyBuffer, use bda"); return 0;
+		case ShaderResourceType::WritableBuffer:
+			GE_ASSERT(ShaderResourceType::WritableBuffer != type, "Vulkan_BindlessManager not support WritableBuffer, use bda"); return 0;
+		}
+	}
+
+	[[nodiscard]] static constexpr bool UsePartiallyBound(ShaderResourceType type, const Vulkan_DeviceFeatures& features) noexcept {
+		switch (type) {
+		case ShaderResourceType::UniformBuffer: GE_ASSERT(ShaderResourceType::UniformBuffer != type, "Vulkan_BindlessManager not support UniformBuffer");
+		case ShaderResourceType::ReadonlyImage: return features.partiallyBoundForSampledImage;
+		case ShaderResourceType::WritableImage: return features.partiallyBoundForStorageImage;
+		case ShaderResourceType::Sampler: return features.partiallyBoundForSampler;
 		case ShaderResourceType::ReadonlyBuffer:
 			GE_ASSERT(ShaderResourceType::ReadonlyBuffer != type, "Vulkan_BindlessManager not support ReadonlyBuffer, use bda"); return 0;
 		case ShaderResourceType::WritableBuffer:
@@ -28,7 +42,7 @@ namespace ge::renderer {
 			dstPoolCreateInfo.maxSets = 1;
 			dstPoolCreateInfo.poolSizeCount = 1;
 			dstPoolCreateInfo.pPoolSizes = &poolSize;
-			dstPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+			dstPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT * UsePartiallyBound(spec.resourceType, renderContext.GetDeviceFeatures());
 			vkCreateDescriptorPool(_renderContext.GetDevice(), &dstPoolCreateInfo, VK_ALLOCATOR_CALLBACKS, &_descriptorPool);
 		}
 
@@ -39,7 +53,7 @@ namespace ge::renderer {
 				| VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT
 				| VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT
 				// pre turing gpu's don't have update after bind for uniform buffers
-				| VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT
+				| (VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT * UsePartiallyBound(spec.resourceType, renderContext.GetDeviceFeatures()))
 				;
 
 			VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsCreateInfo{};
@@ -58,7 +72,7 @@ namespace ge::renderer {
 			dstLayoutCreateInfo.pBindings = &binding;
 			dstLayoutCreateInfo.bindingCount = 1;
 			// pre turing gpu's don't have update after bind for uniform buffers
-			dstLayoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+			dstLayoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT * UsePartiallyBound(spec.resourceType, renderContext.GetDeviceFeatures());
 			dstLayoutCreateInfo.pNext = &bindingFlagsCreateInfo;
 			vkCreateDescriptorSetLayout(_renderContext.GetDevice(), &dstLayoutCreateInfo, VK_ALLOCATOR_CALLBACKS, &_descriptorSetLayout);
 		}

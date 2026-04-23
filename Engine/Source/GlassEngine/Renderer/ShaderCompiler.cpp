@@ -1,7 +1,6 @@
 #include "gepch.h"
 #include "ShaderCompiler.h"
 #include <GlassEngine/Utilities/Counter.h>
-#include <spirv_reflect.h>
 #include <slang.h>
 #include <slang-com-ptr.h>
 #include <slang-com-helper.h>
@@ -100,30 +99,16 @@ namespace ge::renderer {
             Slang::ComPtr<slang::IBlob> diagnosticsBlob;
             linkedProgram->getTargetCode(
                 SpirvTargetIndex,
-                blob.writeRef());
-        }
+                blob.writeRef(),
+                diagnosticsBlob.writeRef());
 
-        spv_reflect::ShaderModule reflect(blob->getBufferSize(), (char*)blob->getBufferPointer());
-
-        uint32_t count;
-        reflect.EnumerateDescriptorSets(&count, nullptr);
-        GEVector<SpvReflectDescriptorSet*> dstSets(count);
-        reflect.EnumerateDescriptorSets(&count, dstSets.data());
-        for (auto* set : dstSets)
-        {
-            uint32_t newSetIndex{};
-            switch (set->set) {
-            case InShaderBindlessReadonlyImageSetIndex: newSetIndex = BindlessReadonlyImageSetIndex; break;
-            case InShaderBindlessWritableImageSetIndex: newSetIndex = BindlessWritableImageSetIndex; break;
-            case InShaderBindlessSamplerSetIndex: newSetIndex = BindlessSamplerSetIndex; break;
-            case InShaderUserResourceSetIndex: newSetIndex = UserResourceSetIndex; break;
-            default: GE_GRAPHICS_WARN("meaningless descriptor set, set = {}", set->set);
+            if (!blob) {
+                GE_GRAPHICS_WARN("Shader module loading error: {}",
+                    std::string_view(static_cast<const char*>(diagnosticsBlob->getBufferPointer()), diagnosticsBlob->getBufferSize()));
             }
-
-            reflect.ChangeDescriptorSetNumber(set, newSetIndex);
         }
 
-        return { (char*)reflect.GetCode(), ((char*)reflect.GetCode()) + reflect.GetCodeSize() };
+        return { (char*)blob->getBufferPointer(), (char*)blob->getBufferPointer() + blob->getBufferSize() };
     }
 
     // TODO: complate this func
@@ -179,7 +164,7 @@ namespace ge::renderer {
 
         const auto shaderPath = shaderDir / (GEString(shaderName) + ".slang");
         if (!std::filesystem::exists(shaderPath)) {
-            GE_GRAPHICS_WARN("Shader not found: ", shaderName);
+            GE_GRAPHICS_WARN("Shader not found: {}", shaderName);
             return false;
         }
 
@@ -242,6 +227,7 @@ namespace ge::renderer {
 
         try {
             //shaderData.reflection = GetReflection(linkedProgram->getLayout());
+            shaderData.reflection = {};// GetReflection(linkedProgram->getLayout());
             shaderData.spirvByteCode = GetSpirvCode(linkedProgram);
             //shaderData.dxilByteCodes = GetSpirvCode(linkedProgram);
             return true;
