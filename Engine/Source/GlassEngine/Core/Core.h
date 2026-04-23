@@ -19,10 +19,8 @@
 #define GE_ASSERT(condition, msg) do { if (!(condition)) { GE_DEBUGBREAK(); std::cerr << msg << std::endl; } } while(0)
 	
 #define BIT(x) 1 << x
-#if defined(_MSC_VER) && !defined(__clang__)
-	#define GE_ARGS(...) ,__VA_ARGS__
 #if defined(_MSC_VER)
-	#define GE_ARGS(...) __VA_ARGS__
+	#define GE_ARGS(...) ,__VA_ARGS__
 #else
 	#define GE_ARGS(...) __VA_OPT__(, ) __VA_ARGS__
 #endif
