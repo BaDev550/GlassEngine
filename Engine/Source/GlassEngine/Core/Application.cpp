@@ -36,9 +36,9 @@ namespace ge {
 		delete _imGuiLayer;
 		_imGuiLayer = nullptr;
 		renderer::Renderer3D::Destroy();
-		profile::Profiler::Destroy();
 		Logger::Destroy();
 		Console::Destroy();
+		profile::Profiler::Destroy();
 	}
 
 	void Application::Run() {

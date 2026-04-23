@@ -80,20 +80,21 @@ namespace ge {
 
         template<typename... Args>
         std::string FormatMessage(std::format_string<Args...> fmt, Args&&... args) {
-            auto tup = std::make_tuple(std::forward<Args>(args)...);
-            return std::apply([&](auto&... a) { return std::vformat(fmt.get(), std::make_format_args(a...)); }, tup);
+            return std::vformat(fmt.get(), std::make_format_args(args...));
         }
 
-#define GE_FORMAT_LOG_MESSAGE(msg, type, name) std::format("[{}][{}][{}]: {}", Time::GetCurrentLocalTime(), name, LogTypeToString(type), msg)
+#define GE_FORMAT_LOG_MESSAGE(msg, type, name) std::format("[{}][{}]: {}", name, LogTypeToString(type), msg) // TODO (0x): add current local time from application instead of 0
 #ifdef GE_USE_APPLICATION_CONSOLE
-    #define GE_LOG(msg, type, name) ge::Console::Get().Log(GEString(GE_FORMAT_LOG_MESSAGE(msg, type, name).data(), GE_FORMAT_LOG_MESSAGE(msg, type, name).size()));
+#define GE_LOG(msg, type, name) \
+            std::string formattedString = GE_FORMAT_LOG_MESSAGE(msg, type, name); \
+            ge::Console::Get().Log(GEString(formattedString.data(), formattedString.size()));
 #elif defined(GE_USE_APPLICATION_AND_STD_CONSOLE)
 #define GE_LOG(msg, type, name) \
-    std::string formattedString = GE_FORMAT_LOG_MESSAGE(msg, type, name); \
-    std::cout << formattedString << std::endl; \
-    ge::Console::Get().Log(GEString(formattedString.data(), formattedString.size()));
+            std::string formattedString = GE_FORMAT_LOG_MESSAGE(msg, type, name); \
+            std::cout << formattedString << '\n'; \
+            ge::Console::Get().Log(GEString(formattedString.data(), formattedString.size()));
 #else
-#define GE_LOG(msg, type, name) std::cout << GE_FORMAT_LOG_MESSAGE(msg, type, name) << std::endl;
+#define GE_LOG(msg, type, name) std::cout << GE_FORMAT_LOG_MESSAGE(msg, type, name) << '\n';
 #endif
 #define GE_LOG_TO_SINK(msg, type, name, sink) if(sink) sink->Log(GE_FORMAT_LOG_MESSAGE(msg, type, name), type);
 
