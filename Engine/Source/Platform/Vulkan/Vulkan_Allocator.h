@@ -20,6 +20,7 @@ namespace ge::renderer::mem {
 		}
 	private:
 		static void* VKAPI_CALL Allocator(void* pUserData, size_t size, size_t aligment, VkSystemAllocationScope allocationScope) {
+			
 			return ge::mem::allocFuncs::GE_AllocateAligned(size, aligment);
 		}
 		static void* VKAPI_CALL Reallocation(void* pUserData, void* pOriginal, size_t size, size_t aligment, VkSystemAllocationScope allocationScope) {

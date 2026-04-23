@@ -6,6 +6,7 @@
 
 #include <glm/glm.hpp>
 #include <GlassEngine/Utilities/Counter.h>
+#include <vulkan/vulkan_core.h>
 
 namespace ge::renderer {
 	Vulkan_Pipeline::Vulkan_Pipeline(const PipelineSpec& specs)
@@ -129,8 +130,8 @@ namespace ge::renderer {
 		if (isSwapchain) {
 			auto swapchain = CastChecked<Vulkan_Swapchain>(&Application::Get()->GetWindow().GetSwapchain());
 			colorFormat.push_back(swapchain->GetSwapchainFormat());
-			depthFormat = VK_FORMAT_D24_UNORM_S8_UINT;
-			stencilFormat = VK_FORMAT_D24_UNORM_S8_UINT;
+			depthFormat = VK_FORMAT_D32_SFLOAT;
+			// stencilFormat = VK_FORMAT_D32_SFLOAT;
 			colorAttachmentCount = 1;
 			colorBlendAttachmentStates.emplace_back(
 				_specs.blendSpec.blendEnabled,

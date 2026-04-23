@@ -360,7 +360,7 @@ namespace ge::renderer {
 		}
 
 		{
-			GEVector<VkDescriptorSetLayoutBinding> bindings;
+			GEVector<VkDescriptorSetLayoutBinding> bindings{};
 			bindings.emplace_back(
 				0,
 				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -386,27 +386,17 @@ namespace ge::renderer {
 		}
 
 		{
-			VkDescriptorSetAllocateInfo allocInfo{};
-			allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-			allocInfo.pSetLayouts = &_globalDescriptorSetLayout;
-			allocInfo.descriptorSetCount = 1;
-			allocInfo.descriptorPool = _globalDescriptorPool;
-
-			vkAllocateDescriptorSets(_device, &allocInfo, &_globalDescriptorSet);
-		}
-
-		{
 			VkPushConstantRange pushConstant{};
 			pushConstant.offset = 0;
 			// anv, radv, and offical nvidia driver support 256byte push constant
-			pushConstant.size = 256; // TODO (dnm): change with 256 when using linux
+			pushConstant.size = 256;
 			pushConstant.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
 
 			VkDescriptorSetLayout setLayouts[4]{
+				_globalDescriptorSetLayout,
 				_readonlyImageBindlessManager->GetDstSetLayout(),
 				_writableImageBindlessManager->GetDstSetLayout(),
 				_samplerBindlessManager->GetDstSetLayout(),
-				_globalDescriptorSetLayout
 			};
 
 			VkPipelineLayoutCreateInfo createInfo{};
@@ -547,11 +537,11 @@ namespace ge::renderer {
 			_deviceFeatures.partiallyBoundForSampler = properties.properties.limits.maxPerStageDescriptorSamplers > 1'000;
 
 			if (!_deviceFeatures.partiallyBoundForSampledImage)
-				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindSampledImages, 200'000);
+				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindSampledImages, VULKAN_SAMPLED_IMAGE_COUNT);
 			if (!_deviceFeatures.partiallyBoundForStorageImage)
-				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindStorageImages, 10'000);
+				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindStorageImages, VULKAN_STORAGE_IMAGE_COUNT);
 			if (!_deviceFeatures.partiallyBoundForSampler)
-				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindSamplers, 1'000);
+				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindSamplers, VULKAN_SAMPLER_COUNT);
 
 			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedOperations & VK_SUBGROUP_FEATURE_VOTE_BIT));
 			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedOperations & VK_SUBGROUP_FEATURE_BASIC_BIT));

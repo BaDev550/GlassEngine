@@ -3,6 +3,7 @@
 #include "Vulkan_Swapchain.h"
 #include "Vulkan_RenderAPI.h"
 #include "Vulkan_Sampler.h"
+#include "Vulkan_Image.h"
 #include "GlassEngine/Renderer/Renderer.h"
 
 namespace ge::renderer {
@@ -266,15 +267,5 @@ namespace ge::renderer {
 				Utils::ImageMemBarrier(cmd, targetImage, targetFormat, 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1);
 			}
 		}
-	}
-
-	void Vulkan_RenderPass::ISetInput(const ShaderResource& resource, const ge::mem::Ref<Buffer>& buffer, uint16_t firstElement, uint16_t elementCount, uint16_t resourceIndex) {
-		_descriptorManager->SetBuffer(resource, *buffer.Cast<Vulkan_Buffer>(), firstElement, elementCount, resourceIndex);
-	}
-	void Vulkan_RenderPass::ISetInput(const ShaderResource& resource, const ge::mem::Ref<Sampler>& sampler, uint16_t resourceIndex) {
-		_descriptorManager->SetSampler(resource, *sampler.Cast<Vulkan_Sampler>(), resourceIndex);
-	}
-	void Vulkan_RenderPass::ISetInput(const ShaderResource& resource, const ge::mem::Ref<Image>& texture, ImageSubresource subresource, uint16_t resourceIndex) {
-		_descriptorManager->SetImage(resource, *texture.Cast<Vulkan_Image>(), subresource, resourceIndex);
 	}
 }
