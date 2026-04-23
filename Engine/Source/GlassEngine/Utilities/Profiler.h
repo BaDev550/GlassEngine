@@ -4,11 +4,10 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
-#include "GlassEngine/Core/Core.h"
 
 namespace ge::profile {
 	struct ProfileEvent {
-		GEString name;
+		std::string name;
 		double startMS;
 		double durationMS;
 	};
@@ -17,7 +16,7 @@ namespace ge::profile {
 	public:
 		static void Init() {
 			if (_instance) {
-				GE_CORE_ERROR("Profiler already initialized");
+				std::cout << "Profiler already initialized" << std::endl;
 				return;
 			}
 			_instance = new Profiler();
@@ -28,14 +27,15 @@ namespace ge::profile {
 		}
 
 		static Profiler& Get() { return *_instance; }
-		void AddEvent(const GEString& name, double startMS, double durationMS) {
+		void AddEvent(const std::string& name, double startMS, double durationMS) {
 			_events.push_back({ name, startMS, durationMS });
 		}
-		const GEVector<ProfileEvent>& GetEvents() const { return _events; }
+		const std::vector<ProfileEvent>& GetEvents() const { return _events; }
 		void Clear() { _events.clear(); }
+		bool IsValid() const { return _instance != nullptr; }
 	private:
 		inline static Profiler* _instance = nullptr;
-		GEVector<ProfileEvent> _events;
+		std::vector<ProfileEvent> _events;
 	};
 
 	namespace utils {
@@ -45,11 +45,11 @@ namespace ge::profile {
 			return std::chrono::duration<double, std::milli>(now - startTime).count();
 		}
 
-		static void WriteEventsToFile(const GEVector<ProfileEvent>& events, std::filesystem::path filePath) {
+		static void WriteEventsToFile(const std::vector<ProfileEvent>& events, std::filesystem::path filePath) {
 			filePath.replace_extension(".json");
 			std::ofstream out(filePath);
 			if (!out.is_open()) {
-				GE_CORE_ERROR("Failed to open profile output file: {}", filePath.string());
+				std::cout << "Failed to open profile output file: " << filePath.string() << std::endl;
 				return;
 			}
 			out << "{\"traceEvents\":[";
@@ -69,18 +69,20 @@ namespace ge::profile {
 			}
 			out << "]}";
 			out.close();
-			GE_CORE_INFO("Profile events written to {}", filePath.string());
+			std::cout << "Profile events written to " << filePath.string() << std::endl;
 		}
 	}
 
 	class ProfileScope {
 	public:
-		ProfileScope(const GEString& name) : _name(name), _startMS(utils::GetCurrentTimeMS()) {}
+		ProfileScope(const std::string& name) : _name(name), _startMS(utils::GetCurrentTimeMS()) {}
 		~ProfileScope() {
 			Stop();
 		}
 
 		void Stop() {
+			if (!Profiler::Get().IsValid()) return;
+
 			if (!_stopped) {
 				double endMS = utils::GetCurrentTimeMS();
 				double duration = endMS - _startMS;
@@ -89,7 +91,7 @@ namespace ge::profile {
 			}
 		}
 	private:
-		GEString _name;
+		std::string _name;
 		double _startMS;
 		bool _stopped = false;
 	};

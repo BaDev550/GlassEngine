@@ -1,5 +1,5 @@
 #pragma once
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Memory/Memory.h"
 #include "Types.h"
 
 struct GLFWwindow;

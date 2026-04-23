@@ -3,7 +3,7 @@
 
 #include "GlassEngine/Renderer/RenderContext.h"
 #include "GlassEngine/Core/Core.h"
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Memory/Memory.h"
 #include "Vulkan_Allocator.h"
 #include "Vulkan_Types.h"
 #include <optional>

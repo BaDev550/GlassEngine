@@ -1,5 +1,5 @@
 #pragma once
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Memory/Memory.h"
 #include "Buffer.h"
 #include "Texture.h"
 #include "Sampler.h"

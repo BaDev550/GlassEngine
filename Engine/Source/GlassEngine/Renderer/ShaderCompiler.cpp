@@ -50,8 +50,8 @@ namespace ge::renderer {
                 std::istreambuf_iterator<char>() };
     }
 
-    static std::unordered_map<GEString, ShaderResource> GetResources(slang::ProgramLayout* layout) {
-        std::unordered_map<GEString, ShaderResource> resources;
+    static GEUnorderedMap<GEString, ShaderResource> GetResources(slang::ProgramLayout* layout) {
+        GEUnorderedMap<GEString, ShaderResource> resources;
         resources.reserve(layout->getParameterCount());
         for (const auto i : Counter(layout->getParameterCount())) {
             auto* var_layout = layout->getParameterByIndex(i);
@@ -78,8 +78,8 @@ namespace ge::renderer {
         };
     }
 
-    static std::unordered_map<GEString, ShaderEntryPoint> GetEntryPoints(slang::ProgramLayout* programLayout) {
-        std::unordered_map<GEString, ShaderEntryPoint> out;
+    static GEUnorderedMap<GEString, ShaderEntryPoint> GetEntryPoints(slang::ProgramLayout* programLayout) {
+        GEUnorderedMap<GEString, ShaderEntryPoint> out;
         for (const auto i : Counter(programLayout->getEntryPointCount())) {
             auto entryPoint = GetEntryPoint(programLayout->getEntryPointByIndex(i));
             out.try_emplace(entryPoint.name, entryPoint);
@@ -241,7 +241,7 @@ namespace ge::renderer {
         }
 
         try {
-            shaderData.reflection = GetReflection(linkedProgram->getLayout());
+            //shaderData.reflection = GetReflection(linkedProgram->getLayout());
             shaderData.spirvByteCode = GetSpirvCode(linkedProgram);
             //shaderData.dxilByteCodes = GetSpirvCode(linkedProgram);
             return true;

@@ -8,11 +8,11 @@ namespace ge {
 	{
 		LoadAssetRegistry();
 
-		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "cookAssets", [this](const GEVector<GEString>& args) { CookAssets(args[0]); }, "cookAssets <outputPakFile>");
-		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "compileAssetsToPAK", [this](const GEVector<GEString>& args) { CompileIntoPakFile(args[0]); }, "compileAssetsToPAK <outputPakFile>");
-		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "compileAssetsToManifest", [this](const GEVector<GEString>& args) { CompileIntoManifest(args[0]); }, "compileAssetsToManifest <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "cookAssets", [this](const GEVector<GEString>& args) { CookAssets(args[0].ToPath()); }, "cookAssets <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "compileAssetsToPAK", [this](const GEVector<GEString>& args) { CompileIntoPakFile(args[0].ToPath()); }, "compileAssetsToPAK <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "compileAssetsToManifest", [this](const GEVector<GEString>& args) { CompileIntoManifest(args[0].ToPath()); }, "compileAssetsToManifest <outputPakFile>");
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "loadAsset", [this](const GEVector<GEString>& args) { 
-			AssetHandle handle = ImportAsset(ImportAssetData(), args[0]); 
+			AssetHandle handle = ImportAsset(ImportAssetData(), args[0].ToPath());
 			GE_CORE_INFO("Asset Loaded: {} Handle: {}", args[0], handle.ToString());
 			}, "loadAsset <assetPath>");
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "clearRegistry", [this](const GEVector<GEString>& args) {
@@ -157,7 +157,7 @@ namespace ge {
 			out.WriteData(reinterpret_cast<const char*>(&mtd.type), sizeof(AssetType));
 		}
 		struct TempEntry { uint64_t offset; uint64_t size; };
-		std::map<AssetHandle, TempEntry> finalEntries;
+		GEMap<AssetHandle, TempEntry> finalEntries;
 
 		for (auto& [handle, mtd] : _assetRegistry) { // Open all the files in registry and write into .pak
 			file::Reader assetReader(mtd.path, std::ios::binary | std::ios::ate);

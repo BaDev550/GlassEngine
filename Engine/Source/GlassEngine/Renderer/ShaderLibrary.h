@@ -27,6 +27,6 @@ namespace ge::renderer {
 			}
 		}
 	private:
-		std::unordered_map<GEString, ge::mem::Ref<Shader>> _loadedShaders;
+		GEUnorderedMap<GEString, ge::mem::Ref<Shader>> _loadedShaders;
 	};
 }

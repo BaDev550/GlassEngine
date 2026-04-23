@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Memory/Memory.h"
 
 #include "GlassEngine/Renderer/RenderObject.h"
 #include "GlassEngine/Renderer/Texture.h"

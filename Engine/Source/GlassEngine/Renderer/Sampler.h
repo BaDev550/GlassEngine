@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Memory/Memory.h"
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Utilities/Flags.h"
 #include "RenderObject.h"

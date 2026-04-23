@@ -5,6 +5,7 @@
 	#define GE_ALIGNED_ALLOC(size, alignment) _aligned_malloc(size, alignment)
 	#define GE_ALIGNED_FREE(ptr) _aligned_free(ptr)
 	#define GE_ALIGNED_REALLOC(ptr, size, alignment) _aligned_realloc(ptr, size, alignment)
+	#define GE_FREE(ptr) free(ptr)
 #else
 	#define GE_ALIGNED_ALLOC(size, alignment) \
 	({ \
@@ -22,4 +23,5 @@
 		newPtr; \
 	})
 	#define GE_ALIGNED_FREE(ptr) free(ptr)
+	#define GE_FREE(ptr) free(ptr)
 #endif

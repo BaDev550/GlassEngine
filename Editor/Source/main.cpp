@@ -2,7 +2,7 @@
 #include <GlassEngine/Core/EntryPoint.h>
 #include <GlassEngine/Core/Application.h>
 #include <GlassEngine/Layers/Layer.h>
-#include <GlassEngine/Core/Memory.h>
+#include <GlassEngine/Memory/Ref.h>
 #include <GlassEngine/Core/Core.h>
 #include <GlassEngine/Renderer/Renderer.h>
 #include <GlassEngine/GUI/GUIConsole.h>

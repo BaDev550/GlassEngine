@@ -1,6 +1,6 @@
 #pragma once
 #include <vk_mem_alloc.h>
-#include "GlassEngine/Core/Memory.h"
+#include "GlassEngine/Memory/Memory.h"
 
 namespace ge::renderer::mem {
 	class Vulkan_AllocatorCallbacks {

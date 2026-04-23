@@ -13,9 +13,9 @@ namespace ge {
 			throw std::runtime_error("Application already exists!");
 		_instance = this;
 
+		profile::Profiler::Init();
 		Console::Init();
 		Logger::Init();
-		profile::Profiler::Init();
 		_threadManager = mem::CreateScope<ThreadManager>(1);
 		_editorAssetManager = (_specs.mode == ApplicationMode::Editor) ? mem::CreateScope<EditorAssetManager>() : nullptr;
 		_runtimeAssetManager = (_specs.mode == ApplicationMode::Runtime) ? mem::CreateScope<RuntimeAssetManager>("assets.pak", "assets_manifest.bin") : nullptr;
@@ -26,7 +26,7 @@ namespace ge {
 		_imGuiLayer = ImGuiLayer::Create();
 
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "close", [this](const GEVector<GEString>& args) { _forceClose = true; });
-		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "writeProfile", [](const GEVector<GEString>& args) { profile::utils::WriteEventsToFile(profile::Profiler::Get().GetEvents(), args[0]);}, "writeProfile <filePath>");
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "writeProfile", [](const GEVector<GEString>& args) { profile::utils::WriteEventsToFile(profile::Profiler::Get().GetEvents(), args[0].ToPath());}, "writeProfile <filePath>");
 	}
 
 	Application::~Application() {

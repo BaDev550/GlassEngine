@@ -1,8 +1,9 @@
 #pragma once
 
-#include <GlassEngine/Utilities/Flags.h>
-#include <GlassEngine/Utilities/Blob.h>
-#include <GlassEngine/Core/Memory.h>
+#include "GlassEngine/Utilities/Flags.h"
+#include "GlassEngine/Utilities/Blob.h"
+#include "GlassEngine/Memory/Memory.h"
+#include "GlassEngine/Core/Core.h"
 
 namespace ge::renderer {
 	enum class FilterType : uint8_t {
@@ -151,14 +152,14 @@ namespace ge::renderer {
 	};
 
 	struct ShaderReflection {
-		std::unordered_map<GEString, ShaderEntryPoint> entryPoints;
-		std::unordered_map<GEString, ShaderResource> resources;
+		GEUnorderedMap<GEString, ShaderEntryPoint> entryPoints;
+		GEUnorderedMap<GEString, ShaderResource> resources;
 	};
 
 	struct ShaderData {
 		ShaderReflection reflection;
 		GEVector<char> spirvByteCode;
-		std::unordered_map<GEString, GEVector<char>> dxilByteCodes;
+		GEUnorderedMap<GEString, GEVector<char>> dxilByteCodes;
 	};
 
 

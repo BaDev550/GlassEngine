@@ -1,11 +1,14 @@
 #pragma once
-#include "GlassEngine/Core/Memory.h"
+#include "String.h"
 #include <vector>
-#include <string>
-#include <string_view>
+#include <map>
+#include <unordered_map>
+#include "GlassEngine/Memory/Allocator.h"
 
 #define GE_CONSOLE_ASSETMANAGER_CATAGORY "asset"
 #define GE_CONSOLE_ENGINE_CATAGORY "engine"
+#define GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE 0
+#define GE_MEMORY_ALLOCATOR_DEBUG_WRITE_INTO_PROFILER 0
 
 #ifdef _WIN32
     #define GE_DEBUGBREAK() __debugbreak()
@@ -16,16 +19,18 @@
 #define GE_ASSERT(condition, msg) do { if (!(condition)) { GE_DEBUGBREAK(); std::cerr << msg << std::endl; } } while(0)
 	
 #define BIT(x) 1 << x
-#if defined(_MSC_VER) || defined(__clang__)
-	#define GE_ARGS(...) __VA_ARGS__
+#if defined(_MSC_VER) && !defined(__clang__)
+	#define GE_ARGS(...) ,__VA_ARGS__
 #else
 	#define GE_ARGS(...) __VA_OPT__(, ) __VA_ARGS__
 #endif
 
 template<typename T>
 using GEVector = std::vector<T, ge::mem::GE_Allocator<T>>;
-using GEString = std::basic_string<char, std::char_traits<char>, ge::mem::GE_Allocator<char>>; // UTF8
-// TODO (badev): make a GEWString class using wstring utf16 for localization
+template<typename T, typename U>
+using GEUnorderedMap = std::unordered_map<T, U, std::hash<T>, std::equal_to<T>, ge::mem::GE_Allocator<std::pair<const T, U>>>;
+template<typename T, typename U>
+using GEMap = std::map<T, U, std::equal_to<T>, ge::mem::GE_Allocator<std::pair<const T, U>>>;
 
 template<typename T>
 static T* CastChecked(void* ptr) {

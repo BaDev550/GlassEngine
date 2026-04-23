@@ -50,7 +50,7 @@ namespace ge {
 			}
 		}
 	private:
-		std::unordered_map<AssetType, mem::Ref<AssetSerializer>> _serializers;
-		std::unordered_map<AssetType, mem::Ref<SourceSerializer>> _sourceSerializers;
+		GEUnorderedMap<AssetType, mem::Ref<AssetSerializer>> _serializers;
+		GEUnorderedMap<AssetType, mem::Ref<SourceSerializer>> _sourceSerializers;
 	};
 }

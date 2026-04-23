@@ -1,4 +1,4 @@
-import GE;
+#include "GE.slang"
 
 [shader("vertex")]
 float4 VertMain() : SV_Position {

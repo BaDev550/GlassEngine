@@ -5,9 +5,10 @@
 #include "GlassEngine/Layers/LayerStack.h"
 #include "GlassEngine/Layers/ImGuiLayer.h"
 #include "GlassEngine/Utilities/Logger.h"
-#include "GlassEngine/Thread/ThreadManager.h"
 #include "GlassEngine/Core/Window.h"
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Memory/Memory.h"
+#include "GlassEngine/Thread/ThreadManager.h"
 #include "GlassEngine/Utilities/Console.h"
 #include "GlassEngine/Utilities/Profiler.h"
 
