@@ -19,8 +19,10 @@ namespace ge::mem {
 #if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
 			std::cout << "[MEMORY] Allocated: " << size << std::endl;
 #endif
+			
 			return malloc(size);
 		}
+
 		static void* GE_AllocateAligned(size_t size, size_t alignment) {
 			s_allocationMetrics.totalAllocated += size;
 #if GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE
@@ -28,6 +30,7 @@ namespace ge::mem {
 #endif
 #ifdef _WIN32
 			return _aligned_malloc(size, alignment);
+			
 #else
 			void* ptr = nullptr;
 			if (posix_memalign(&ptr, alignment, size) != 0) return nullptr;
