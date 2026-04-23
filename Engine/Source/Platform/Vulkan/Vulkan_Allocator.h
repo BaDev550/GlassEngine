@@ -49,7 +49,8 @@ namespace ge::renderer::mem {
 			createInfo.instance = instance;
 			createInfo.physicalDevice = physicalDevice;
 			createInfo.pAllocationCallbacks = &Vulkan_AllocatorCallbacks::GetCallbacks();
-			createInfo.vulkanApiVersion = VK_API_VERSION_1_3;
+			createInfo.vulkanApiVersion = VK_API_VERSION_1_4;
+			createInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
 			vmaCreateAllocator(&createInfo, &_allocator);
 		}
 

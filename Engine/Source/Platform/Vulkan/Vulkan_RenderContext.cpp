@@ -6,8 +6,10 @@
 #include <GLFW/glfw3native.h>
 #include <exception>
 #include <set>
+#include <vulkan/vulkan_core.h>
 
-#define FEATURE_MUST_BE_SUPPORTED(feature) if (feature != VK_TRUE) { GE_GRAPHICS_ERROR("{} must be supported", #feature); is_supported = false; } 
+#define FEATURE_MUST_BE_SUPPORTED(feature) if (feature != VK_TRUE) { GE_GRAPHICS_ERROR("{} must be supported", #feature); isSuitable = false; }
+#define PROPERTIES_MUST_BE_GREATER_THAN(feature, value) if (feature < value) { GE_GRAPHICS_ERROR("{} must be at least {}", #feature, value); isSuitable = false; }
 // TODO (dnm): better name
 #define VK_SET_EXT_FUNC(name) name = (PFN_##name)vkGetInstanceProcAddr(_instance, #name);
 
@@ -89,7 +91,7 @@ namespace ge::renderer {
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = Application::Get()->GetSpecs().title.c_str();
 		appInfo.pEngineName = "GlassEngine";
-		appInfo.apiVersion = VK_API_VERSION_1_3;
+		appInfo.apiVersion = VK_API_VERSION_1_4;
 
 		GEVector<const char*> instanceExtensions = GetRequiredInstanceExtensions();
 		if (_useValidationLayer) {
@@ -107,8 +109,9 @@ namespace ge::renderer {
 		createInfo.ppEnabledLayerNames = _layers.data();
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(instanceExtensions.size());
 		createInfo.ppEnabledExtensionNames = instanceExtensions.data();
-		if (vkCreateInstance(&createInfo, VK_ALLOCATOR_CALLBACKS, &_instance) != VK_SUCCESS)
-			throw std::runtime_error("Failed to create vulkan instance");
+		const auto result = vkCreateInstance(&createInfo, VK_ALLOCATOR_CALLBACKS, &_instance);
+		if (result != VK_SUCCESS)
+			throw std::runtime_error("Failed to create vulkan instance, result: " + std::to_string(result));
 
 		{
 			VK_SET_EXT_FUNC(vkSetDebugUtilsObjectNameEXT);
@@ -149,7 +152,7 @@ namespace ge::renderer {
 		for (const auto& pdevice : physicalDevices) {
 			if (IsPhysicalDeviceSuitable(pdevice)) {
 				_physicalDevice = pdevice;
-				break;
+				if (_deviceFeatures.discrateGpu) break;
 			}
 		}
 
@@ -158,74 +161,14 @@ namespace ge::renderer {
 
 		FindQueueFamilies();
 
-		uint32_t extCount{};
-		vkEnumerateDeviceExtensionProperties(_physicalDevice, nullptr, &extCount, nullptr);
-		GEVector<VkExtensionProperties> extensions(extCount);
-		vkEnumerateDeviceExtensionProperties(_physicalDevice, nullptr, &extCount, extensions.data());
-
-		GEVector<GEString> supportedExtensions{};
-		for (const auto& extension : extensions) {
-			const std::string extensionName = extension.extensionName;
-
-			if (extensionName == VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME) {
-				_deviceFeatures.hostImageCopy = true; supportedExtensions.push_back(VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME);
-			}
-
-			if (extensionName == VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME) {
-				_deviceFeatures.unifiedImageLayouts = true; supportedExtensions.push_back(VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME);
-			}
-
-			if (extensionName == VK_KHR_MAINTENANCE_5_EXTENSION_NAME) {
-				_deviceFeatures.maintenance5 = true; supportedExtensions.push_back(VK_KHR_MAINTENANCE_5_EXTENSION_NAME);
-			}
-
-			if (extensionName == VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME) {
-				_deviceFeatures.descriptorHeap = true; supportedExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
-			}
-		}
-
 		VkPhysicalDeviceProperties physicalDeviceProperties;
 		vkGetPhysicalDeviceProperties(_physicalDevice, &physicalDeviceProperties);
-		GE_GRAPHICS_INFO("GPU Selected: ");
+		GE_GRAPHICS_INFO("GPU Selected:");
 		GE_GRAPHICS_INFO("GPU Name: {}", physicalDeviceProperties.deviceName);
-		for (const auto ext : supportedExtensions)
-			GE_GRAPHICS_INFO("GPU supported optional extensions: {}", ext);
-
-		physicalDeviceProperties.limits.framebufferColorSampleCounts;
-
-		const auto supportedSamples = physicalDeviceProperties.limits.framebufferColorSampleCounts;
-
-		_sampleMap[int(ImageSampleCount::e1)] = VK_SAMPLE_COUNT_1_BIT;
-		_sampleMap[int(ImageSampleCount::e2)] = VK_SAMPLE_COUNT_1_BIT;
-		_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_1_BIT;
-		_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_1_BIT;
-
-		if (VK_SAMPLE_COUNT_2_BIT & supportedSamples) {
-			_sampleMap[int(ImageSampleCount::e2)] = VK_SAMPLE_COUNT_2_BIT;
-		}
-		else if (VK_SAMPLE_COUNT_4_BIT & supportedSamples) {
-			_sampleMap[int(ImageSampleCount::e2)] = VK_SAMPLE_COUNT_4_BIT;
-		}
-
-		if (VK_SAMPLE_COUNT_4_BIT & supportedSamples) {
-			_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_4_BIT;
-		}
-		else if (VK_SAMPLE_COUNT_8_BIT & supportedSamples) {
-			_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_8_BIT;
-		}
-		else if (VK_SAMPLE_COUNT_2_BIT & supportedSamples) {
-			_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_2_BIT;
-		}
-
-		if (VK_SAMPLE_COUNT_8_BIT & supportedSamples) {
-			_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_8_BIT;
-		}
-		else if (VK_SAMPLE_COUNT_4_BIT & supportedSamples) {
-			_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_4_BIT;
-		}
-		else if (VK_SAMPLE_COUNT_2_BIT & supportedSamples) {
-			_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_2_BIT;
-		}
+		// TODO (dnm): log more properties
+		if (_deviceFeatures.unifiedImageLayouts) GE_GRAPHICS_INFO("GPU supported optional extension: {}", VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME);
+		if (_deviceFeatures.descriptorHeap) GE_GRAPHICS_INFO("GPU supported optional extension: {}", VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
+		if (_deviceFeatures.hostImageCopy) GE_GRAPHICS_INFO("GPU supported optional feature: hostImageCopy");
 	}
 
 	void Vulkan_RenderContext::CreateSurface()
@@ -240,6 +183,7 @@ namespace ge::renderer {
 
 		void* pNext = nullptr;
 
+		// TODO (dnm): change with pipeline robustness
 #ifdef _DEBUG
 		VkPhysicalDeviceRobustness2FeaturesEXT robustness2{};
 		robustness2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
@@ -251,16 +195,6 @@ namespace ge::renderer {
 		robustness2.pNext = pNext;
 		pNext = &robustness2;
 #endif
-
-		VkPhysicalDeviceMaintenance5FeaturesKHR maintenance5{};
-		maintenance5.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_FEATURES_KHR;
-		maintenance5.maintenance5 = true;
-		if (_deviceFeatures.maintenance5)
-		{
-			_deviceExtensions.emplace_back(VK_KHR_MAINTENANCE_5_EXTENSION_NAME);
-			maintenance5.pNext = pNext;
-			pNext = &maintenance5;
-		}
 
 		VkPhysicalDeviceDescriptorHeapFeaturesEXT descriptorHeap{};
 		descriptorHeap.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT;
@@ -282,15 +216,10 @@ namespace ge::renderer {
 			pNext = &unifiedImageLayouts;
 		}
 
-		VkPhysicalDeviceHostImageCopyFeaturesEXT imageCopyFeatures{};
-		imageCopyFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_IMAGE_COPY_FEATURES_EXT;
-		imageCopyFeatures.hostImageCopy = true;
-		if (_deviceFeatures.hostImageCopy)
-		{
-			_deviceExtensions.emplace_back(VK_EXT_HOST_IMAGE_COPY_EXTENSION_NAME);
-			imageCopyFeatures.pNext = pNext;
-			pNext = &imageCopyFeatures;
-		}
+		VkPhysicalDeviceVulkan14Features features14{};
+		features14.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
+		features14.pNext = pNext;
+		pNext = &features14;
 
 		VkPhysicalDeviceVulkan13Features features13{};
 		features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
@@ -312,6 +241,11 @@ namespace ge::renderer {
 		features.pNext = pNext;
 		pNext = &features;
 
+		features14.hostImageCopy = _deviceFeatures.hostImageCopy;
+		// TODO (dnm): enable for debug mode
+		// features14.pipelineRobustness = true;
+		features14.pushDescriptor = true;
+		features14.maintenance5 = true;
 		features13.synchronization2 = true;
 		features13.dynamicRendering = true;
 		features13.inlineUniformBlock = true;
@@ -465,7 +399,7 @@ namespace ge::renderer {
 			VkPushConstantRange pushConstant{};
 			pushConstant.offset = 0;
 			// anv, radv, and offical nvidia driver support 256byte push constant
-			pushConstant.size = 128; // TODO (dnm): change with 256 when using linux
+			pushConstant.size = 256; // TODO (dnm): change with 256 when using linux
 			pushConstant.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
 
 			VkDescriptorSetLayout setLayouts[4]{
@@ -487,34 +421,62 @@ namespace ge::renderer {
 
 	// TODO (dnm): log for unsupported features
 	bool Vulkan_RenderContext::IsPhysicalDeviceSuitable(VkPhysicalDevice device) {
-		bool is_supported = true;
+		bool isSuitable = true;
+		_deviceFeatures = {};
+
+		{
+			uint32_t extCount{};
+			vkEnumerateDeviceExtensionProperties(device, nullptr, &extCount, nullptr);
+			GEVector<VkExtensionProperties> extensions(extCount);
+			vkEnumerateDeviceExtensionProperties(device, nullptr, &extCount, extensions.data());
+	
+			for (const auto& extension : extensions) {
+				const std::string extensionName = extension.extensionName;
+	
+				if (extensionName == VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME) {
+					_deviceFeatures.unifiedImageLayouts = true; // supportedExtensions.push_back(VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME);
+				}
+	
+				if (extensionName == VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME) {
+					_deviceFeatures.descriptorHeap = true; // supportedExtensions.push_back(VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
+				}
+			}
+		}
 
 		// check features
 		{
 			void* pNext = nullptr;
 
-			VkPhysicalDeviceVulkan13Features features13;
+			VkPhysicalDeviceVulkan14Features features14{};
+			features14.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
+			features14.pNext = pNext;
+			pNext = &features14;
+
+			VkPhysicalDeviceVulkan13Features features13{};
 			features13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
 			features13.pNext = pNext;
 			pNext = &features13;
 
-			VkPhysicalDeviceVulkan12Features features12;
+			VkPhysicalDeviceVulkan12Features features12{};
 			features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 			features12.pNext = pNext;
 			pNext = &features12;
 
-			VkPhysicalDeviceVulkan11Features features11;
+			VkPhysicalDeviceVulkan11Features features11{};
 			features11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
 			features11.pNext = pNext;
 			pNext = &features11;
 
-			VkPhysicalDeviceFeatures2 features;
+			VkPhysicalDeviceFeatures2 features{};
 			features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 			features.pNext = pNext;
 			pNext = &features;
 
 			vkGetPhysicalDeviceFeatures2(device, &features);
 
+			_deviceFeatures.hostImageCopy = features14.hostImageCopy;
+			FEATURE_MUST_BE_SUPPORTED(features14.pushDescriptor)
+			FEATURE_MUST_BE_SUPPORTED(features14.maintenance5)
 			FEATURE_MUST_BE_SUPPORTED(features13.synchronization2)
 			FEATURE_MUST_BE_SUPPORTED(features13.dynamicRendering)
 			FEATURE_MUST_BE_SUPPORTED(features13.inlineUniformBlock)
@@ -548,9 +510,107 @@ namespace ge::renderer {
 			FEATURE_MUST_BE_SUPPORTED(features.features.drawIndirectFirstInstance)
 		}
 
-		// TODO: check device properties
+		{
+			void* pNext = nullptr;
+			
+			VkPhysicalDeviceVulkan14Properties properties14{};
+			properties14.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_PROPERTIES;
+			properties14.pNext = pNext;
+			pNext = &properties14;
 
-		return is_supported;
+			VkPhysicalDeviceVulkan13Properties properties13{};
+			properties13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_PROPERTIES;
+			properties13.pNext = pNext;
+			pNext = &properties13;
+
+			VkPhysicalDeviceVulkan12Properties properties12{};
+			properties12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES;
+			properties12.pNext = pNext;
+			pNext = &properties12;
+
+			VkPhysicalDeviceVulkan11Properties properties11{};
+			properties11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_PROPERTIES;
+			properties11.pNext = pNext;
+			pNext = &properties11;
+
+			VkPhysicalDeviceProperties2 properties{};
+			properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+			properties.pNext = pNext;
+			pNext = &properties;
+
+			vkGetPhysicalDeviceProperties2(device, &properties);
+	
+			PROPERTIES_MUST_BE_GREATER_THAN(properties.properties.limits.maxPushConstantsSize, 256);
+
+			_deviceFeatures.partiallyBoundForSampledImage = properties.properties.limits.maxPerStageDescriptorSampledImages > 200'000;
+			_deviceFeatures.partiallyBoundForStorageImage = properties.properties.limits.maxPerStageDescriptorStorageImages > 10'000;
+			_deviceFeatures.partiallyBoundForSampler = properties.properties.limits.maxPerStageDescriptorSamplers > 1'000;
+
+			if (!_deviceFeatures.partiallyBoundForSampledImage)
+				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindSampledImages, 200'000);
+			if (!_deviceFeatures.partiallyBoundForStorageImage)
+				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindStorageImages, 10'000);
+			if (!_deviceFeatures.partiallyBoundForSampler)
+				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindSamplers, 1'000);
+
+			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedOperations & VK_SUBGROUP_FEATURE_VOTE_BIT));
+			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedOperations & VK_SUBGROUP_FEATURE_BASIC_BIT));
+
+			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedStages & VK_SHADER_STAGE_FRAGMENT_BIT));
+			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedStages & VK_SHADER_STAGE_COMPUTE_BIT));
+
+			_deviceFeatures.discrateGpu = properties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+			_deviceFeatures.umaOrRebar = !_deviceFeatures.discrateGpu;
+
+			VkPhysicalDeviceMemoryProperties2 memoryProperties{};
+			memoryProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
+
+			vkGetPhysicalDeviceMemoryProperties2(device, &memoryProperties);
+
+			for (const auto memType : memoryProperties.memoryProperties.memoryTypes) {
+				const auto heap = memoryProperties.memoryProperties.memoryHeaps[memType.heapIndex];
+				if (heap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT && heap.size > ((1 << 20) * 512)) {
+					_deviceFeatures.umaOrRebar |= 
+						memType.propertyFlags & (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+				}
+			}
+
+			const auto supportedSamples = properties.properties.limits.framebufferColorSampleCounts;
+
+			_sampleMap[int(ImageSampleCount::e1)] = VK_SAMPLE_COUNT_1_BIT;
+			_sampleMap[int(ImageSampleCount::e2)] = VK_SAMPLE_COUNT_1_BIT;
+			_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_1_BIT;
+			_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_1_BIT;
+
+			if (VK_SAMPLE_COUNT_2_BIT & supportedSamples) {
+				_sampleMap[int(ImageSampleCount::e2)] = VK_SAMPLE_COUNT_2_BIT;
+			}
+			else if (VK_SAMPLE_COUNT_4_BIT & supportedSamples) {
+				_sampleMap[int(ImageSampleCount::e2)] = VK_SAMPLE_COUNT_4_BIT;
+			}
+
+			if (VK_SAMPLE_COUNT_4_BIT & supportedSamples) {
+				_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_4_BIT;
+			}
+			else if (VK_SAMPLE_COUNT_8_BIT & supportedSamples) {
+				_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_8_BIT;
+			}
+			else if (VK_SAMPLE_COUNT_2_BIT & supportedSamples) {
+				_sampleMap[int(ImageSampleCount::e4)] = VK_SAMPLE_COUNT_2_BIT;
+			}
+
+			if (VK_SAMPLE_COUNT_8_BIT & supportedSamples) {
+				_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_8_BIT;
+			}
+			else if (VK_SAMPLE_COUNT_4_BIT & supportedSamples) {
+				_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_4_BIT;
+			}
+			else if (VK_SAMPLE_COUNT_2_BIT & supportedSamples) {
+				_sampleMap[int(ImageSampleCount::e8)] = VK_SAMPLE_COUNT_2_BIT;
+			}
+		}
+
+		return isSuitable;
 	}
 
 	void Vulkan_RenderContext::FindQueueFamilies()
@@ -584,8 +644,7 @@ namespace ge::renderer {
 
 	GEVector<const char*> Vulkan_RenderContext::GetRequiredDeviceExtensions() {
 		return {
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-			VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
 	}
 

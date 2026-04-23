@@ -27,6 +27,15 @@ namespace ge::renderer {
 		bool hostImageCopy;
 		bool maintenance5;
 		bool descriptorHeap;
+
+		bool discrateGpu;
+		bool umaOrRebar;
+		
+		bool partiallyBoundForSampler; // TODO (dnm): maybe has performance impact, need to test
+		bool partiallyBoundForSampledImage; // TODO (dnm): maybe has performance impact, need to test
+		bool partiallyBoundForStorageImage; // TODO (dnm): maybe has performance impact, need to test
+
+		std::array<VkSampleCountFlagBits, 4> _sampleMap{};
 	};
 
 	class Vulkan_RenderContext final : public RenderContext {

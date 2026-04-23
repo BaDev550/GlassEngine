@@ -7,7 +7,7 @@ namespace ge::renderer {
 		case ShaderResourceType::UniformBuffer: GE_ASSERT(ShaderResourceType::UniformBuffer != type, "Vulkan_BindlessManager not support UniformBuffer");
 		case ShaderResourceType::ReadonlyImage: return 200'000;
 		case ShaderResourceType::WritableImage: return 10'000;
-		case ShaderResourceType::Sampler: return 1'000; // this enough, reuse
+		case ShaderResourceType::Sampler: return 1'000; // this is enough, reuse
 		case ShaderResourceType::ReadonlyBuffer:
 			GE_ASSERT(ShaderResourceType::ReadonlyBuffer != type, "Vulkan_BindlessManager not support ReadonlyBuffer, use bda"); return 0;
 		case ShaderResourceType::WritableBuffer:
