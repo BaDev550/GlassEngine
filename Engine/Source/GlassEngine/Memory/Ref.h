@@ -1,5 +1,6 @@
 #pragma once
 #include "Allocator.h"
+#include <atomic>
 
 namespace ge::mem {
 	class RefCounted { // Base class for all mem::Ref objects

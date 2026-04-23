@@ -23,14 +23,14 @@ public:
 namespace std {
 	template <>
 	struct hash<GEString> {
-		std::size_t operator()(const GEString& k) const noexcept {
-			return std::hash<std::string_view>{}(std::string_view(k.data(), k.size()));
+		size_t operator()(const GEString& k) const noexcept {
+			return hash<string_view>{}(string_view(k.data(), k.size()));
 		}
 	};
 	template <>
-	struct std::formatter<GEString> : std::formatter<std::string_view> {
-		auto format(const GEString& str, std::format_context& ctx) const {
-			return std::formatter<std::string_view>::format(std::string_view(str.data(), str.size()), ctx);
+	struct formatter<GEString> : formatter<string_view> {
+		auto format(const GEString& str, format_context& ctx) const {
+			return formatter<string_view>::format(string_view(str.data(), str.size()), ctx);
 		}
 	};
 }

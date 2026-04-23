@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <cstdint>
+#include <cstring>
 
 namespace ge::file {
 	class BufferReader {
