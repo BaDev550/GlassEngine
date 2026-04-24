@@ -15,5 +15,8 @@ namespace ge::renderer {
 	private:
 		VkBuffer _buffer;
 		VmaAllocation _allocation;
+
+		VkAccessFlags2 _accessFlags;
+		VkPipelineStageFlags2 _pipelineStageFlags;
 	};
 }

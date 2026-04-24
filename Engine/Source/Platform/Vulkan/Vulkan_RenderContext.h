@@ -17,6 +17,9 @@
 
 namespace ge::renderer {
 	class Vulkan_BindlessManager;
+	class Vulkan_Image;
+	class Vulkan_Buffer;
+	class Vulkan_Sampler;
 
 	VK_DEFINE_EXT_FUNC(vkSetDebugUtilsObjectNameEXT);
 	VK_DEFINE_EXT_FUNC(vkCreateDebugUtilsMessengerEXT);
