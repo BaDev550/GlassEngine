@@ -34,7 +34,7 @@ namespace ge {
 		glfwTerminate();
 	}
 
-	uint32_t Window::GetImageIndex()
+	uint32_t Window::GetImageIndex() const
 	{
 		return _imageIndex;
 	}
