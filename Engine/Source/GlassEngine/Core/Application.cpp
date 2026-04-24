@@ -3,7 +3,7 @@
 #include "GlassEngine/Renderer/Renderer.h"
 #include "GlassEngine/Renderer/Texture.h"
 #include "GlassEngine/Asset/AssetManager.h"
-#include "GlassEngine/Editor/EditorConsole.h"
+#include "GlassEngine/Utilities/Timer.h"
 #include <stdexcept>
 #include <iostream>
 
@@ -43,12 +43,17 @@ namespace ge {
 	}
 
 	void Application::Run() {
+		Timer timer;
 		while (!_window->ShoudClose() && !_forceClose) {
+			float time = timer.Elapsed();
+			_deltaTime = time - _lastTime;
+			_lastTime = time;
+
 			_window->PollEvents();
 
 			ge::renderer::Renderer3D::BeginFrame();
 			for (auto& layer : _layerStack) {
-				layer->OnUpdate(0.0f);
+				layer->OnUpdate(_deltaTime);
 
 				_imGuiLayer->Begin();
 				for (auto& [name, panel] : layer->GetPanelManager()) { panel->Draw(); }

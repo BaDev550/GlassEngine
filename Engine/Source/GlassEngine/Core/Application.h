@@ -63,6 +63,8 @@ namespace ge {
 		mem::Scope<RuntimeAssetManager> _runtimeAssetManager;
 
 		bool _forceClose = false;
+		float _lastTime = 0.0f;
+		float _deltaTime = 0.0f;
 	};
 
 	Application* CreateApplication(const ApplicationSpecification& createInfo);

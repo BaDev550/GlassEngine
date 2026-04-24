@@ -28,7 +28,7 @@ public:
 	virtual void OnUpdate(float deltaTime) override {
 		ge::renderer::Renderer3D::BeginDefaultPass(); // TODO (badev): Move this into scene renderer
 
-		_scene->OnEditorUpdate(0);
+		_scene->OnEditorUpdate(deltaTime);
 
 		ge::renderer::Renderer3D::EndDefaultPass();
 	}

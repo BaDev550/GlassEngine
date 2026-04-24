@@ -33,11 +33,7 @@ namespace ge::renderer {
 			FramebufferSpec framebufferSpec{};
 			framebufferSpec.IsSwapchain = true;
 			mem::Ref<Framebuffer> _defaultFramebuffer = Framebuffer::Create(framebufferSpec);
-			PipelineSpec pipelineSpec{};
-			pipelineSpec.shader = GetShaderLibrary().GetShader("dnm");
-			pipelineSpec.targetFramebuffer = _defaultFramebuffer;
-			mem::Ref<Pipeline> _defaultPipeline = Pipeline::Create(pipelineSpec);
-			g_defaultRenderPass = RenderPass::Create(_defaultPipeline);
+			g_defaultRenderPass = RenderPass::Create(_defaultFramebuffer, "DEFAULT_PASS");
 		}
 	}
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GlassEngine/Memory/Memory.h"
-#include "GlassEngine/Utilities/Time.h"
+#include "GlassEngine/Utilities/Timer.h"
 #include "GlassEngine/Utilities/Console.h"
 #include <format>
 #include <chrono>
