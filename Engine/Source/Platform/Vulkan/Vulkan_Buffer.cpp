@@ -30,12 +30,17 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_Buffer::SetDebugName(GEString name) const noexcept {
-		VkDebugUtilsObjectNameInfoEXT nameInfo;
+		VkDebugUtilsObjectNameInfoEXT nameInfo{};
 		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 		nameInfo.objectHandle = reinterpret_cast<uint64_t>(_buffer);
 		nameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
 		nameInfo.pObjectName = name.c_str();
 
 		vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+	}
+
+	uint64_t Vulkan_Buffer::GetGPUAddress() const noexcept {
+		const auto bdaInfo = VkBufferDeviceAddressInfo{ .sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO, .buffer = _buffer };
+		return vkGetBufferDeviceAddress(VK_RENDER_CONTEXT->GetDevice(), &bdaInfo);
 	}
 }

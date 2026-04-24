@@ -11,8 +11,12 @@ namespace ge::renderer {
 		[[nodiscard]] auto GetVkBuffer() const noexcept { return _buffer; }
 		[[nodiscard]] auto* GetAllocation() const noexcept { return _allocation; }
 		virtual void SetDebugName(GEString name) const noexcept override;
+		[[nodiscard]] virtual uint64_t GetGPUAddress() const noexcept override;
 	private:
 		VkBuffer _buffer;
 		VmaAllocation _allocation;
+
+		VkAccessFlags2 _accessFlags;
+		VkPipelineStageFlags2 _pipelineStageFlags;
 	};
 }

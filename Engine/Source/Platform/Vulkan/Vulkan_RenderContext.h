@@ -16,16 +16,20 @@
 #define VK_DEFINE_EXT_FUNC(name) inline PFN_##name name
 
 namespace ge::renderer {
-	class Vulkan_BindlessManager;
+	class Vulkan_DescriptorManager;
+	class Vulkan_Image;
+	class Vulkan_Buffer;
+	class Vulkan_Sampler;
 
 	VK_DEFINE_EXT_FUNC(vkSetDebugUtilsObjectNameEXT);
 	VK_DEFINE_EXT_FUNC(vkCreateDebugUtilsMessengerEXT);
 	VK_DEFINE_EXT_FUNC(vkDestroyDebugUtilsMessengerEXT);
+	VK_DEFINE_EXT_FUNC(vkCmdBeginDebugUtilsLabelEXT);
+	VK_DEFINE_EXT_FUNC(vkCmdEndDebugUtilsLabelEXT);
 
 	struct Vulkan_DeviceFeatures {
 		bool unifiedImageLayouts;
 		bool hostImageCopy;
-		bool maintenance5;
 		bool descriptorHeap;
 
 		bool discrateGpu;
@@ -53,7 +57,6 @@ namespace ge::renderer {
 		[[nodiscard]] VkDevice GetDevice() const noexcept { return _device; }
 		[[nodiscard]] VkPhysicalDevice GetPhysicalDevice() const noexcept { return _physicalDevice; }
 		[[nodiscard]] VkSurfaceKHR GetSurface() const noexcept { return _surface; }
-		[[nodiscard]] VkDescriptorPool GetGlobalDescriptorPool() const noexcept { return _globalDescriptorPool; }
 		[[nodiscard]] Vulkan_DeviceFeatures GetDeviceFeatures() const noexcept { return _deviceFeatures; }
 		[[nodiscard]] VkQueue GetGraphicsQueue() const noexcept { return _graphicsQueue; }
 		[[nodiscard]] uint32_t GetGraphicsQueueFamilyIndex() const noexcept { return _graphicsQueueFamilyIndex; }
@@ -62,12 +65,9 @@ namespace ge::renderer {
 		[[nodiscard]] virtual uint32_t IGetWritableImageHandle(Image& image, ImageSubresource subresource) override;
 		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) override;
 
-		[[nodiscard]] VkPipelineLayout GetGlobalPipelineLayout() const noexcept { return _globalPipelineLayout; }
 		void BindDescriptorSets(VkCommandBuffer commandBuffer) const noexcept;
 
-		[[nodiscard]] auto &GetBindlessManagersReadonlyImage() noexcept { return *_readonlyImageBindlessManager; }
-		[[nodiscard]] auto &GetBindlessManagersWritableImage() noexcept { return *_writableImageBindlessManager; }
-		[[nodiscard]] auto &GetBindlessManagersSampler() noexcept { return *_samplerBindlessManager; }
+		[[nodiscard]] auto &GetDescriptorManager() noexcept { return *_descriptorManager; }
 
 		[[nodiscard]] VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) const noexcept { return _sampleMap[static_cast<uint16_t>(sample)]; }
 	private:
@@ -81,7 +81,7 @@ namespace ge::renderer {
 		bool CheckEnabledLayersSupport();
 		bool IsPhysicalDeviceSuitable(VkPhysicalDevice device);
 		void FindQueueFamilies();
-		void CreatePipelineLayoutAndBindlessManagers();
+		void CreateDescriptorManager();
 		GEVector<const char*> GetRequiredInstanceExtensions();
 		GEVector<const char*> GetRequiredDeviceExtensions();
 		GEVector<const char*> GetSupportedOptionalDeviceExtensions();
@@ -97,10 +97,7 @@ namespace ge::renderer {
 		VkDebugUtilsMessengerEXT _debugMessenger = VK_NULL_HANDLE;
 		VkPipelineCache _pipelineCache = VK_NULL_HANDLE;
 
-		VkDescriptorPool _globalDescriptorPool = VK_NULL_HANDLE; // for engine global datas, dont change
-		VkDescriptorSet _globalDescriptorSet = VK_NULL_HANDLE; // for engine global datas, dont change
-		VkDescriptorSetLayout _globalDescriptorSetLayout = VK_NULL_HANDLE; // for engine global datas, dont change
-		VkPipelineLayout _globalPipelineLayout = VK_NULL_HANDLE;
+		ge::mem::Scope<Vulkan_DescriptorManager> _descriptorManager;
 
 		uint32_t _graphicsQueueFamilyIndex{};
 		VkQueue _graphicsQueue = VK_NULL_HANDLE;
@@ -112,10 +109,6 @@ namespace ge::renderer {
 
 		GEVector<const char*> _layers{};
 		GEVector<const char*> _deviceExtensions{};
-
-		ge::mem::Scope<Vulkan_BindlessManager> _readonlyImageBindlessManager;
-		ge::mem::Scope<Vulkan_BindlessManager> _writableImageBindlessManager;
-		ge::mem::Scope<Vulkan_BindlessManager> _samplerBindlessManager;
 
 		std::array<VkSampleCountFlagBits, 4> _sampleMap{};
 #ifdef _DEBUG

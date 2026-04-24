@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <iostream>
 #include "GlassEngine/Memory/Memory.h"
 
@@ -24,8 +25,14 @@ namespace ge::renderer {
 
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
-		virtual void DrawVertex() = 0;
-		virtual void DrawIndexed() = 0;
+
+		virtual void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex = 0, uint32_t firstInstance = 0) = 0;
+		virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex = 0, uint32_t firstInstance = 0, int32_t vertexOffset = 0) = 0;
+
+		virtual void BeginCopyPass() = 0;
+		virtual void EndCopyPass() = 0;
+		// virtual void BeginRenderPass() = 0;
+		// virtual void EndRenderPass() = 0;
 
 		virtual void LoadDataToTexture2D(Texture2D& texture, void* data, uint64_t dataSize) = 0;
 

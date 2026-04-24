@@ -14,7 +14,7 @@ namespace ge::renderer {
 		if (!_specs.IsSwapchain) {
 			for (const auto& attachment : spec.Attachments) {
 				if (attachment.existingImage) {
-					if (utility::IsDepthStencilFormat(attachment.existingImage->GetDesc().imageFormat)) {
+					if (utility::IsDepthStencilFormat(attachment.existingImage->GetSpec().imageFormat)) {
 						_depthStencilAttachment = attachment.existingImage;
 					}
 					else {

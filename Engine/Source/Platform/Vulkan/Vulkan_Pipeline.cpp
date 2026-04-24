@@ -3,6 +3,7 @@
 #include "Vulkan_Shader.h"
 #include "Vulkan_Image.h"
 #include "Vulkan_Swapchain.h"
+#include "Vulkan_DescriptorManager.h"
 
 #include <glm/glm.hpp>
 #include <GlassEngine/Utilities/Counter.h>
@@ -193,12 +194,14 @@ namespace ge::renderer {
 		createInfo.pDepthStencilState = &depthStencilState;
 		createInfo.pColorBlendState = &colorBlendState;
 		createInfo.pDynamicState = &dynamicState;
-		createInfo.layout = VK_RENDER_CONTEXT->GetGlobalPipelineLayout();
+		if (!VK_RENDER_CONTEXT->GetDeviceFeatures().descriptorHeap) {
+			createInfo.layout = static_cast<const Vulkan_DescriptorManagerDefault&>(VK_RENDER_CONTEXT->GetDescriptorManager()).GetPipelineLayout();
+		}
 		vkCreateGraphicsPipelines(VK_RENDER_CONTEXT->GetDevice(), VK_RENDER_CONTEXT->GetPipelineCache(), 1, &createInfo, VK_ALLOCATOR_CALLBACKS, &_pipeline);
 	}
 
 	void Vulkan_Pipeline::SetDebugName(GEString name) const noexcept {
-		VkDebugUtilsObjectNameInfoEXT nameInfo;
+		VkDebugUtilsObjectNameInfoEXT nameInfo{};
 		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 		nameInfo.objectHandle = reinterpret_cast<uint64_t>(_pipeline);
 		nameInfo.objectType = VK_OBJECT_TYPE_PIPELINE;
