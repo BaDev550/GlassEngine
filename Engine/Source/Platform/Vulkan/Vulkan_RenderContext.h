@@ -30,7 +30,6 @@ namespace ge::renderer {
 	struct Vulkan_DeviceFeatures {
 		bool unifiedImageLayouts;
 		bool hostImageCopy;
-		bool maintenance5;
 		bool descriptorHeap;
 
 		bool discrateGpu;

@@ -153,7 +153,6 @@ namespace ge::renderer {
 		}
 	}
 
-	// TODO (dnm): select discrate gpu
 	void Vulkan_RenderContext::PickPhysicalDevice() {
 		uint32_t physicalDeviceCount;
 		vkEnumeratePhysicalDevices(_instance, &physicalDeviceCount, nullptr);
@@ -176,10 +175,14 @@ namespace ge::renderer {
 		vkGetPhysicalDeviceProperties(_physicalDevice, &physicalDeviceProperties);
 		GE_GRAPHICS_INFO("GPU Selected:");
 		GE_GRAPHICS_INFO("GPU Name: {}", physicalDeviceProperties.deviceName);
-		// TODO (dnm): log more properties
-		if (_deviceFeatures.unifiedImageLayouts) GE_GRAPHICS_INFO("GPU supported optional extension: {}", VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME);
-		if (_deviceFeatures.descriptorHeap) GE_GRAPHICS_INFO("GPU supported optional extension: {}", VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME);
-		if (_deviceFeatures.hostImageCopy) GE_GRAPHICS_INFO("GPU supported optional feature: hostImageCopy");
+		if (_deviceFeatures.discrateGpu) GE_GRAPHICS_INFO("GPU is discrete");
+		if (_deviceFeatures.unifiedImageLayouts) GE_GRAPHICS_INFO("GPU supported VK_KHR_unified_image_layouts extension");
+		if (_deviceFeatures.descriptorHeap) GE_GRAPHICS_INFO("GPU supported VK_EXT_descriptor_heap extension");
+		if (_deviceFeatures.hostImageCopy) GE_GRAPHICS_INFO("GPU supported hostImageCopy feature");
+		if (_deviceFeatures.partiallyBoundForSampler) GE_GRAPHICS_INFO("GPU supported partiallyBoundForSampler feature");
+		if (_deviceFeatures.partiallyBoundForSampledImage) GE_GRAPHICS_INFO("GPU supported partiallyBoundForSampledImage feature");
+		if (_deviceFeatures.partiallyBoundForStorageImage) GE_GRAPHICS_INFO("GPU supported partiallyBoundForStorageImage feature");
+		if (_deviceFeatures.umaOrRebar) GE_GRAPHICS_INFO("GPU supported umaOrRebar feature");
 	}
 
 	void Vulkan_RenderContext::CreateSurface()
