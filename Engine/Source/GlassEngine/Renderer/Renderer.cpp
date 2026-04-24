@@ -61,10 +61,12 @@ namespace ge::renderer {
 		g_defaultRenderPass->End();
 	}
 	void Renderer3D::DrawVertex() {
-		g_renderAPI->DrawVertex();
+		// TODO(0x):
+		g_renderAPI->Draw(0, 0, 0);
 	}
 	void Renderer3D::DrawIndexed() {
-		g_renderAPI->DrawIndexed();
+		// TODO(0x): 
+		g_renderAPI->DrawIndexed(0, 0, 0);
 	}
 
 	uint32_t Renderer3D::GetFrameIndex() { return g_frameIndex; }

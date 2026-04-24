@@ -192,7 +192,7 @@ namespace ge::renderer {
 		barriers.reserve(_image_layout_transition_set.size());
 
 		for (const auto* image : _image_layout_transition_set) {
-			const auto newLayout = utility::Vulkan_OptimalImageLayout(image->GetDescRef().usageFlags);
+			const auto newLayout = utility::Vulkan_OptimalImageLayout(image->GetSpecRef().usageFlags);
 
 			barriers.emplace_back(
 				VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,

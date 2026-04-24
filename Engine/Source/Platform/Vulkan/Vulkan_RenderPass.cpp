@@ -215,7 +215,7 @@ namespace ge::renderer {
 				colorAttachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 				colorAttachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 				targetImage = image->GetImage();
-				targetFormat = utility::Vulkan_GetImageFormat(image->GetDesc().imageFormat);
+				targetFormat = utility::Vulkan_GetImageFormat(image->GetSpec().imageFormat);
 				extent = VkExtent2D({ framebufferSpecs.width, framebufferSpecs.height });
 				clearValue = framebufferSpecs.Attachments[i].clearColor;
 			}
@@ -262,7 +262,7 @@ namespace ge::renderer {
 			else {
 				auto image = targetFramebuffer->GetColorAttachmentTexture(i).Cast<Vulkan_Image>();
 				VkImage targetImage = image->GetImage();
-				VkFormat targetFormat = utility::Vulkan_GetImageFormat(image->GetDesc().imageFormat);
+				VkFormat targetFormat = utility::Vulkan_GetImageFormat(image->GetSpec().imageFormat);
 			}
 		}
 	}

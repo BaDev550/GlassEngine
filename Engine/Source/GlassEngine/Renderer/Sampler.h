@@ -23,6 +23,8 @@ namespace ge::renderer {
 		[[nodiscard]] static ge::mem::Ref<Sampler> Create(const SamplerSpec& desc);
 		explicit Sampler(const SamplerSpec& desc) : _desc(desc) {} 
 
+		[[nodiscard]] const auto& GetSpecRef() const noexcept { return _desc; }
+		[[nodiscard]] auto GetSpec() const noexcept { return _desc; }
 		[[nodiscard]] uint32_t GetHandle();
 	protected:
 		SamplerSpec _desc;

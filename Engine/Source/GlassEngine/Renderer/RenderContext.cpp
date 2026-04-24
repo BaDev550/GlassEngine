@@ -5,13 +5,13 @@
 
 namespace ge::renderer {
 	uint32_t RenderContext::GetReadonlyImageHandle(Image& image, ImageSubresource subresource) {
-		GE_ASSERT(image.GetDescRef().usageFlags.Has(ImageUsageFlagsBits::Readonly), "image must br have readonly usage bit");
+		GE_ASSERT(image.GetSpecRef().usageFlags.Has(ImageUsageFlagsBits::Readonly), "image must br have readonly usage bit");
 
 		return IGetReadonlyImageHandle(image, subresource);
 	}
 
 	uint32_t RenderContext::GetWritableImageHandle(Image& image, ImageSubresource subresource) {
-		GE_ASSERT(image.GetDescRef().usageFlags.Has(ImageUsageFlagsBits::Writable), "image must br have readonly usage bit");
+		GE_ASSERT(image.GetSpecRef().usageFlags.Has(ImageUsageFlagsBits::Writable), "image must br have readonly usage bit");
 
 		return IGetWritableImageHandle(image, subresource);
 	}

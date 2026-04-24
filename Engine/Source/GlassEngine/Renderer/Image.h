@@ -27,8 +27,8 @@ namespace ge::renderer {
 		explicit Image(const ImageSpec& desc) noexcept : _desc(desc) {}
 		virtual ~Image() = default;
 
-		[[nodiscard]] const auto& GetDescRef() const noexcept { return _desc; }
-		[[nodiscard]] auto GetDesc() const noexcept { return _desc; }
+		[[nodiscard]] const auto& GetSpecRef() const noexcept { return _desc; }
+		[[nodiscard]] auto GetSpec() const noexcept { return _desc; }
 	protected:
 		ImageSpec _desc;
 	};

@@ -30,7 +30,7 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_Buffer::SetDebugName(GEString name) const noexcept {
-		VkDebugUtilsObjectNameInfoEXT nameInfo;
+		VkDebugUtilsObjectNameInfoEXT nameInfo{};
 		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 		nameInfo.objectHandle = reinterpret_cast<uint64_t>(_buffer);
 		nameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
