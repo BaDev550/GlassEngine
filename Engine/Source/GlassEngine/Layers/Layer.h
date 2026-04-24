@@ -1,11 +1,17 @@
 #pragma once
 
-#include <GlassEngine/Core/Core.h>
+#include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Utilities/Console.h"
 
 namespace ge {
 	class Layer {
 	public:
-		Layer(const char* debugName = "Layer") : _debugName(debugName) {}
+		Layer(const char* debugName = "Layer") : _debugName(debugName) {
+			GE_ADD_CONSOLE_COMMAND(_debugName, "showPanel", [this](const GEVector<GEString>& args) { GetPanelManager().ShowPanel(args[0]); }, "showPanel <panelName>");
+			GE_ADD_CONSOLE_COMMAND(_debugName, "hidePanel", [this](const GEVector<GEString>& args) { GetPanelManager().DisablePanel(args[0]); }, "hidePanel <panelName>");
+			GE_ADD_CONSOLE_COMMAND(_debugName, "printAllRegisteredPanels", [this](const GEVector<GEString>& args) { GetPanelManager().PrintAllPanels(); });
+		}
+
 		virtual ~Layer() = default;
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
@@ -13,7 +19,9 @@ namespace ge {
 		virtual void OnEvent() {}
 		virtual void OnImGuiRender() {}
 		inline const char* GetDebugName() const { return _debugName.c_str(); }
+		inline editor::PanelManager& GetPanelManager() { return _panelManager; }
 	private:
 		GEString _debugName = "Layer";
+		editor::PanelManager _panelManager;
 	};
 }

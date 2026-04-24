@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "GlassEngine/Editor/PanelStack.h"
 #include "Layer.h"
 
 namespace ge {

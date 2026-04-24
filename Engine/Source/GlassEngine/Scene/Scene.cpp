@@ -6,7 +6,6 @@
 namespace ge {
 	Scene::Scene(const GEString& name) : _name(name) {
 		GE_ADD_CONSOLE_COMMAND("scene", "clear_scene", [this](const GEVector<GEString>& args) { Clear(); });
-		GE_ADD_CONSOLE_COMMAND("scene", "ecs_debug_panel", [this](const GEVector<GEString>& args) { _ecsDebugPanel.Toggle(); });
 	}
 	Scene::~Scene(){ Clear(); }
 
@@ -64,6 +63,5 @@ namespace ge {
 
 	void Scene::OnEditorUpdate(float DeltaTime)
 	{
-		_ecsDebugPanel.OnImGuiRender();
 	}
 }

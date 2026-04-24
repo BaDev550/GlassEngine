@@ -2,7 +2,6 @@
 #include <entt/entt.hpp>
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Memory/Memory.h"
-#include "GlassEngine/GUI/GUIECSDebugPanel.h"
 #include "Entity.h"
 
 namespace ge {
@@ -29,7 +28,6 @@ namespace ge {
 		GEUnorderedMap<EntityID, mem::Ref<Entity>>& GetEntities() { return _entities; }
 	private:
 		GEString _name;
-		gui::GUIECSDebugPanel _ecsDebugPanel{ this };
 		entt::registry _registry;
 		GEUnorderedMap<EntityID, mem::Ref<Entity>> _entities;
 	};

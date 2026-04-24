@@ -3,12 +3,13 @@
 #include "GlassEngine/Utilities/Console.h"
 #include "GlassEngine/Utilities/Time.h"
 #include "GlassEngine/Utilities/Logger.h"
+#include "EditorPanel.h"
 #include <imgui.h>
 
-namespace ge::gui {
-	class Console {
+namespace ge::editor {
+	class Console : public EditorPanel {
 	public:
-		void OnImGuiRender() {
+		virtual void Draw() override {
 			ImGui::SetNextWindowSize(ImVec2(600, 350), ImGuiCond_FirstUseEver);
 			ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
@@ -89,7 +90,7 @@ namespace ge::gui {
 		}
 
 		static int TextEditCallbackStub(ImGuiInputTextCallbackData* data) {
-			gui::Console* console = (gui::Console*)data->UserData;
+			editor::Console* console = (editor::Console*)data->UserData;
 			return console->TextEditCallback(data);
 		}
 

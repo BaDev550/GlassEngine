@@ -3,6 +3,7 @@
 #include "GlassEngine/Renderer/Renderer.h"
 #include "GlassEngine/Renderer/Texture.h"
 #include "GlassEngine/Asset/AssetManager.h"
+#include "GlassEngine/Editor/EditorConsole.h"
 #include <stdexcept>
 #include <iostream>
 
@@ -50,6 +51,7 @@ namespace ge {
 				layer->OnUpdate(0.0f);
 
 				_imGuiLayer->Begin();
+				for (auto& [name, panel] : layer->GetPanelManager()) { panel->Draw(); }
 				layer->OnImGuiRender();
 				_imGuiLayer->End();
 			}

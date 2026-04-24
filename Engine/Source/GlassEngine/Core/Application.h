@@ -3,6 +3,7 @@
 #include <string>
 
 #include "GlassEngine/Layers/LayerStack.h"
+#include "GlassEngine/Editor/PanelStack.h"
 #include "GlassEngine/Layers/ImGuiLayer.h"
 #include "GlassEngine/Utilities/Logger.h"
 #include "GlassEngine/Core/Window.h"
@@ -53,8 +54,8 @@ namespace ge {
 	private:
 		static Application* _instance;
 		ApplicationSpecification _specs;
-		LayerStack _layerStack;
 		ImGuiLayer* _imGuiLayer;
+		LayerStack _layerStack;
 
 		mem::Scope<Window> _window;
 		mem::Scope<ThreadManager> _threadManager;

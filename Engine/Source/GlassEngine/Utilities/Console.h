@@ -1,6 +1,7 @@
 #pragma once
 #include "GlassEngine/Core/Core.h"
 #include <functional>
+#include <iostream>
 
 namespace ge {
 	struct Command {
@@ -14,6 +15,10 @@ namespace ge {
 		GEVector<Command> commands;
 		void AddCommand(const GEString& name, std::function<void(const GEVector<GEString>&)> action, const GEString& usage) {
 			commands.push_back({ name, usage, action });
+		}
+		bool HasCommand(const GEString& name) {
+			auto it = std::find_if(commands.begin(), commands.end(), [&name](const ge::Command& cmd) {return cmd.name == name; });
+			return it != commands.end();
 		}
 	};
 
@@ -41,6 +46,8 @@ namespace ge {
 		void AddCommand(const GEString& category, const GEString& name, std::function<void(const GEVector<GEString>&)> action, const GEString& usage = "") {
 			for (auto& list : _commandLists) {
 				if (list.name == category) {
+					if (list.HasCommand(name)) return;
+
 					list.AddCommand(name, action, usage);
 					return;
 				}
