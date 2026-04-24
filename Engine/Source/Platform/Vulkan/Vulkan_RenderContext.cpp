@@ -51,7 +51,7 @@ namespace ge::renderer {
 
 		vkDestroyDevice(_device, VK_ALLOCATOR_CALLBACKS);
 		vkDestroySurfaceKHR(_instance, _surface, VK_ALLOCATOR_CALLBACKS);
-		vkDestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, VK_ALLOCATOR_CALLBACKS);
+		if (_debugMessenger) vkDestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, VK_ALLOCATOR_CALLBACKS);
 		vkDestroyInstance(_instance, VK_ALLOCATOR_CALLBACKS);
 	}
 
@@ -123,7 +123,7 @@ namespace ge::renderer {
 		VkDebugUtilsMessengerCreateInfoEXT debugcreateInfo{};
 		debugcreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 		debugcreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		debugcreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		debugcreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
 		debugcreateInfo.pfnUserCallback = debugCallback;
 		debugcreateInfo.pUserData = nullptr;
 		debugcreateInfo.pNext = &validationFeatures;

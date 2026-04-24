@@ -73,7 +73,6 @@ namespace ge::renderer {
 	private:
 		void CreateVulkanAllocator();
 		void CreateInstance();
-		void CreateDebugMessenger();
 		void PickPhysicalDevice();
 		void CreateSurface();
 		void CreateLogicalDevice();
