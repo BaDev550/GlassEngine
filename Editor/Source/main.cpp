@@ -5,6 +5,7 @@
 #include <GlassEngine/Memory/Ref.h>
 #include <GlassEngine/Core/Core.h>
 #include <GlassEngine/Renderer/Renderer.h>
+#include <GlassEngine/Scene/Scene.h>
 #include <GlassEngine/GUI/GUIConsole.h>
 
 #include <imgui.h>
@@ -14,6 +15,8 @@ public:
 	EditorLayer() : ge::Layer("EditorLayer") {}
 	virtual void OnAttach() override {
 		GE_ADD_CONSOLE_COMMAND("editor", "ping", [](const GEVector<GEString>& args) { GE_APPLICATION_INFO("Pong!"); });
+
+		_scene = ge::mem::Ref<ge::Scene>::Create("Test Scene");
 	}
 
 	virtual void OnDetach() override {}
@@ -25,9 +28,11 @@ public:
 
 	virtual void OnImGuiRender() override {
 		_console.OnImGuiRender();
+		_scene->OnEditorUpdate(0); // TEMP
 	}
 private:
 	ge::gui::Console _console;
+	ge::mem::Ref<ge::Scene> _scene;
 };
 
 class EditorApp : public ge::Application {

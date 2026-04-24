@@ -12,6 +12,7 @@ public:
 
 	GEString(const BaseString& other) : BaseString(other) {}
 	GEString(BaseString&& other) noexcept : BaseString(std::move(other)) {}
+	GEString(std::string other) : BaseString(std::move(other)) {}
 	GEString& operator=(const BaseString& other) { BaseString::operator=(other); return *this; }
 	GEString& operator=(BaseString&& other) noexcept { BaseString::operator=(std::move(other)); return *this; }
 

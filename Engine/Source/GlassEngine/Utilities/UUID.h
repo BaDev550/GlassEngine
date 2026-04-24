@@ -2,6 +2,7 @@
 #include <iostream>
 #include <random>
 #include <sstream>
+#include <entt/entity/entity.hpp>
 
 namespace ge {
 	class UUID {

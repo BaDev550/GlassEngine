@@ -56,6 +56,14 @@ FetchContent_Declare(
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/vma
 )
 FetchContent_MakeAvailable(vma)
+# entt
+FetchContent_Declare(
+    entt
+    GIT_REPOSITORY https://github.com/skypjack/entt
+    GIT_TAG v3.16.0
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt
+)
+FetchContent_MakeAvailable(entt)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
@@ -74,6 +82,7 @@ target_compile_definitions(
 target_link_libraries(Engine
 	PUBLIC
 		glfw
+        EnTT
         imgui
 		Vulkan::Vulkan
         slang::slang
