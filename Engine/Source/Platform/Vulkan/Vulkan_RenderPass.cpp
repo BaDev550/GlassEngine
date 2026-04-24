@@ -207,7 +207,6 @@ namespace ge::renderer {
 				targetImage = swapchain->GetImages()[imageIndex];
 				targetFormat = swapchain->GetSwapchainFormat();
 				extent = VkExtent2D({ swapchain->GetExtent().x, swapchain->GetExtent().y });
-				// Utils::ImageMemBarrier(cmd, targetImage, targetFormat, 1, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
 			}
 			else {
 				auto image = targetFramebuffer->GetColorAttachmentTexture(i).Cast<Vulkan_Image>();
@@ -219,7 +218,6 @@ namespace ge::renderer {
 				targetFormat = utility::Vulkan_GetImageFormat(image->GetDesc().imageFormat);
 				extent = VkExtent2D({ framebufferSpecs.width, framebufferSpecs.height });
 				clearValue = framebufferSpecs.Attachments[i].clearColor;
-				Utils::ImageMemBarrier(cmd, targetImage, targetFormat, 1, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
 			}
 			colorAttachments[i].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 			colorAttachments[i].clearValue = VkClearValue({ clearValue.x, clearValue.g, clearValue.b, 1.0f });
@@ -260,13 +258,11 @@ namespace ge::renderer {
 				uint32_t imageIndex = window.GetImageIndex();
 				VkImage targetImage = swapchain->GetImages()[imageIndex];
 				VkFormat targetFormat = swapchain->GetSwapchainFormat();
-				// Utils::ImageMemBarrier(cmd, targetImage, targetFormat, 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1);
 			}
 			else {
 				auto image = targetFramebuffer->GetColorAttachmentTexture(i).Cast<Vulkan_Image>();
 				VkImage targetImage = image->GetImage();
 				VkFormat targetFormat = utility::Vulkan_GetImageFormat(image->GetDesc().imageFormat);
-				Utils::ImageMemBarrier(cmd, targetImage, targetFormat, 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1);
 			}
 		}
 	}

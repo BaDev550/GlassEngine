@@ -1,3 +1,4 @@
+#include "GlassEngine/Utilities/Logger.h"
 #include "gepch.h"
 #include "Vulkan_RenderContext.h"
 #include "Vulkan_Types.h"
@@ -21,8 +22,15 @@ namespace ge::renderer {
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData) {
 
-		if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+		if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
 			GE_GRAPHICS_ERROR("validation layer: {}", pCallbackData->pMessage);
+		}
+		else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+			GE_GRAPHICS_WARN("validation layer: {}", pCallbackData->pMessage);
+		}
+		else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+			GE_GRAPHICS_INFO("validation layer: {}", pCallbackData->pMessage);
+		}
 		return VK_FALSE;
 	}
 
@@ -102,6 +110,24 @@ namespace ge::renderer {
 			throw std::runtime_error("Layer is enabled but not available!");
 		}
 
+		constexpr VkValidationFeatureEnableEXT enabledValidationFeatures[2] = {
+			VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
+			VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT
+		};
+
+		VkValidationFeaturesEXT validationFeatures{};
+		validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+		validationFeatures.enabledValidationFeatureCount = 2;
+		validationFeatures.pEnabledValidationFeatures = enabledValidationFeatures;
+
+		VkDebugUtilsMessengerCreateInfoEXT debugcreateInfo{};
+		debugcreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		debugcreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		debugcreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		debugcreateInfo.pfnUserCallback = debugCallback;
+		debugcreateInfo.pUserData = nullptr;
+		debugcreateInfo.pNext = &validationFeatures;
+
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
@@ -109,7 +135,10 @@ namespace ge::renderer {
 		createInfo.ppEnabledLayerNames = _layers.data();
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(instanceExtensions.size());
 		createInfo.ppEnabledExtensionNames = instanceExtensions.data();
-		const auto result = vkCreateInstance(&createInfo, VK_ALLOCATOR_CALLBACKS, &_instance);
+		createInfo.pNext = _useValidationLayer ? &debugcreateInfo : nullptr;
+
+		auto result = vkCreateInstance(&createInfo, VK_ALLOCATOR_CALLBACKS, &_instance);
+
 		if (result != VK_SUCCESS)
 			throw std::runtime_error("Failed to create vulkan instance, result: " + std::to_string(result));
 
@@ -119,26 +148,11 @@ namespace ge::renderer {
 			VK_SET_EXT_FUNC(vkDestroyDebugUtilsMessengerEXT);
 		}
 
-		GE_GRAPHICS_INFO("Vulkan instance created");
-	}
-
-	void Vulkan_RenderContext::CreateDebugMessenger() {
-		if (!_useValidationLayer) return;
-
-		constexpr VkValidationFeatureEnableEXT validation_features[2] = {
-			VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
-			VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT
-		};
-
-		VkDebugUtilsMessengerCreateInfoEXT createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-		createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-		createInfo.pfnUserCallback = debugCallback;
-		createInfo.pUserData = nullptr;
-		createInfo.pNext = validation_features;
-		if (vkCreateDebugUtilsMessengerEXT(_instance, &createInfo, VK_ALLOCATOR_CALLBACKS, &_debugMessenger) != VK_SUCCESS) {
-			throw std::runtime_error("failed to set up debug messenger!");
+		if (_useValidationLayer) {
+			result = vkCreateDebugUtilsMessengerEXT(_instance, &debugcreateInfo, VK_ALLOCATOR_CALLBACKS, &_debugMessenger);
+			if (result != VK_SUCCESS) {
+				throw std::runtime_error("failed to set up debug messenger!, result: " + std::to_string(result));
+			}
 		}
 	}
 
