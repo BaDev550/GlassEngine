@@ -38,4 +38,9 @@ namespace ge::renderer {
 
 		vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
 	}
+
+	uint64_t Vulkan_Buffer::GetGPUAddress() const noexcept {
+		const auto bdaInfo = VkBufferDeviceAddressInfo{ .sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO, .buffer = _buffer };
+		return vkGetBufferDeviceAddress(VK_RENDER_CONTEXT->GetDevice(), &bdaInfo);
+	}
 }
