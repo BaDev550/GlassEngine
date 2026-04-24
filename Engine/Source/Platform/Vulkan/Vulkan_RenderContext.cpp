@@ -141,6 +141,8 @@ namespace ge::renderer {
 			VK_SET_EXT_FUNC(vkSetDebugUtilsObjectNameEXT);
 			VK_SET_EXT_FUNC(vkCreateDebugUtilsMessengerEXT);
 			VK_SET_EXT_FUNC(vkDestroyDebugUtilsMessengerEXT);
+			VK_SET_EXT_FUNC(vkCmdBeginDebugUtilsLabelEXT);
+			VK_SET_EXT_FUNC(vkCmdEndDebugUtilsLabelEXT);
 		}
 
 		if (_useValidationLayer) {

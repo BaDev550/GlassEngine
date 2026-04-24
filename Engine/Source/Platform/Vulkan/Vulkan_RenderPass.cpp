@@ -7,12 +7,23 @@
 #include "GlassEngine/Renderer/Renderer.h"
 
 namespace ge::renderer {
-	Vulkan_RenderPass::Vulkan_RenderPass(const ge::mem::Ref<Framebuffer>& framebuffer)
-		: RenderPass(framebuffer) {}
+	Vulkan_RenderPass::Vulkan_RenderPass(const ge::mem::Ref<Framebuffer>& framebuffer, std::string_view debugName)
+		: RenderPass(framebuffer, debugName) {}
 
 	void Vulkan_RenderPass::Begin(uint32_t layer)
 	{
 		VkCommandBuffer cmd = Renderer3D::GetRenderAPI().Cast<Vulkan_RenderAPI>()->GetCurrentCommandBuffer();
+#ifdef _DEBUG
+		if (!_debugName.empty()) {
+			const auto label = VkDebugUtilsLabelEXT{
+				.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
+				.pLabelName = _debugName.c_str(),
+				.color = { 1.0f, 1.0f, 1.0f, 1.0f }
+			};
+
+			vkCmdBeginDebugUtilsLabelEXT(cmd, &label);
+		}
+#endif
 		uint32_t frameIndex = Renderer3D::GetFrameIndex();
 		auto& framebufferSpecs = _framebuffer->GetSpecification();
 		auto& window = Application::Get()->GetWindow();
@@ -66,6 +77,7 @@ namespace ge::renderer {
 		viewport.minDepth = 0;
 		viewport.maxDepth = 1;
 		VkRect2D scissor{ {0,0}, extent };
+
 		vkCmdBeginRendering(cmd, &renderingInfo);
 		vkCmdSetViewport(cmd, 0, 1, &viewport);
 		vkCmdSetScissor(cmd, 0, 1, &scissor);
@@ -93,6 +105,10 @@ namespace ge::renderer {
 				VkImage targetImage = image->GetImage();
 				VkFormat targetFormat = utility::Vulkan_GetImageFormat(image->GetSpec().imageFormat);
 			}
+		}
+
+		if (!_debugName.empty()) {
+			vkCmdEndDebugUtilsLabelEXT(cmd);
 		}
 	}
 }
