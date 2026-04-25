@@ -18,6 +18,9 @@ namespace ge::renderer {
 		[[nodiscard]] uint32_t GetWritableImageHandle(Image& image, ImageSubresource subresource);
 		[[nodiscard]] uint32_t GetSamplerHandle(Sampler& sampler);
 
+		//TODO (0x): better name
+		[[nodiscard]] virtual bool UmaOrRebar() = 0;
+
 		static ge::mem::Scope<RenderContext> Create(GLFWwindow* window);
 	protected:
 		[[nodiscard]] virtual uint32_t IGetReadonlyImageHandle(Image& image, ImageSubresource subresource) = 0;
