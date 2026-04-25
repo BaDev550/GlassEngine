@@ -1,0 +1,32 @@
+{
+  "dependencies": [
+    {
+      "name": "glfw3",
+      "platform": "windows"
+    },
+    {
+      "name": "glfw3",
+      "platform": "linux",
+      "features": [
+        "wayland"
+      ]
+    },
+    "assimp",
+    "entt",
+    "vulkan-memory-allocator",
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "vulkan-binding"
+      ]
+    },
+    {
+      "name": "imgui",
+      "platform": "windows",
+      "features": [
+        "dx12-binding"
+      ]
+    }
+  ]
+}

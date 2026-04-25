@@ -4,8 +4,8 @@
 #include "Vulkan_Swapchain.h"
 #include "Vulkan_RenderAPI.h"
 
-#include <backends/imgui_impl_vulkan.h>
-#include <backends/imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
+#include <imgui_impl_glfw.h>
 #include <imgui.h>
 
 namespace ge {
