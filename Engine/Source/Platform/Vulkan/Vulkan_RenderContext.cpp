@@ -9,8 +9,8 @@
 #include <set>
 #include <vulkan/vulkan_core.h>
 
-#define FEATURE_MUST_BE_SUPPORTED(feature) if (feature != VK_TRUE) { GE_GRAPHICS_ERROR("{} must be supported", #feature); isSuitable = false; }
-#define PROPERTIES_MUST_BE_GREATER_THAN(feature, value) if (feature < value) { GE_GRAPHICS_ERROR("{} must be at least {}", #feature, value); isSuitable = false; }
+#define FEATURE_MUST_BE_SUPPORTED(feature) if (bool(feature) != VK_TRUE) { GE_GRAPHICS_ERROR("{} must be supported", #feature); isSuitable = false; }
+#define PROPERTIES_MUST_BE_GREATER_THAN(feature, value) if (bool(feature < value)) { GE_GRAPHICS_ERROR("{} must be at least {}", #feature, value); isSuitable = false; }
 // TODO (dnm): better name
 #define VK_SET_EXT_FUNC(name) name = (PFN_##name)vkGetInstanceProcAddr(_instance, #name);
 
@@ -494,11 +494,11 @@ namespace ge::renderer {
 			if (!_deviceFeatures.partiallyBoundForSampler)
 				PROPERTIES_MUST_BE_GREATER_THAN(properties12.maxPerStageDescriptorUpdateAfterBindSamplers, VULKAN_SAMPLER_COUNT);
 
-			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedOperations & VK_SUBGROUP_FEATURE_VOTE_BIT));
-			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedOperations & VK_SUBGROUP_FEATURE_BASIC_BIT));
+			FEATURE_MUST_BE_SUPPORTED(properties11.subgroupSupportedOperations & VK_SUBGROUP_FEATURE_VOTE_BIT);
+			FEATURE_MUST_BE_SUPPORTED(properties11.subgroupSupportedOperations & VK_SUBGROUP_FEATURE_BASIC_BIT);
 
-			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedStages & VK_SHADER_STAGE_FRAGMENT_BIT));
-			FEATURE_MUST_BE_SUPPORTED(bool(properties11.subgroupSupportedStages & VK_SHADER_STAGE_COMPUTE_BIT));
+			FEATURE_MUST_BE_SUPPORTED(properties11.subgroupSupportedStages & VK_SHADER_STAGE_FRAGMENT_BIT);
+			FEATURE_MUST_BE_SUPPORTED(properties11.subgroupSupportedStages & VK_SHADER_STAGE_COMPUTE_BIT);
 
 			_deviceFeatures.discrateGpu = properties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
 			_deviceFeatures.umaOrRebar = !_deviceFeatures.discrateGpu;
