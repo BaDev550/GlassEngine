@@ -213,6 +213,36 @@ namespace ge {
 
 	mem::Ref<Asset> MeshAssetSerializer::DeserializeFromFile(const GEVector<uint8_t>& buffer)
 	{
-		return mem::Ref<Asset>();
+		file::BufferReader in(buffer);
+		char magic[4];
+		if (!in.ReadData(magic, 4) || strncmp(magic, STATIC_MESH_MAGIC, 4) != 0) {
+			GE_CORE_ERROR("Invalid magic for static mesh asset");
+			return nullptr;
+		}
+		mem::Ref<renderer::StaticMesh> mesh = mem::Ref<renderer::StaticMesh>::Create();
+		uint32_t lodCount = 0;
+		if (!in.Read(lodCount)) {
+			GE_CORE_ERROR("Failed to read LOD count from buffer");
+			return nullptr;
+		}
+		auto& lods = mesh->GetLODs();
+		lods.resize(lodCount);
+
+		for (uint32_t i = 0; i < lodCount; i++) {
+			uint32_t vertexCount, indexCount, submeshCount;
+			in.ReadData(reinterpret_cast<char*>(&vertexCount), sizeof(uint32_t));
+			in.ReadData(reinterpret_cast<char*>(&indexCount), sizeof(uint32_t));
+			in.ReadData(reinterpret_cast<char*>(&submeshCount), sizeof(uint32_t));
+
+			auto& currentLod = lods[i];
+			currentLod.vertices.resize(vertexCount);
+			currentLod.indices.resize(indexCount);
+			currentLod.submesh.resize(submeshCount);
+			in.ReadData(reinterpret_cast<char*>(currentLod.vertices.data()), vertexCount * sizeof(renderer::Vertex));
+			in.ReadData(reinterpret_cast<char*>(currentLod.indices.data()), indexCount * sizeof(uint32_t));
+			in.ReadData(reinterpret_cast<char*>(currentLod.submesh.data()), submeshCount * sizeof(renderer::Submesh));
+		}
+		mesh->CreateGPUBuffers();
+		return mesh;
 	}
 }
