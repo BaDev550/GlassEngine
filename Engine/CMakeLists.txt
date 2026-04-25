@@ -64,6 +64,22 @@ FetchContent_Declare(
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt
 )
 FetchContent_MakeAvailable(entt)
+# assip
+FetchContent_Declare(
+    assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp
+    GIT_TAG v6.0.4
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/assimp
+)
+FetchContent_MakeAvailable(assimp)
+# meshoptimizer
+FetchContent_Declare(
+    meshoptimizer
+    GIT_REPOSITORY https://github.com/zeux/meshoptimizer
+    GIT_TAG v1.1.1
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/meshoptimizer
+)
+FetchContent_MakeAvailable(meshoptimizer)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
@@ -84,6 +100,8 @@ target_link_libraries(Engine
 		glfw
         EnTT
         imgui
+        assimp
+        meshoptimizer
 		Vulkan::Vulkan
         slang::slang
         GPUOpen::VulkanMemoryAllocator

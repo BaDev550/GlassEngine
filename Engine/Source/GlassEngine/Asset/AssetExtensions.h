@@ -5,7 +5,8 @@
 
 namespace ge {
 #define GE_ASSET_EXTENSION ".gasset"
-    constexpr char MODEL_MAGIC[4] = { 'M', 'O', 'D', 'L' };
+    constexpr char STATIC_MESH_MAGIC[4] = { 'S', 'M', 'D', 'L' };
+    constexpr char SKELETAL_MESH_MAGIC[4] = { 'S', 'K', 'M', 'H' };
     constexpr char TEXTURE_MAGIC[4] = { 'T', 'E', 'X', 'T' };
     constexpr char MATERIAL_MAGIC[4] = { 'M', 'A', 'T', 'L' };
 

@@ -5,6 +5,7 @@
 #include <GlassEngine/Memory/Ref.h>
 #include <GlassEngine/Core/Core.h>
 #include <GlassEngine/Renderer/Renderer.h>
+#include <GlassEngine/Renderer/Model.h>
 #include <GlassEngine/Scene/Scene.h>
 #include <GlassEngine/Editor/EditorConsole.h>
 #include <GlassEngine/Editor/EditorECSDebugPanel.h>
@@ -13,15 +14,26 @@
 
 class EditorLayer : public ge::Layer {
 public:
-	EditorLayer() : ge::Layer("EditorLayer") {}
+	EditorLayer() : ge::Layer("LAYER_Editor") {}
 	virtual void OnAttach() override {
 		_scene = ge::mem::Ref<ge::Scene>::Create("Test Scene");
 
 		GetPanelManager().RegisterPanel<ge::editor::Console>("E_c");
 		GetPanelManager().RegisterPanel<ge::editor::EditorECSDebugPanel>("E_ecs", _scene.Get());
 
-		GE_EXECUTE_CONSOLE_COMMAND("EditorLayer.showPanel E_c");
-		GE_EXECUTE_CONSOLE_COMMAND("EditorLayer.showPanel E_ecs");
+		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_c");
+		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_ecs");
+
+#if 1
+		auto mario = ge::Application::Get()->GetAssetManager()->GetOrImportAsset("Resources/mario_2/mario_2.obj").Cast<ge::renderer::StaticMesh>();
+		for (int i = 0; i < mario->GetLODs().size(); i++) {
+			auto& lod = mario->GetLODs()[i];
+			GE_APPLICATION_INFO("LOD: {}", i);
+			GE_APPLICATION_INFO(" -vertexC: {}", lod.vertices.size());
+			GE_APPLICATION_INFO(" -indicesC: {}", lod.indices.size());
+			GE_APPLICATION_INFO(" -submeshC: {}", lod.submesh.size());
+		}
+#endif
 	}
 
 	virtual void OnDetach() override {}

@@ -77,9 +77,11 @@ namespace ge {
 
 	namespace renderer {
 		struct TextureSpec;
+		struct SourceMeshSpec;
 	}
 
 	struct ImportAssetData {
 		renderer::TextureSpec* textureSpecs;
+		renderer::SourceMeshSpec* sourceMeshSpecs;
 	};
 }

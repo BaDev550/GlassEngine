@@ -1,6 +1,7 @@
 #pragma once
 #include "Serializers/AssetSerializer.h"
 #include "Serializers/TextureSerializer.h"
+#include "Serializers/MeshSerializer.h"
 #include "AssetExtensions.h"
 
 namespace ge {
@@ -8,7 +9,9 @@ namespace ge {
 	public:
 		AssetImporter() {
 			_sourceSerializers[AssetType::SourceTexture] = mem::Ref<SourceTextureSerializer>::Create();
+			_sourceSerializers[AssetType::SourceMesh] = mem::Ref<MeshSourceSerializer>::Create();
 			_serializers[AssetType::Texture] = mem::Ref<TextureSerializer>::Create();
+			_serializers[AssetType::StaticMesh] = mem::Ref<MeshAssetSerializer>::Create();
 		}
 		AssetImporter(AssetImporter&) = delete;
 		AssetImporter& operator=(AssetImporter&) = delete;
