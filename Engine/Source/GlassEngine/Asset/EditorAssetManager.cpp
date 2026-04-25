@@ -42,7 +42,7 @@ namespace ge {
 				return LoadAssetFromFile(handle);
 		}
 		else if (!sourcePath.empty()) {
-			sourcePath.replace_extension(GE_ASSET_EXTENSION);
+			//sourcePath.replace_extension(GE_ASSET_EXTENSION);
 			auto mtd = GetMetadata(sourcePath);
 			if (mtd.IsValid()) {
 				if (mtd.IsLoaded())

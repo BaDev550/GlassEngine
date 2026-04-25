@@ -7,7 +7,6 @@ set_target_properties(Engine PROPERTIES
 find_package(Vulkan)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 set(slang_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/slang/cmake")
-set(SPIRV_REFLECT_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/SPIRV-Reflect/spirv_reflect.cpp")
 find_package(slang CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
@@ -26,12 +25,11 @@ FetchContent_MakeAvailable(meshoptimizer)
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
-target_sources(Engine PRIVATE ${ENGINE_SOURCES} ${SPIRV_REFLECT_SOURCE})
+target_sources(Engine PRIVATE ${ENGINE_SOURCES})
 target_include_directories(Engine 
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}/Source
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SPIRV-Reflect
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/include
 )
 target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Source/gepch.h>")

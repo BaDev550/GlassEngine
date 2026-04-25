@@ -4,6 +4,7 @@
 #include <glm/ext/vector_float4.hpp>
 #include <glm/ext/vector_uint2.hpp>
 #include <glm/ext/vector_uint4.hpp>
+#include <span>
 #include <iostream>
 #include <string_view>
 #include "GlassEngine/Memory/Memory.h"
