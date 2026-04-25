@@ -89,12 +89,14 @@ target_include_directories(Engine
 		${CMAKE_CURRENT_SOURCE_DIR}/Source
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/SPIRV-Reflect
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/include
 )
 target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Source/gepch.h>")
 target_compile_definitions(
     Engine PRIVATE
     $<$<CONFIG:Debug>:_DEBUG>
 )
+if(WIN32)
 target_link_libraries(Engine
 	PUBLIC
 		glfw
@@ -105,4 +107,22 @@ target_link_libraries(Engine
 		Vulkan::Vulkan
         slang::slang
         GPUOpen::VulkanMemoryAllocator
+        $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/Compressonator_MT.lib>
+        $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/Compressonator_MTd.lib>       
 )
+else()
+target_link_libraries(Engine
+	PUBLIC
+		glfw
+        EnTT
+        imgui
+		Vulkan::Vulkan
+        slang::slang
+        GPUOpen::VulkanMemoryAllocator
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Compressonator.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core_AVX.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core_AVX512.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core_SSE.a
+)
+endif()

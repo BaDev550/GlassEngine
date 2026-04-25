@@ -1,5 +1,6 @@
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Renderer/Swapchain.h"
+#include "Platform/Vulkan/Vulkan_RenderContext.h"
 #include "gepch.h"
 #include "Vulkan_RenderAPI.h"
 #include "Vulkan_Swapchain.h"
@@ -224,5 +225,27 @@ namespace ge::renderer {
 		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
 
 		_image_layout_transition_set.clear();
+	}
+
+	void Vulkan_RenderAPI::BeginRenderPass(const BeginRenderPassSpec& spec) {
+		;	
+	}
+
+	void Vulkan_RenderAPI::EndRenderPass() {
+		_image_layout_transition_set.clear();
+	}
+
+	void Vulkan_RenderAPI::LoadDataToTexture2D(Texture2D& texture, void* data, uint64_t dataSize) {}
+	
+	void Vulkan_RenderAPI::SetBeginDebugLabel(std::string_view label) {
+		VkDebugUtilsLabelEXT label_desc{};
+		label_desc.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+		label_desc.pLabelName = label.data();
+		// label_desc.color = {0.8f, 0.2f, 0.6f, 1.f};
+		vkCmdBeginDebugUtilsLabelEXT(GetCurrentCommandBuffer(), &label_desc);
+	}
+
+	void Vulkan_RenderAPI::SetEndDebugLabel() {
+
 	}
 }

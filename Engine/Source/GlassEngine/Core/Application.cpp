@@ -1,11 +1,15 @@
+#include "GlassEngine/Core/String.h"
 #include "gepch.h"
 #include "Application.h"
 #include "GlassEngine/Renderer/Renderer.h"
 #include "GlassEngine/Renderer/Texture.h"
 #include "GlassEngine/Asset/AssetManager.h"
 #include "GlassEngine/Utilities/Timer.h"
+#include "compressonator.h"
+#include <cstdint>
 #include <stdexcept>
 #include <iostream>
+#include <vector>
 
 namespace ge {
 	Application* Application::_instance = nullptr;
@@ -23,6 +27,15 @@ namespace ge {
 
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		_window->SetIcon("Resources/icon-512.png");
+
+		ImportAssetData assetData{};
+		ge::renderer::TextureSpec textureSpecs{};
+		textureSpecs.filter = ge::renderer::ImageFilter::Linear;
+		textureSpecs.format = ge::renderer::ImageFormat::RGBA8;
+		assetData.textureSpecs = &textureSpecs;
+		auto iconAsset = Application::Get()->GetAssetManager()->GetOrImportAsset(
+			GEString("Resources/icon-512.png").ToPath(), assetData).Cast<renderer::Texture2D>();
+
 		renderer::Renderer3D::Init();
 		_imGuiLayer = ImGuiLayer::Create();
 

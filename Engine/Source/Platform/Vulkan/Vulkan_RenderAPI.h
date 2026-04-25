@@ -19,10 +19,15 @@ namespace ge::renderer {
 
 		virtual void BeginCopyPass() override;
 		virtual void EndCopyPass() override;
+		virtual void BeginRenderPass(const BeginRenderPassSpec&) override;
+		virtual void EndRenderPass() override;
+
+		virtual void LoadDataToTexture2D(Texture2D& texture, void* data, uint64_t dataSize) override;
+
+		virtual void SetBeginDebugLabel(std::string_view label) override;
+		virtual void SetEndDebugLabel() override;
 
 		VkCommandBuffer GetCurrentCommandBuffer();
-
-		virtual void LoadDataToTexture2D(Texture2D& texture, void* data, uint64_t dataSize) override {}
 	private:
 		struct FrameContext {
 			VkCommandPool commandPool;
