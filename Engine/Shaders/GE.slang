@@ -1,8 +1,14 @@
+#define __GE_SPIRV__
+
+#ifdef __GE_DXIL__
 static const constexpr uint DxilCameraBufferIndex = 0;
 static const constexpr uint DxilLightBufferIndex = 1;
+#endif
 
 // TODO: better name
 class CameraData {
+    float4x4 proj;
+    float4x4 view;
 };
 
 // TODO: better name
@@ -68,11 +74,13 @@ extension ReadonlyImageCube : IBindlessDescriptor {}
 
 extension Sampler : IBindlessDescriptor {}
 
+#ifdef __GE_SPIRV__
 [vk::binding(0, 0)]
-__DynamicResource<__DynamicResourceKind.General> __EngineGlobalCameraBuffer__;
+ConstantBuffer<CameraData> __EngineGlobalCameraBuffer__;
 
 [vk::binding(1, 0)]
-__DynamicResource<__DynamicResourceKind.General> __EngineGlobalLightBuffer__;
+ConstantBuffer<LightData> __EngineGlobalLightBuffer__;
+#endif
 
 [vk::binding(0, 1)]
 __DynamicResource<__DynamicResourceKind.General> __TextureHandles__[];
@@ -114,32 +122,18 @@ T GetBindless<T>(uint handle)
     }
 }
 
-// TODO: better name
 CameraData GetCamaraData() {
-    __target_switch
-    {
-    case spirv:
-        return __EngineGlobalCameraBuffer__.asOpaqueDescriptor<UniformBuffer<CameraData, DefaultDataLayout>>();
-
-    case hlsl:
-        return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
-
-    default: static_assert(false, "unsupported shader target");
-        return {};
-    }
+#ifdef __GE_SPIRV__
+    return __EngineGlobalCameraBuffer__;
+#else 
+    return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
+#endif
 }
 
-// TODO: better name
 LightData GetLightData() {
-    __target_switch
-    {
-    case spirv:
-        return __EngineGlobalLightBuffer__.asOpaqueDescriptor<UniformBuffer<LightData, DefaultDataLayout>>();
-
-    case hlsl:
-        return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
-
-    default: static_assert(false, "unsupported shader target");
-        return {};
-    }
+#ifdef __GE_SPIRV__
+    return __EngineGlobalLightBuffer__;
+#else
+    return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
+#endif
 }

@@ -6,6 +6,7 @@
 #include "Vulkan_Swapchain.h"
 #include "Vulkan_Image.h"
 #include "Vulkan_Buffer.h"
+#include "Vulkan_DescriptorManager.h"
 #include "Vulkan_Sampler.h"
 #include <vulkan/vulkan_core.h>
 
@@ -79,6 +80,10 @@ namespace ge::renderer {
 		}
 	}
 
+	void Vulkan_RenderAPI::PushConstant(const void *ptr, uint8_t size, uint8_t offset) {
+		VK_RENDER_CONTEXT->GetDescriptorManager().PushConstant(GetCurrentCommandBuffer(), ptr, size, offset);
+	}
+
 	void Vulkan_RenderAPI::BeginFrame()
 	{
 		GE_ASSERT(!_frameStarted, "Cannot call beginFrame while processing a frame");
@@ -93,6 +98,8 @@ namespace ge::renderer {
 
 		vkResetCommandPool(VK_RENDER_CONTEXT->GetDevice(), frame.commandPool, 0);
 		vkBeginCommandBuffer(frame.commandBuffer, &beginInfo);
+
+		VK_RENDER_CONTEXT->GetDescriptorManager().BindDescriptors(frame.commandBuffer);
 
 		auto& window = Application::Get()->GetWindow();
 		const auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());

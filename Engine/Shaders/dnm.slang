@@ -1,24 +1,37 @@
 #include "GE.slang"
 
+struct VertexIn {
+    float4 position;
+    float4 normal;
+    float2 uv;
+};
+
+struct VertexOut {
+    float4 vertPos : SV_Position;
+    float3 normal;
+    float2 uv;
+};
+
 [shader("vertex")]
-float4 VertMain() : SV_Position {
-    return float4(0);
-}
+VertexOut VertMain(VertexIn in) {
+    VertexOut out;
+    out.vertPos = in.position;
+    out.uv = in.uv;
+    out.normal = in.normal.xyz;
+    return out;
+};
 
 struct Material {
-    uint albedoIndex;
-    uint normalIndex;
-    uint metallicRoughnessIndex;
+    uint albedoTextureIndex;
+    uint roughnessTextureIndex;
+    uint normalTextureIndex;
 };
 
-struct PushConstants {
-    Ptr<Material> materials;
-};
+[[vk::push_constant]] Material pc;
 
-[[vk::push_constant]] PushConstants pc;
 [shader("fragment")]
-float4 FragMain() : SV_Target {
-    return GetBindless<ReadonlyImage2D>(
-        pc.materials[5].albedoIndex
-    ).Load(int3(0,0,0));
+float4 FragMain(VertexOut vertOut) : SV_Target {
+    const let sampler = GetBindless<Sampler>(0); // TODO: temp
+
+    return GetBindless<ReadonlyImage2D>(pc.albedoTextureIndex).Sample(sampler, vertOut.uv);
 }

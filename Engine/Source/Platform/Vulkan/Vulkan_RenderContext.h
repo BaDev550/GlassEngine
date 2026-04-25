@@ -65,8 +65,6 @@ namespace ge::renderer {
 		[[nodiscard]] virtual uint32_t IGetWritableImageHandle(Image& image, ImageSubresource subresource) override;
 		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) override;
 
-		void BindDescriptorSets(VkCommandBuffer commandBuffer) const noexcept;
-
 		[[nodiscard]] auto &GetDescriptorManager() noexcept { return *_descriptorManager; }
 
 		[[nodiscard]] VkSampleCountFlagBits GetSampleCount(ImageSampleCount sample) const noexcept { return _sampleMap[static_cast<uint16_t>(sample)]; }

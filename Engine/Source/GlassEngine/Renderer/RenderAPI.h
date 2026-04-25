@@ -80,6 +80,8 @@ namespace ge::renderer {
 		virtual void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex = 0, uint32_t firstInstance = 0) = 0;
 		virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex = 0, uint32_t firstInstance = 0, int32_t vertexOffset = 0) = 0;
 
+		virtual void PushConstant(const void *ptr, uint8_t size, uint8_t offset) = 0;
+
 		virtual void BeginCopyPass() = 0;
 		virtual void EndCopyPass() = 0;
 		virtual void BeginRenderPass(const BeginRenderPassSpec&) = 0;
