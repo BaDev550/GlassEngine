@@ -12,6 +12,7 @@ find_package(slang CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 
 # meshoptimizer
@@ -42,6 +43,7 @@ if(WIN32)
 target_link_libraries(Engine
 	PUBLIC
 		glfw
+        glm::glm-header-only
         EnTT::EnTT
         imgui::imgui
 		Vulkan::Vulkan
@@ -54,6 +56,7 @@ else()
 target_link_libraries(Engine
 	PUBLIC
 		glfw
+        glm::glm-header-only
         EnTT::EnTT
 		Vulkan::Vulkan
         imgui::imgui

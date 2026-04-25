@@ -1,3 +1,5 @@
+#define __GE_SPIRV__
+
 #ifdef __GE_DXIL__
 static const constexpr uint DxilCameraBufferIndex = 0;
 static const constexpr uint DxilLightBufferIndex = 1;
@@ -122,16 +124,16 @@ T GetBindless<T>(uint handle)
 
 CameraData GetCamaraData() {
 #ifdef __GE_SPIRV__
-    return __EngineGlobalCameraBuffer__.asOpaqueDescriptor<UniformBuffer<CameraData, DefaultDataLayout>>();
-#elifdef (__GE_DXIL__) 
+    return __EngineGlobalCameraBuffer__;
+#else 
     return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
 #endif
 }
 
 LightData GetLightData() {
 #ifdef __GE_SPIRV__
-    return __EngineGlobalLightBuffer__.asOpaqueDescriptor<UniformBuffer<LightData, DefaultDataLayout>>();
-#elifdef(__GE_DXIL__)
+    return __EngineGlobalLightBuffer__;
+#else
     return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
 #endif
 }

@@ -6,6 +6,7 @@
 #include "Vulkan_Swapchain.h"
 #include "Vulkan_Image.h"
 #include "Vulkan_Buffer.h"
+#include "Vulkan_DescriptorManager.h"
 #include "Vulkan_Sampler.h"
 #include <vulkan/vulkan_core.h>
 
@@ -77,6 +78,10 @@ namespace ge::renderer {
 			vkFreeCommandBuffers(VK_RENDER_CONTEXT->GetDevice(), _frames[i].commandPool, 1, &_frames[i].commandBuffer);
 			vkDestroyCommandPool(VK_RENDER_CONTEXT->GetDevice(), _frames[i].commandPool, VK_ALLOCATOR_CALLBACKS);
 		}
+	}
+
+	void Vulkan_RenderAPI::PushConstant(const void *ptr, uint8_t size, uint8_t offset) {
+		VK_RENDER_CONTEXT->GetDescriptorManager().PushConstant(GetCurrentCommandBuffer(), ptr, size, offset);
 	}
 
 	void Vulkan_RenderAPI::BeginFrame()

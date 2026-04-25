@@ -317,4 +317,8 @@ namespace ge::renderer {
 	void Vulkan_DescriptorManagerDefault::UnregisterSampler(uint32_t handle) {
 		_samplerDeletedIndices.push_back(handle);
 	}
+
+	void Vulkan_DescriptorManagerDefault::PushConstant(VkCommandBuffer cmd, const void *ptr, uint8_t size, uint8_t offset) {
+		vkCmdPushConstants(cmd, _pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, offset, size, ptr);
+	}
 }

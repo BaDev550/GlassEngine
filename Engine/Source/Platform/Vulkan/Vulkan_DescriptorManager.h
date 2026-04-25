@@ -20,6 +20,8 @@ namespace ge::renderer {
 		virtual void UnregisterReadonlyImage(uint32_t handle) = 0;
 		virtual void UnregisterWritableImage(uint32_t handle) = 0;
 		virtual void UnregisterSampler(uint32_t handle) = 0;
+
+		virtual void PushConstant(VkCommandBuffer cmd, const void *ptr, uint8_t size, uint8_t offset) = 0;
 	protected:
 		Vulkan_RenderContext& _renderContext;
 	};
@@ -36,6 +38,8 @@ namespace ge::renderer {
 		virtual void UnregisterReadonlyImage(uint32_t handle) override;
 		virtual void UnregisterWritableImage(uint32_t handle) override;
 		virtual void UnregisterSampler(uint32_t handle) override;
+
+		virtual void PushConstant(VkCommandBuffer cmd, const void *ptr, uint8_t size, uint8_t offset) override;
 
 		[[nodiscard]] auto GetGlobalDescriptorSet() const noexcept { return _globalDescriptorSet; }
 		[[nodiscard]] auto GetReadonlyImageSet() const noexcept { return _readonlyImageSet; }

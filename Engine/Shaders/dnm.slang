@@ -22,15 +22,16 @@ VertexOut VertMain(VertexIn in) {
 };
 
 struct Material {
-    uint albedoIndex;
-    uint samplerIndex;
+    uint albedoTextureIndex;
+    uint roughnessTextureIndex;
+    uint normalTextureIndex;
 };
 
 [[vk::push_constant]] Material pc;
 
 [shader("fragment")]
 float4 FragMain(VertexOut vertOut) : SV_Target {
-    const let sampler = GetBindless<Sampler>(pc.samplerIndex);
+    const let sampler = GetBindless<Sampler>(0); // TODO: temp
 
-    return GetBindless<ReadonlyImage2D>(pc.albedoIndex).Sample(sampler, vertOut.uv);
+    return GetBindless<ReadonlyImage2D>(pc.albedoTextureIndex).Sample(sampler, vertOut.uv);
 }
