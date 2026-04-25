@@ -51,6 +51,7 @@ namespace ge::renderer {
 			vkSubresource.baseMipLevel = subresource.baseMipmap;
 			vkSubresource.layerCount = subresource.layerCount;
 			vkSubresource.baseMipLevel = subresource.baseMipmap;
+			vkSubresource.levelCount = 1;
 
 			VkImageViewCreateInfo createInfo{};
 			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

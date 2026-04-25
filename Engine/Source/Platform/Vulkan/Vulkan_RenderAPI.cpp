@@ -8,6 +8,7 @@
 #include "Vulkan_Buffer.h"
 #include "Vulkan_DescriptorManager.h"
 #include "Vulkan_Sampler.h"
+#include "Vulkan_Pipeline.h"
 #include <vulkan/vulkan_core.h>
 
 namespace ge::renderer {
@@ -174,12 +175,36 @@ namespace ge::renderer {
 		_frameStarted = false;
 	}
 
-	void Vulkan_RenderAPI::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) {
+	void Vulkan_RenderAPI::Draw(uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex, uint32_t firstInstance)
+	{
+		auto vulkanVertexBuffer = vertexBuffer.Cast<Vulkan_Buffer>()->GetVkBuffer();
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(GetCurrentCommandBuffer(), 0, 1, &vulkanVertexBuffer, offsets);
 		vkCmdDraw(GetCurrentCommandBuffer(), vertexCount, instanceCount, firstVertex, firstInstance);
 	}
 
-	void Vulkan_RenderAPI::DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t firstInstance, int32_t vertexOffset) {
+	void Vulkan_RenderAPI::DrawIndexed(uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex, uint32_t firstInstance, int32_t vertexOffset)
+	{
+		auto vulkanVertexBuffer = vertexBuffer.Cast<Vulkan_Buffer>()->GetVkBuffer();
+		auto vulkanIndexBuffer = indexBuffer.Cast<Vulkan_Buffer>()->GetVkBuffer();
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(GetCurrentCommandBuffer(), 0, 1, &vulkanVertexBuffer, offsets);
+		vkCmdBindIndexBuffer(GetCurrentCommandBuffer(), vulkanIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(GetCurrentCommandBuffer(), indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+	}
+
+	void Vulkan_RenderAPI::DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex, ge::mem::Ref<MaterialTable> materialTable, const glm::mat4& transform)
+	{
+		const auto& currentLOD = mesh->GetLODs()[lodIndex];
+		auto& materialAssets = materialTable ? materialTable->GetMaterials() : mesh->GetMaterialTable()->GetMaterials();
+		auto vulkanPipeline = pipeline.Cast<Vulkan_Pipeline>()->GetPipeline();
+
+		vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
+		for (const Submesh& submesh : currentLOD.submesh) {
+			auto material = materialAssets[submesh.materialIndex]->GetMaterial();
+			PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), 0);
+			DrawIndexed(submesh.indexCount, 1, mesh->GetVertexBuffer(), mesh->GetIndexBuffer(), submesh.indexOffset, 0, submesh.vertexOffset);
+		}
 	}
 
 	void Vulkan_RenderAPI::BeginCopyPass() {

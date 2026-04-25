@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 
 namespace ge::renderer {
+	class Camera;
 	struct Vertex {
 		glm::vec3 position;
 		glm::vec3 normal;
@@ -30,10 +31,18 @@ namespace ge::renderer {
 		GEVector<Submesh> submesh;
 	};
 
+	class LODManager {
+	public:
+		uint32_t GetLODindex(const GEVector<LODMesh>& lods, const ge::mem::Ref<Camera>& cam, const glm::vec3& objectPosition) const;
+	private:
+		GEVector<float> _lodLevels = { 100.0f, 250.0f, 500.0f, 1000.0f };
+	};
+
 	class SourceMesh : public Asset {
 	public:
 		virtual ~SourceMesh() = default;
 		GEVector<LODMesh>& GetLODs() { return _lods; }
+		LODManager& GetLODManager() { return _lodManager; }
 
 		ge::mem::Ref<Buffer>& GetVertexBuffer() { return _vertexBuffer; }
 		ge::mem::Ref<Buffer>& GetIndexBuffer() { return _indexBuffer; }
@@ -43,6 +52,7 @@ namespace ge::renderer {
 		virtual AssetType GetAssetType() const override { return GetStaticAssetType(); }
 	protected:
 		GEVector<LODMesh> _lods;
+		LODManager _lodManager;
 		ge::mem::Ref<Buffer> _vertexBuffer = nullptr;
 		ge::mem::Ref<Buffer> _indexBuffer = nullptr;
 	};
@@ -51,11 +61,11 @@ namespace ge::renderer {
 	public:
 		StaticMesh() = default;
 
-		mem::Ref<MaterialTable>& GetMaterialTable() { return _materialTable; }
-		void SetMaterialTable(const mem::Ref<MaterialTable>& materialTable) { _materialTable = materialTable; }
+		ge::mem::Ref<MaterialTable>& GetMaterialTable() { return _materialTable; }
+		void SetMaterialTable(const ge::mem::Ref<MaterialTable>& materialTable) { _materialTable = materialTable; }
 		static AssetType GetStaticAssetType() { return AssetType::StaticMesh; }
 		virtual AssetType GetAssetType() const override { return GetStaticAssetType(); }
 	private:
-		mem::Ref<MaterialTable> _materialTable;
+		ge::mem::Ref<MaterialTable> _materialTable;
 	};
 }

@@ -12,7 +12,9 @@
 #include "GlassEngine/Memory/Ref.h"
 #include "GlassEngine/Renderer/RenderObject.h"
 #include "GlassEngine/Renderer/Texture.h"
+#include "GlassEngine/Renderer/Model.h"
 #include "GlassEngine/Renderer/Types.h"
+#include "GlassEngine/Renderer/Pipeline.h"
 
 namespace ge::renderer {
 	struct RenderStats {
@@ -78,8 +80,9 @@ namespace ge::renderer {
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 
-		virtual void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex = 0, uint32_t firstInstance = 0) = 0;
-		virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex = 0, uint32_t firstInstance = 0, int32_t vertexOffset = 0) = 0;
+		virtual void Draw(uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex = 0, uint32_t firstInstance = 0) = 0;
+		virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex = 0, uint32_t firstInstance = 0, int32_t vertexOffset = 0) = 0;
+		virtual void DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex = 0, ge::mem::Ref<MaterialTable> materialTable = nullptr, const glm::mat4& transform = glm::mat4(1.0f)) = 0;
 
 		virtual void PushConstant(const void *ptr, uint8_t size, uint8_t offset) = 0;
 

@@ -30,6 +30,7 @@ namespace ge {
 		[[nodiscard]] AssetHandle ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
 		[[nodiscard]] AssetMap GetLoadedAssets() const { return _loadedAssets; }
 		[[nodiscard]] mem::Ref<Asset> LoadAssetFromFile(AssetHandle handle);
+		[[nodiscard]] AssetHandle CreateAsset(const std::filesystem::path& targetPath, mem::Ref<Asset> asset);
 
 		void ImportAssetAsync(const ImportAssetData& asset, std::function<void(AssetHandle)> loadedFunc, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
 		void CompileIntoPakFile(const std::filesystem::path& outPath);

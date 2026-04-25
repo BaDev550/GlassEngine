@@ -56,13 +56,15 @@ namespace ge::renderer {
 	void Renderer3D::EndDefaultPass() {
 		g_defaultRenderPass->End();
 	}
-	void Renderer3D::DrawVertex() {
-		// TODO(0x):
-		g_renderAPI->Draw(0, 0, 0);
+
+	void Renderer3D::DrawVertex(uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex, uint32_t firstInstance) {
+		g_renderAPI->Draw(vertexCount, instanceCount, vertexBuffer, firstVertex, firstInstance);
 	}
-	void Renderer3D::DrawIndexed() {
-		// TODO(0x): 
-		g_renderAPI->DrawIndexed(0, 0, 0);
+	void Renderer3D::DrawIndexed(uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex, uint32_t firstInstance, int32_t vertexOffset) {
+		g_renderAPI->DrawIndexed(indexCount, instanceCount, vertexBuffer, indexBuffer, firstIndex, firstInstance, vertexOffset);
+	}
+	void Renderer3D::DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex, ge::mem::Ref<MaterialTable> materialTable, const glm::mat4& transform) {
+		g_renderAPI->DrawStaticMesh(pipeline, mesh, lodIndex, materialTable, transform);
 	}
 
 	uint32_t Renderer3D::GetFrameIndex() { return g_frameIndex; }

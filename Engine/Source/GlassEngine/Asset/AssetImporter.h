@@ -11,6 +11,7 @@ namespace ge {
 			_sourceSerializers[AssetType::SourceTexture] = mem::Ref<SourceTextureSerializer>::Create();
 			_sourceSerializers[AssetType::SourceMesh] = mem::Ref<MeshSourceSerializer>::Create();
 			_serializers[AssetType::Texture] = mem::Ref<TextureSerializer>::Create();
+			_serializers[AssetType::Material] = mem::Ref<MaterialSerializer>::Create();
 			_serializers[AssetType::StaticMesh] = mem::Ref<MeshAssetSerializer>::Create();
 		}
 		AssetImporter(AssetImporter&) = delete;

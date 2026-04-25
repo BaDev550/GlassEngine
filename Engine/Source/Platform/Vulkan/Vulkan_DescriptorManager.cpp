@@ -238,7 +238,7 @@ namespace ge::renderer {
 		imageInfo.imageView = image.CreateGetImageView(subresource);
 
 		uint32_t index{};
-		if (_readonlyImageUsageCount + 1 > VULKAN_SAMPLED_IMAGE_COUNT) {
+		if (_readonlyImageUsageCount + 1 < VULKAN_SAMPLED_IMAGE_COUNT) {
 			index = ++_readonlyImageUsageCount;
 		}
 		else if (!_readonlyImageDeletedIndices.empty()) {

@@ -6,6 +6,8 @@
 namespace ge {
 	Scene::Scene(const GEString& name) : _name(name) {
 		GE_ADD_CONSOLE_COMMAND("scene", "clear_scene", [this](const GEVector<GEString>& args) { Clear(); });
+
+		_sceneRenderer = mem::Ref<renderer::SceneRenderer>::Create(this);
 	}
 	Scene::~Scene(){ Clear(); }
 
@@ -61,7 +63,8 @@ namespace ge {
 	{
 	}
 
-	void Scene::OnEditorUpdate(float DeltaTime)
+	void Scene::OnEditorUpdate(float DeltaTime, mem::Ref<renderer::Camera>& cam)
 	{
+		_sceneRenderer->DrawScene(cam);
 	}
 }

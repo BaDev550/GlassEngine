@@ -143,6 +143,48 @@ namespace ge {
 				}
 			}
 
+			uint32_t materialCount = scene->mNumMaterials;
+			GEVector<AssetHandle> materialHandles(materialCount, GE_INVALID_ASSET_HANDLE);
+			if (scene->HasMaterials()) {
+				for (uint32_t i = 0; i < materialCount; i++) {
+					aiMaterial* aiMat = scene->mMaterials[i];
+					aiString aiTexturePath;
+					aiString aiMatName;
+					aiMat->Get(AI_MATKEY_NAME, aiMatName);
+					GEString matName = aiMatName.length > 0 ? aiMatName.C_Str() : std::format("Material_{}", i);
+					std::filesystem::path matTargetPath = targetPath.parent_path() / (matName + GE_ASSET_EXTENSION);
+					mem::Ref<renderer::Material> mat = mem::Ref<renderer::Material>::Create();
+					mem::Ref<renderer::MaterialAsset> matAsset = mem::Ref<renderer::MaterialAsset>::Create(mat);
+
+					bool hasAlbedo = aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexturePath) == AI_SUCCESS;
+					if (hasAlbedo) {
+						ImportAssetData importData;
+						renderer::TextureSpec textureSpec{};
+						textureSpec.attachment = false;
+						textureSpec.filter = renderer::ImageFilter::Linear;
+						textureSpec.format = renderer::ImageFormat::RGBA8;
+						importData.textureSpecs = &textureSpec;
+						auto texturePath = meshDirectory / aiTexturePath.C_Str();
+						auto texture = Application::Get()->GetAssetManager()->GetOrImportAsset(texturePath, importData);
+						matAsset->SetAlbedoTexture(texture->_assetHandle);
+					}
+
+					bool hasNormal = aiMat->GetTexture(aiTextureType_NORMALS, 0, &aiTexturePath) == AI_SUCCESS;
+					if (hasNormal) {
+						ImportAssetData importData;
+						renderer::TextureSpec textureSpec{};
+						textureSpec.attachment = false;
+						textureSpec.filter = renderer::ImageFilter::Linear;
+						textureSpec.format = renderer::ImageFormat::RGBA8;
+						importData.textureSpecs = &textureSpec;
+						auto texturePath = meshDirectory / aiTexturePath.C_Str();
+						auto texture = Application::Get()->GetAssetManager()->GetOrImportAsset(texturePath, importData);
+						matAsset->SetNormalTexture(texture->_assetHandle);
+					}
+					materialHandles[i] = Application::Get()->GetEditorAssetManager().CreateAsset(matTargetPath, matAsset);
+				}
+			}
+
 			// Write into .gasset
 			file::Writer out(targetPath);
 			if (!out.IsStreamGood()) {
@@ -152,6 +194,8 @@ namespace ge {
 			uint32_t lodCount = static_cast<uint32_t>(allLods.size());
 			out.WriteData(STATIC_MESH_MAGIC, 4);
 			out.WriteData(reinterpret_cast<const char*>(&lodCount), sizeof(uint32_t));
+			out.WriteData(reinterpret_cast<const char*>(&materialCount), sizeof(uint32_t));
+			out.WriteData(reinterpret_cast<const char*>(materialHandles.data()), materialCount * sizeof(AssetHandle));
 			for (const auto& lod : allLods) {
 				uint32_t vertexCount = static_cast<uint32_t>(lod.vertices.size());
 				uint32_t indexCount = static_cast<uint32_t>(lod.indices.size());
@@ -192,6 +236,20 @@ namespace ge {
 		auto& lods = mesh->GetLODs();
 
 		in.ReadData(reinterpret_cast<char*>(&lodCount), sizeof(uint32_t));
+
+		uint32_t materialCount = 0;
+		in.ReadData(reinterpret_cast<char*>(&materialCount), sizeof(uint32_t));
+		GEVector<AssetHandle> materialHandles(materialCount);
+		in.ReadData(reinterpret_cast<char*>(materialHandles.data()), materialCount * sizeof(AssetHandle));
+
+		auto materialTable = mem::Ref<renderer::MaterialTable>::Create();
+		for (uint32_t i = 0; i < materialCount; i++) {
+			AssetHandle handle = materialHandles[i];
+			mem::Ref<renderer::MaterialAsset> materialAsset = Application::Get()->GetAssetManager()->GetAsset(handle).Cast<renderer::MaterialAsset>();
+			materialTable->AddMaterial(i, materialAsset);
+		}
+		mesh->SetMaterialTable(materialTable);
+
 		lods.resize(lodCount);
 		for (uint32_t i = 0; i < lodCount; i++) {
 			uint32_t vertexCount, indexCount, submeshCount;

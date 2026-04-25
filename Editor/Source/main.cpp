@@ -17,6 +17,7 @@ public:
 	EditorLayer() : ge::Layer("LAYER_Editor") {}
 	virtual void OnAttach() override {
 		_scene = ge::mem::Ref<ge::Scene>::Create("Test Scene");
+		_camera = ge::mem::Ref<ge::renderer::Camera>::Create();
 
 		GetPanelManager().RegisterPanel<ge::editor::Console>("E_c");
 		GetPanelManager().RegisterPanel<ge::editor::EditorECSDebugPanel>("E_ecs", _scene.Get());
@@ -33,21 +34,22 @@ public:
 			GE_APPLICATION_INFO(" -indicesC: {}", lod.indices.size());
 			GE_APPLICATION_INFO(" -submeshC: {}", lod.submesh.size());
 		}
+
+		auto entity = _scene->CreateEntity("Mario");
+		auto& smc = entity->AddComponent<ge::StaticMeshComponent>();
+		smc.meshHandle = mario->_assetHandle;
 #endif
 	}
 
 	virtual void OnDetach() override {}
 	virtual void OnUpdate(float deltaTime) override {
-		ge::renderer::Renderer3D::BeginDefaultPass(); // TODO (badev): Move this into scene renderer
-
-		_scene->OnEditorUpdate(deltaTime);
-
-		ge::renderer::Renderer3D::EndDefaultPass();
+		_scene->OnEditorUpdate(deltaTime, _camera);
 	}
 
 	virtual void OnImGuiRender() override {}
 private:
 	ge::mem::Ref<ge::Scene> _scene;
+	ge::mem::Ref<ge::renderer::Camera> _camera;
 };
 
 class EditorApp : public ge::Application {

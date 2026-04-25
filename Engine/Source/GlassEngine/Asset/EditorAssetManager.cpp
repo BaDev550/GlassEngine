@@ -141,6 +141,27 @@ namespace ge {
 		return nullptr;
 	}
 
+	AssetHandle EditorAssetManager::CreateAsset(const std::filesystem::path& targetPath, mem::Ref<Asset> asset)
+	{
+		AssetHandle handle = AssetHandle();
+		asset->_assetHandle = handle;
+
+		AssetMetadata mtd;
+		mtd.handle = handle;
+		mtd.path = targetPath;
+		mtd.type = asset->GetAssetType();
+		mtd.state = AssetLoadingState::Loaded;
+
+		_importer->SerializeToFile(targetPath, asset, mtd);
+
+		_assetRegistry[handle] = mtd;
+		_loadedAssets[handle] = asset;
+		SaveAssetRegistry();
+
+		GE_CORE_INFO("Created new asset: {} at {}", AssetTypeToString(mtd.type), targetPath.string());
+		return handle;
+	}
+
 	void EditorAssetManager::CompileIntoPakFile(const std::filesystem::path& outPath)
 	{
 		GE_PROFILE_SCOPE("EditorAssetManager::CompileIntoPakFile");

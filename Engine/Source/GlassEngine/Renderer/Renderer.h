@@ -21,8 +21,9 @@ namespace ge::renderer {
 		static void EndFrame();
 		static void BeginDefaultPass();
 		static void EndDefaultPass();
-		static void DrawVertex();
-		static void DrawIndexed();
+		static void DrawVertex(uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex = 0, uint32_t firstInstance = 0);
+		static void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex = 0, uint32_t firstInstance = 0, int32_t vertexOffset = 0);
+		static void DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex = 0, ge::mem::Ref<MaterialTable> materialTable = nullptr, const glm::mat4& transform = glm::mat4(1.0f));
 
 		static uint32_t GetFrameIndex();
 		static RenderStats GetRenderStats();

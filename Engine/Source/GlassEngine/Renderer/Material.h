@@ -3,15 +3,20 @@
 #include "RenderObject.h"
 
 namespace ge::renderer {
+	struct MaterialBindlessData {
+		uint32_t albedoTextureIndex = 0;
+		uint32_t roughnessTextureIndex = 0;
+		uint32_t normalTextureIndex = 0;
+	};
+
 	class Material : public RenderObject {
 	public:
+		MaterialBindlessData& GetBindlessData() { return _bindlessData; }
 		// This needs to have bindless ids for textures
+
+		virtual void SetDebugName(GEString name) const noexcept final override { };
 	private:
-		struct MaterialBindlessData {
-			uint32_t albedoTextureIndex = 0;
-			uint32_t roughnessTextureIndex = 0;
-			uint32_t normalTextureIndex = 0;
-		} _bindlessData;
+		MaterialBindlessData _bindlessData;
 		friend class MaterialAsset;
 	};
 
@@ -31,22 +36,25 @@ namespace ge::renderer {
 			AssetHandle normalTextureHandle = GE_INVALID_ASSET_HANDLE;
 		} _textureHandles;
 		ge::mem::Ref<Material> _material;
+	public:
+		TextureHandles& GetTextureHandles() { return _textureHandles; }
 	};
 
 	class MaterialTable : public ge::mem::RefCounted {
 	public:
-		void AddMaterial(const AssetHandle& materialHandle, const ge::mem::Ref<MaterialAsset>& material) {
-			_materials[materialHandle] = material;
+		void AddMaterial(uint32_t materialIndex, const ge::mem::Ref<MaterialAsset>& material) {
+			_materials[materialIndex] = material;
 		}
 
-		ge::mem::Ref<Material> GetMaterial(const AssetHandle& materialHandle) const {
-			auto it = _materials.find(materialHandle);
+		GEUnorderedMap<uint32_t, ge::mem::Ref<MaterialAsset>>& GetMaterials() { return _materials; }
+		ge::mem::Ref<Material> GetMaterial(uint32_t materialIndex) const {
+			auto it = _materials.find(materialIndex);
 			if (it != _materials.end()) {
 				return it->second->GetMaterial();
 			}
 			return nullptr;
 		}
 	private:
-		GEUnorderedMap<AssetHandle, ge::mem::Ref<MaterialAsset>> _materials;
+		GEUnorderedMap<uint32_t, ge::mem::Ref<MaterialAsset>> _materials;
 	};
 }
