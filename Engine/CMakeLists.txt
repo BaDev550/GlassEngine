@@ -107,8 +107,8 @@ target_link_libraries(Engine
 		Vulkan::Vulkan
         slang::slang
         GPUOpen::VulkanMemoryAllocator
-        $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/Compressonator_MT.lib>
-        $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/Compressonator_MTd.lib>       
+        $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/Compressonator_MTd.lib>
+        $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/Compressonator_MT.lib>       
 )
 else()
 target_link_libraries(Engine
