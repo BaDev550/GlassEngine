@@ -51,6 +51,12 @@ namespace ge::renderer {
 		virtual void Init() override;
 		virtual void Wait() override;
 
+		[[nodiscard]] virtual uint32_t IGetReadonlyImageHandle(Image& image, ImageSubresource subresource) override;
+		[[nodiscard]] virtual uint32_t IGetWritableImageHandle(Image& image, ImageSubresource subresource) override;
+		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) override;
+
+		[[nodiscard]] virtual bool UmaOrRebar() override { return _deviceFeatures.umaOrRebar; }
+
 		[[nodiscard]] mem::Vulkan_Allocator& GetAllocator() const noexcept { return *_allocator; }
 		[[nodiscard]] VkInstance GetInstance() const noexcept { return _instance; }
 		[[nodiscard]] VkPipelineCache GetPipelineCache() const noexcept { return _pipelineCache; }
@@ -60,10 +66,6 @@ namespace ge::renderer {
 		[[nodiscard]] Vulkan_DeviceFeatures GetDeviceFeatures() const noexcept { return _deviceFeatures; }
 		[[nodiscard]] VkQueue GetGraphicsQueue() const noexcept { return _graphicsQueue; }
 		[[nodiscard]] uint32_t GetGraphicsQueueFamilyIndex() const noexcept { return _graphicsQueueFamilyIndex; }
-
-		[[nodiscard]] virtual uint32_t IGetReadonlyImageHandle(Image& image, ImageSubresource subresource) override;
-		[[nodiscard]] virtual uint32_t IGetWritableImageHandle(Image& image, ImageSubresource subresource) override;
-		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) override;
 
 		[[nodiscard]] auto &GetDescriptorManager() noexcept { return *_descriptorManager; }
 
