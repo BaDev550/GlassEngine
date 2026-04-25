@@ -34,7 +34,7 @@ namespace ge::renderer {
 			pushConstant.size = 256;
 			pushConstant.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
 
-			VkDescriptorSetLayout setLayouts[4]{
+			const VkDescriptorSetLayout setLayouts[4]{
 				_globalDescriptorSetLayout,
 				_readonlyImageSetLayout,
 				_writableImageSetLayout,
@@ -321,4 +321,17 @@ namespace ge::renderer {
 	void Vulkan_DescriptorManagerDefault::PushConstant(VkCommandBuffer cmd, const void *ptr, uint8_t size, uint8_t offset) {
 		vkCmdPushConstants(cmd, _pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, offset, size, ptr);
 	}
+
+	void Vulkan_DescriptorManagerDefault::BindDescriptors(VkCommandBuffer cmd) {
+		const VkDescriptorSet sets[4]{
+			_globalDescriptorSet,
+			_readonlyImageSet,
+			_writableImageSet,
+			_samplerSet,
+		};
+
+		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 4, sets, 0, nullptr);
+		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, _pipelineLayout, 0, 4, sets, 0, nullptr);
+	}
+
 }

@@ -99,6 +99,8 @@ namespace ge::renderer {
 		vkResetCommandPool(VK_RENDER_CONTEXT->GetDevice(), frame.commandPool, 0);
 		vkBeginCommandBuffer(frame.commandBuffer, &beginInfo);
 
+		VK_RENDER_CONTEXT->GetDescriptorManager().BindDescriptors(frame.commandBuffer);
+
 		auto& window = Application::Get()->GetWindow();
 		const auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
 		const auto image = swapchain.GetImages()[window.GetImageIndex()];
