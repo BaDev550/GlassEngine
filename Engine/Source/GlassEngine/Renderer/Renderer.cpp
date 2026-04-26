@@ -12,7 +12,6 @@ namespace ge::renderer {
 		mem::Ref<Texture2D> _defaultNormal = nullptr;
 	} static s_data;
 	static mem::Ref<RenderAPI> g_renderAPI = nullptr;
-	static mem::Ref<RenderPass> g_defaultRenderPass = nullptr;
 	static uint32_t g_frameIndex = 0;
 
 	void Renderer3D::Init() {
@@ -36,17 +35,24 @@ namespace ge::renderer {
 		GetShaderLibrary().AddShader("dnm");
 
 		{
-			FramebufferSpec framebufferSpec{};
-			framebufferSpec.Attachments = { FramebufferAttachment(ImageFormat::D32S8) };
-			framebufferSpec.IsSwapchain = true;
-			mem::Ref<Framebuffer> _defaultFramebuffer = Framebuffer::Create(framebufferSpec);
-			g_defaultRenderPass = RenderPass::Create(_defaultFramebuffer, "DEFAULT_PASS");
+			TextureSpec whiteTextureData{};
+			uint32_t whiteData = 0xffffffff;
+			whiteTextureData.width = 1;
+			whiteTextureData.height = 1;
+			whiteTextureData.format = ImageFormat::RGBA8;
+			s_data._defaultWhiteTexture = Texture2D::Create(whiteTextureData, &whiteTextureData);
 			s_data._defaultSampler = Sampler::Create(SamplerSpec{});
+
+			TextureSpec blackTextureData{};
+			uint32_t blackData = 0x00000000;
+			whiteTextureData.width = 1;
+			whiteTextureData.height = 1;
+			whiteTextureData.format = ImageFormat::RGBA8;
+			s_data._defaultBlackTexture = Texture2D::Create(whiteTextureData, &blackTextureData);
 		}
 	}
 
 	void Renderer3D::Destroy() {
-		g_defaultRenderPass = nullptr;
 		s_data._shaderLibrary = nullptr;
 		s_data._defaultSampler = nullptr;
 		s_data._defaultWhiteTexture = nullptr;
@@ -60,12 +66,6 @@ namespace ge::renderer {
 	void Renderer3D::EndFrame() {
 		g_renderAPI->EndFrame();
 		g_frameIndex = (g_frameIndex + 1) % MaxFramesInFlight;
-	}
-	void Renderer3D::BeginDefaultPass() {
-		g_defaultRenderPass->Begin();
-	}
-	void Renderer3D::EndDefaultPass() {
-		g_defaultRenderPass->End();
 	}
 
 	void Renderer3D::DrawVertex(uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex, uint32_t firstInstance) {
@@ -81,6 +81,6 @@ namespace ge::renderer {
 	uint32_t Renderer3D::GetFrameIndex() { return g_frameIndex; }
 	RenderStats Renderer3D::GetRenderStats() { return g_renderAPI->GetRenderStats(); }
 	ShaderLibrary& Renderer3D::GetShaderLibrary() { return *s_data._shaderLibrary; }
-	ge::mem::Ref<RenderPass> Renderer3D::GetDefaultRenderPass() { return g_defaultRenderPass; }
+	ge::mem::Ref<Texture2D>& Renderer3D::GetWhiteTexture() { return s_data._defaultWhiteTexture; }
 	mem::Ref<RenderAPI> Renderer3D::GetRenderAPI() { return g_renderAPI; }
 }

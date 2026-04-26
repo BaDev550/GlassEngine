@@ -28,7 +28,7 @@ namespace ge::renderer {
 		static uint32_t GetFrameIndex();
 		static RenderStats GetRenderStats();
 		static ShaderLibrary& GetShaderLibrary();
-		static ge::mem::Ref<RenderPass> GetDefaultRenderPass();
+		static ge::mem::Ref<Texture2D>& GetWhiteTexture();
 		static ge::mem::Ref<RenderAPI> GetRenderAPI();
 	};
 }

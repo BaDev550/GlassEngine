@@ -81,10 +81,10 @@ namespace ge::renderer {
 		renderingInfo.layerCount = 1;
 		renderingInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
 		renderingInfo.pColorAttachments = colorAttachments.data();
-		if (hasDepthAttachment) {
-			renderingInfo.pDepthAttachment = &depthAttachment;
-			renderingInfo.pStencilAttachment = &depthAttachment;
-		}
+		//if (hasDepthAttachment) {
+		//	renderingInfo.pDepthAttachment = &depthAttachment;
+		//	renderingInfo.pStencilAttachment = &depthAttachment;
+		//}
 		
 		VkViewport viewport{ 0, 0, (float)extent.width, (float)extent.height };
 		viewport.minDepth = 0;

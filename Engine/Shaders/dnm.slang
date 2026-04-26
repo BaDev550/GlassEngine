@@ -13,7 +13,7 @@ struct VertexOut {
 };
 
 struct Material {
-    float4x4 model;
+    column_major float4x4 model;
     uint albedoTextureIndex;
     uint roughnessTextureIndex;
     uint normalTextureIndex;
@@ -26,10 +26,7 @@ VertexOut VertMain(VertexIn in) {
     VertexOut out;
     out.uv = in.uv;
     out.normal = in.normal.xyz;
-    out.vertPos = 
-    mul(__EngineGlobalCameraBuffer__.proj, 
-        mul(__EngineGlobalCameraBuffer__.view, 
-            mul(pc.model, in.position)));
+    out.vertPos = mul(__EngineGlobalCameraBuffer__.proj, mul(__EngineGlobalCameraBuffer__.view, mul(pc.model, in.position)));
     return out;
 };
 

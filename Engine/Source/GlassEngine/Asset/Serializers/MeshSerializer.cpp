@@ -7,6 +7,7 @@
 #include <meshoptimizer.h>
 
 #include "GlassEngine/Renderer/Model.h"
+#include "GlassEngine/Renderer/Renderer.h"
 
 namespace ge {
 
@@ -152,6 +153,7 @@ namespace ge {
 			uint32_t materialCount = scene->mNumMaterials;
 			GEVector<AssetHandle> materialHandles(materialCount, GE_INVALID_ASSET_HANDLE);
 			if (scene->HasMaterials()) {
+				auto whiteTexture = renderer::Renderer3D::GetWhiteTexture();
 				for (uint32_t i = 0; i < materialCount; i++) {
 					aiMaterial* aiMat = scene->mMaterials[i];
 					aiString aiTexturePath;
@@ -174,6 +176,9 @@ namespace ge {
 						auto texture = Application::Get()->GetAssetManager()->GetOrImportAsset(texturePath, importData);
 						matAsset->SetAlbedoTexture(texture->_assetHandle);
 					}
+					else {
+						matAsset->SetAlbedoTexture(whiteTexture->_assetHandle);
+					}
 
 					bool hasNormal = aiMat->GetTexture(aiTextureType_NORMALS, 0, &aiTexturePath) == AI_SUCCESS;
 					if (hasNormal) {
@@ -186,6 +191,9 @@ namespace ge {
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
 						auto texture = Application::Get()->GetAssetManager()->GetOrImportAsset(texturePath, importData);
 						matAsset->SetNormalTexture(texture->_assetHandle);
+					}
+					else {
+						matAsset->SetAlbedoTexture(whiteTexture->_assetHandle);
 					}
 					materialHandles[i] = Application::Get()->GetEditorAssetManager().CreateAsset(matTargetPath, matAsset);
 				}
