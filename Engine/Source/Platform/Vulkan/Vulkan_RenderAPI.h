@@ -61,7 +61,7 @@ namespace ge::renderer {
 		} _frames[Renderer3D::MaxFramesInFlight]; // TEMP ig
 		bool _frameStarted = false;
 
-		VkImageMemoryBarrier2 GetMemoryBarrier(Vulkan_Image& image, const VkImageLayout newImageLayout);
+		VkImageMemoryBarrier2 GetMemoryBarrier(Vulkan_Image& image, const VkImageLayout newImageLayout, bool loadOpIsLoad = false);
 
 		// translates image layout to Vulkan_OptimalImageLayout() when called End*Pass() func
 		std::unordered_set<Vulkan_Image*> _barriersForImages; // TODO (0x): better name

@@ -38,12 +38,12 @@ namespace ge::renderer {
 			}
 		}
 	
-		constexpr VkAccessFlags2 Vulkan_GetAccessFlagsFromLayout(VkImageLayout layout) noexcept {
+		constexpr VkAccessFlags2 Vulkan_GetAccessFlagsFromLayout(VkImageLayout layout, bool loadOpIsLoad = false) noexcept {
 			switch (layout) {
 				case VK_IMAGE_LAYOUT_GENERAL: 
 					return VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT;
 				case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-					return VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+					return !loadOpIsLoad ? VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT : VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT;
 				case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
 					return VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 				case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
@@ -57,10 +57,9 @@ namespace ge::renderer {
 				default: return {};
 			}
 		}
-
 	}
 
-	VkImageMemoryBarrier2 Vulkan_RenderAPI::GetMemoryBarrier(Vulkan_Image& image, const VkImageLayout newImageLayout) {
+	VkImageMemoryBarrier2 Vulkan_RenderAPI::GetMemoryBarrier(Vulkan_Image& image, const VkImageLayout newImageLayout, bool loadOpIsLoad) {
 		const auto oldImageLayout = image.GetImageLayout();
 		image._imageLayout = newImageLayout;
 		return {
@@ -140,9 +139,9 @@ namespace ge::renderer {
 
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = frameIndex <= swapchain.GetImages().size() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		barrier.srcAccessMask = {};
-		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+		barrier.oldLayout = frameIndex <= swapchain.GetImages().size() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -155,7 +154,8 @@ namespace ge::renderer {
 
 		vkCmdPipelineBarrier(
 			frame.commandBuffer,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			0,
 			0, nullptr,
 			0, nullptr,
@@ -279,7 +279,8 @@ namespace ge::renderer {
 				memBarriers.emplace_back(
 					GetMemoryBarrier(
 						*vk_image, 
-						VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+						VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+						attachment.loadOp == AttachmentLoadOp::Load
 					)
 				);
 				_barriersForImages.emplace(vk_image.Get());
