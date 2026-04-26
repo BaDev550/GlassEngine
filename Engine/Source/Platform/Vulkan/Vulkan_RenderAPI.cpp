@@ -1,4 +1,5 @@
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Core/Window.h"
 #include "GlassEngine/Memory/Memory.h"
 #include "GlassEngine/Renderer/Buffer.h"
 #include "GlassEngine/Renderer/Swapchain.h"
@@ -55,6 +56,30 @@ namespace ge::renderer {
 					return VK_ACCESS_2_TRANSFER_WRITE_BIT;
 				default: return {};
 			}
+		}
+
+		static VkImageMemoryBarrier2 GetMemoryBarrier(const Vulkan_Image& image, const VkImageLayout newImageLayout) {
+			const auto oldImageLayout = image.GetImageLayout();
+			return {
+				VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+				nullptr,
+				utility::Vulkan_GetPipelineStageFlagsFromLayout(oldImageLayout),
+				utility::Vulkan_GetAccessFlagsFromLayout(oldImageLayout),
+				utility::Vulkan_GetPipelineStageFlagsFromLayout(newImageLayout),
+				utility::Vulkan_GetAccessFlagsFromLayout(newImageLayout),
+				oldImageLayout,
+				newImageLayout,
+				VK_QUEUE_FAMILY_IGNORED,
+				VK_QUEUE_FAMILY_IGNORED,
+				image.GetImage(),
+				VkImageSubresourceRange{
+					.aspectMask = image.GetAspectFlags(),
+					.baseMipLevel = 0,
+					.levelCount = VK_REMAINING_MIP_LEVELS,
+					.baseArrayLayer = 0,
+					.layerCount =  VK_REMAINING_ARRAY_LAYERS
+				}
+			};
 		}
 	}
 
@@ -217,7 +242,7 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderAPI::EndCopyPass() {
-		TransitionImageLayouts();
+		Barrier();
 	}
 
 	VkCommandBuffer Vulkan_RenderAPI::GetCurrentCommandBuffer() {
@@ -225,57 +250,41 @@ namespace ge::renderer {
 		return _frames[Renderer3D::GetFrameIndex()].commandBuffer;
 	}
 
-	void Vulkan_RenderAPI::TransitionImageLayouts() {
-		GEVector<VkImageMemoryBarrier2> barriers;
-		barriers.reserve(_image_layout_transition_set.size());
-
-		for (const auto* image : _image_layout_transition_set) {
-			const auto newLayout = utility::Vulkan_OptimalImageLayout(image->GetSpecRef().usageFlags);
-
-			barriers.emplace_back(
-				VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-				nullptr,
-				utility::Vulkan_GetPipelineStageFlagsFromLayout(image->GetImageLayout()),
-				utility::Vulkan_GetAccessFlagsFromLayout(image->GetImageLayout()),
-				utility::Vulkan_GetPipelineStageFlagsFromLayout(newLayout),
-				utility::Vulkan_GetAccessFlagsFromLayout(newLayout),
-				image->GetImageLayout(),
-				newLayout,
-				VK_QUEUE_FAMILY_IGNORED,
-				VK_QUEUE_FAMILY_IGNORED,
-				image->GetImage(),
-				VkImageSubresourceRange{
-					.aspectMask = image->GetAspectFlags(),
-					.baseMipLevel = 0,
-					.levelCount = VK_REMAINING_MIP_LEVELS,
-					.baseArrayLayer = 0,
-					.layerCount =  VK_REMAINING_ARRAY_LAYERS
-				}
-			);
-		}
-
-		VkDependencyInfo dependencyInfo{};
-		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-		dependencyInfo.pImageMemoryBarriers = barriers.data();
-		dependencyInfo.imageMemoryBarrierCount = barriers.size();
-
-		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
-
-		_image_layout_transition_set.clear();
-	}
-
 	void Vulkan_RenderAPI::BeginRenderPass(const BeginRenderPassSpec& spec) {
+		// Barrier();
+
 		VkCommandBuffer cmd = Renderer3D::GetRenderAPI().Cast<Vulkan_RenderAPI>()->GetCurrentCommandBuffer();
+		
+		const auto& window = Application::Get()->GetWindow();
+		const uint32_t imageIndex = window.GetImageIndex();
+
+		const auto unifiedImageLayouts = VK_RENDER_CONTEXT->GetDeviceFeatures().unifiedImageLayouts;
 		
 		GEVector<VkRenderingAttachmentInfo> colorAttachments;
 		colorAttachments.reserve(spec.color_attachments.size());
 
+		GEVector<VkImageMemoryBarrier2> memBarriers;
+		memBarriers.reserve(spec.color_attachments.size() + 1);
+
 		for (const auto& attachment : spec.color_attachments) {
 			auto vk_image = attachment.image.Cast<Vulkan_Image>();
+
+			if (!attachment.isSwapchainImage && vk_image->GetImageLayout() != VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+				memBarriers.emplace_back(
+					utility::GetMemoryBarrier(
+						*vk_image, 
+						VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+					)
+				);
+			}
+			_barriersForImages.emplace(vk_image.Get());
+
 			colorAttachments.emplace_back(
 				VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 				nullptr,
-				vk_image->CreateGetImageView(attachment.subresource),
+				attachment.isSwapchainImage ? 
+					static_cast<const Vulkan_Swapchain&>(window.GetSwapchain()).GetImageViews()[imageIndex]
+					: vk_image->CreateGetImageView(attachment.subresource),
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 				VkResolveModeFlagBits{},
 				VkImageView{},
@@ -291,10 +300,29 @@ namespace ge::renderer {
 			);
 		}
 
-		auto vk_image = spec.depth_stencil.image.Cast<Vulkan_Image>();
+		VkDependencyInfo dependencyInfo{};
+		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+		dependencyInfo.pImageMemoryBarriers = memBarriers.data();
+		dependencyInfo.imageMemoryBarrierCount = memBarriers.size();
 
+		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
+
+		auto vk_image = spec.depth_stencil.image.Cast<Vulkan_Image>();
+		const auto has_depth = vk_image != nullptr;
+		const auto has_stencil = has_depth ? 
+			utility::IsDepthStencilFormat(vk_image->GetSpecRef().imageFormat) : false;
+
+		if (has_depth && vk_image->GetImageLayout() != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+			memBarriers.emplace_back(
+				utility::GetMemoryBarrier(
+					*vk_image, 
+					VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+				)
+			);
+		}
+		_barriersForImages.emplace(vk_image.Get());
 		const VkRenderingAttachmentInfo depthStencilAttachment
-		 	= vk_image ? VkRenderingAttachmentInfo{} : VkRenderingAttachmentInfo{
+		 	= has_depth ? VkRenderingAttachmentInfo{} : VkRenderingAttachmentInfo{
 			VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 			nullptr,
 			vk_image->CreateGetImageView(spec.depth_stencil.subresource),
@@ -316,13 +344,13 @@ namespace ge::renderer {
 		renderingInfo.layerCount = 1;
 		renderingInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
 		renderingInfo.pColorAttachments = colorAttachments.data();
-		renderingInfo.pDepthAttachment = &depthStencilAttachment;
-		renderingInfo.pStencilAttachment = &depthStencilAttachment;
+		if (has_depth) renderingInfo.pDepthAttachment = &depthStencilAttachment;
+		if (has_stencil) renderingInfo.pStencilAttachment = &depthStencilAttachment;
 		
 		VkViewport viewport{ 0, 0, (float)spec.extent.x, (float)spec.extent.y };
 		viewport.minDepth = 0;
 		viewport.maxDepth = 1;
-		VkRect2D scissor{ {0,0}, {spec.extent.x, spec.extent.y} };
+		const VkRect2D scissor{ {0,0}, {spec.extent.x, spec.extent.y} };
 
 		vkCmdBeginRendering(cmd, &renderingInfo);
 		vkCmdSetViewport(cmd, 0, 1, &viewport);
@@ -330,36 +358,47 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderAPI::EndRenderPass() {
-		_image_layout_transition_set.clear();
+		_barriersForImages.clear();
 	}
 
-	void Vulkan_RenderAPI::LoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) {
+	void Vulkan_RenderAPI::ILoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) {
+		const auto cmd = GetCurrentCommandBuffer();
+		if (buffer->GetSpecRef().cpuAccess != BufferCpuAccess::None) {
+			std::memcpy(buffer->GetMappedPtr(), data, dataSize);
+			return;
+		}
+		else if (dataSize < (1u<<20) * 64) {
+			vkCmdUpdateBuffer(cmd, 
+				buffer.Cast<Vulkan_Buffer>()->GetVkBuffer(), 0, dataSize, data);
+			return;
+		}
 		
+		const auto &staging_buffer = staging_buffers.emplace_back(ge::mem::CreateScope<Vulkan_Buffer>(BufferSpec{
+			.elementSize = static_cast<uint32_t>(dataSize),
+			.elementCount = 1,
+			.usageFlags = BufferUsageFlagsBits::TransferSrc,
+			.cpuAccess = BufferCpuAccess::Write,
+			.memoryType = BufferMemoryType::Auto,
+		}));
+
+		std::memcpy(buffer->GetMappedPtr(), data, dataSize);
+
+		const VkBufferCopy bufferCopy {
+			0,
+			0,
+			dataSize
+		};
+
+		vkCmdCopyBuffer(cmd, 
+			buffer.Cast<Vulkan_Buffer>()->GetVkBuffer(), staging_buffer->GetVkBuffer(),
+			1, &bufferCopy);
 	}
 
-	void Vulkan_RenderAPI::LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) {
+	void Vulkan_RenderAPI::ILoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) {
 		auto vk_image = texture.GetImage().Cast<Vulkan_Image>();
 
-		const VkImageMemoryBarrier2 barrier{
-			VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-			nullptr,
-			utility::Vulkan_GetPipelineStageFlagsFromLayout(vk_image->GetImageLayout()),
-			utility::Vulkan_GetAccessFlagsFromLayout(vk_image->GetImageLayout()),
-			utility::Vulkan_GetPipelineStageFlagsFromLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL),
-			utility::Vulkan_GetAccessFlagsFromLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL),
-			vk_image->GetImageLayout(),
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			VK_QUEUE_FAMILY_IGNORED,
-			VK_QUEUE_FAMILY_IGNORED,
-			vk_image->GetImage(),
-			VkImageSubresourceRange{
-				.aspectMask = vk_image->GetAspectFlags(),
-				.baseMipLevel = 0,
-				.levelCount = VK_REMAINING_MIP_LEVELS,
-				.baseArrayLayer = 0,
-				.layerCount =  VK_REMAINING_ARRAY_LAYERS
-			}
-		};
+		const VkImageMemoryBarrier2 barrier 
+			= utility::GetMemoryBarrier(*vk_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		VkDependencyInfo dependencyInfo{};
 		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
@@ -396,7 +435,7 @@ namespace ge::renderer {
 			&region);
 
 		vk_image->_imageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-		_image_layout_transition_set.emplace(vk_image.Get());
+		_barriersForImages.emplace(vk_image.Get());
 	}
 	
 	void Vulkan_RenderAPI::SetBeginDebugLabel(std::string_view label) {
@@ -411,6 +450,220 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderAPI::SetEndDebugLabel() {
+		vkCmdEndDebugUtilsLabelEXT(GetCurrentCommandBuffer());
+	}
 
+	void Vulkan_RenderAPI::Barrier() {
+		GEVector<VkImageMemoryBarrier2> imageBarriers;
+		GEVector<VkBufferMemoryBarrier2> bufferBarriers;
+		imageBarriers.reserve(_barriersForImages.size());
+		bufferBarriers.reserve(_barriersForBuffers.size());
+
+		for (const auto* image : _barriersForImages) {
+			const auto newLayout = utility::Vulkan_OptimalImageLayout(image->GetSpecRef().usageFlags);
+
+			imageBarriers.emplace_back(
+				utility::GetMemoryBarrier(
+						*image, 
+						newLayout
+					)
+			);
+		}
+
+		// for (const auto* buffer : _barriersForBuffers) {
+		// 	bufferBarriers.emplace_back(
+		// 		VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
+		// 		nullptr,
+		// 		utility::Vulkan_GetPipelineStageFlagsFromLayout({}),
+		// 		utility::Vulkan_GetAccessFlagsFromLayout({}),
+		// 		utility::Vulkan_GetPipelineStageFlagsFromLayout({}),
+		// 		utility::Vulkan_GetAccessFlagsFromLayout({}),
+		// 		VK_QUEUE_FAMILY_IGNORED,
+		// 		VK_QUEUE_FAMILY_IGNORED,
+		// 		buffer->GetVkBuffer(),
+		// 		0,
+		// 		VK_WHOLE_SIZE
+		// 	);
+		// }
+
+		const VkDependencyInfo dependencyInfo{
+			VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+			nullptr,
+			{},
+			0,
+			nullptr,
+			static_cast<uint32_t>(bufferBarriers.size()),
+			bufferBarriers.data(),
+			static_cast<uint32_t>(imageBarriers.size()),
+			imageBarriers.data(),
+		};
+
+		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
+
+		_barriersForImages.clear();
+		_barriersForBuffers.clear();
+	}
+
+	void Vulkan_RenderAPI::ICopyBufferToBuffer(
+		const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Buffer>& dst, 
+		uint32_t size, uint32_t srcOffset, uint32_t dstOffset
+	) {
+
+		// const VkDependencyInfo dependencyInfo{
+		// 	VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+		// 	nullptr,
+		// 	{},
+		// 	0,
+		// 	nullptr,
+		// 	static_cast<uint32_t>(bufferBarriers.size()),
+		// 	bufferBarriers.data(),
+		// 	nullptr,
+		// 	nullptr
+		// };
+
+		// vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
+
+		const auto cmd = GetCurrentCommandBuffer();
+		auto &vk_src = *src.Cast<Vulkan_Buffer>(); 
+		auto &vk_dst = *dst.Cast<Vulkan_Buffer>(); 
+
+		const VkBufferCopy bufferCopy {
+			srcOffset,
+			dstOffset,
+			size
+		};
+
+		vkCmdCopyBuffer(cmd, 
+			vk_src.GetVkBuffer(), vk_dst.GetVkBuffer(),
+			1, &bufferCopy);
+
+		// _barriersForBuffers.emplace(&vk_src);
+		// _barriersForBuffers.emplace(&vk_dst);
+	}
+
+	void Vulkan_RenderAPI::ICopyBufferToImage(
+		const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Image>& dst, 
+		const ImageSubresourceLayers& imageSubresource, glm::uvec3 extent, uint32_t srcOffset, glm::uvec3 dstOffset
+	) {
+
+		const auto cmd = GetCurrentCommandBuffer();
+		auto &vk_src = *src.Cast<Vulkan_Buffer>(); 
+		auto &vk_dst = *dst.Cast<Vulkan_Image>(); 
+
+		const VkImageMemoryBarrier2 barrier 
+			= utility::GetMemoryBarrier(vk_dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+		VkDependencyInfo dependencyInfo{};
+		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+		dependencyInfo.pImageMemoryBarriers = &barrier;
+		dependencyInfo.imageMemoryBarrierCount = 1;
+
+		vk_dst._imageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
+
+		const VkBufferImageCopy bufferImageCopy {
+			srcOffset,
+			0,
+			0,
+			VkImageSubresourceLayers{vk_dst.GetAspectFlags(), imageSubresource.mipLevel, 
+				imageSubresource.baseArrayLayer, imageSubresource.layerCount},
+			{static_cast<int32_t>(dstOffset.x), static_cast<int32_t>(dstOffset.y), static_cast<int32_t>(dstOffset.z)},
+			{extent.x, extent.y, extent.z}
+		};
+
+		vkCmdCopyBufferToImage(cmd, 
+			vk_src.GetVkBuffer(), 
+			vk_dst.GetImage(), 
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+			1, 
+			&bufferImageCopy
+		);
+
+		_barriersForImages.emplace(&vk_dst);
+	}
+
+	void Vulkan_RenderAPI::ICopyImageToBuffer(
+		const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& imageSubresource, 
+		const ge::mem::Ref<Buffer>& dst, glm::uvec3 extent, glm::uvec3 srcOffset, uint32_t dstOffset
+	) {
+		const auto cmd = GetCurrentCommandBuffer();
+		auto &vk_src = *src.Cast<Vulkan_Image>(); 
+		auto &vk_dst = *dst.Cast<Vulkan_Buffer>(); 
+
+		const VkImageMemoryBarrier2 barrier 
+			= utility::GetMemoryBarrier(vk_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+		VkDependencyInfo dependencyInfo{};
+		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+		dependencyInfo.pImageMemoryBarriers = &barrier;
+		dependencyInfo.imageMemoryBarrierCount = 1;
+
+		vk_src._imageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
+
+		const VkBufferImageCopy bufferImageCopy {
+			dstOffset,
+			0,
+			0,
+			VkImageSubresourceLayers{vk_src.GetAspectFlags(), imageSubresource.mipLevel, 
+				imageSubresource.baseArrayLayer, imageSubresource.layerCount},
+			{static_cast<int32_t>(srcOffset.x), static_cast<int32_t>(srcOffset.y), static_cast<int32_t>(srcOffset.z)},
+			{extent.x, extent.y, extent.z}
+		};
+
+		vkCmdCopyImageToBuffer(cmd, 
+			vk_src.GetImage(), 
+			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 
+			vk_dst.GetVkBuffer(), 
+			1, 
+			&bufferImageCopy
+		);
+
+		_barriersForImages.emplace(&vk_src);
+	}
+	void Vulkan_RenderAPI::ICopyImageToImage(
+		const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& srcSubresource, 
+		const ge::mem::Ref<Image>& dst, const ImageSubresourceLayers& dstSubresource, 
+		glm::uvec3 extent, glm::uvec3 srcOffset, glm::uvec3 dstOffset
+	) {
+		const auto cmd = GetCurrentCommandBuffer();
+		auto &vk_src = *src.Cast<Vulkan_Image>(); 
+		auto &vk_dst = *dst.Cast<Vulkan_Image>(); 
+
+		const VkImageMemoryBarrier2 barrier 
+			= utility::GetMemoryBarrier(vk_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+		VkDependencyInfo dependencyInfo{};
+		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+		dependencyInfo.pImageMemoryBarriers = &barrier;
+		dependencyInfo.imageMemoryBarrierCount = 1;
+
+		vk_src._imageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
+
+		const VkImageCopy imageCopy {
+			VkImageSubresourceLayers{vk_src.GetAspectFlags(), srcSubresource.mipLevel, 
+				srcSubresource.baseArrayLayer, srcSubresource.layerCount},
+			{static_cast<int32_t>(srcOffset.x), static_cast<int32_t>(srcOffset.y), static_cast<int32_t>(srcOffset.z)},
+			VkImageSubresourceLayers{vk_dst.GetAspectFlags(), dstSubresource.mipLevel, 
+				dstSubresource.baseArrayLayer, dstSubresource.layerCount},
+			{static_cast<int32_t>(dstOffset.x), static_cast<int32_t>(dstOffset.y), static_cast<int32_t>(dstOffset.z)},
+			{extent.x, extent.y, extent.z}
+		};
+
+		vkCmdCopyImage(cmd, 
+			vk_src.GetImage(), 
+			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 
+			vk_dst.GetImage(), 
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+			1, 
+			&imageCopy
+		);
+
+		_barriersForImages.emplace(&vk_dst);
+		_barriersForImages.emplace(&vk_src);
 	}
 }

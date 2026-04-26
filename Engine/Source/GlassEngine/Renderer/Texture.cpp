@@ -18,10 +18,9 @@ namespace ge::renderer {
 		createDesc.imageFormat = spec.format;
 		createDesc.extent = { spec.width, spec.height, 1 };
 		createDesc.usageFlags |= ImageUsageFlagsBits::Readonly;
+		createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 		if (spec.attachment)
 			createDesc.usageFlags |= utility::IsColorFormat(spec.format) ? ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
-		else
-			createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 
 		return ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
 	}
@@ -37,11 +36,10 @@ namespace ge::renderer {
 		createDesc.imageFormat = spec.format;
 		createDesc.extent = { spec.width, spec.height, 1 };
 		createDesc.usageFlags |= ImageUsageFlagsBits::Readonly;
+		createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 		if (spec.attachment)
 			createDesc.usageFlags |= utility::IsColorFormat(spec.format) ?
 				ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
-		else
-			createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 
 		auto texture = ge::mem::Ref<Texture2D>(new Texture2D(Image::Create(createDesc), ImageSubresource{}, spec));
 		Renderer3D::GetRenderAPI()->BeginFrame();
@@ -60,11 +58,10 @@ namespace ge::renderer {
 		createDesc.imageFormat = spec.format;
 		createDesc.extent = { spec.width, spec.height, 1 };
 		createDesc.usageFlags |= ImageUsageFlagsBits::Readonly;
+		createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 		if (spec.attachment)
 			createDesc.usageFlags |= utility::IsColorFormat(spec.format) ?
 				ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
-		else
-			createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 
 		auto texture = ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
 		texture->_data = std::vector<uint8_t>(dataPtr, dataPtr + dataSize);

@@ -27,8 +27,26 @@ namespace ge::renderer {
 		virtual void BeginRenderPass(const BeginRenderPassSpec&) override;
 		virtual void EndRenderPass() override;
 
-		virtual void LoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) override;
-		virtual void LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) override;
+		virtual void ICopyBufferToBuffer(
+			const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Buffer>& dst, 
+			uint32_t size, uint32_t srcOffset = 0, uint32_t dstOffset = 0
+		) override;
+		virtual void ICopyBufferToImage(
+			const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Image>& dst, 
+			const ImageSubresourceLayers& imageSubresource, glm::uvec3 extent, uint32_t srcOffset = 0, glm::uvec3 dstOffset = {0,0,0}
+		) override;
+		virtual void ICopyImageToBuffer(
+			const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& imageSubresource, 
+			const ge::mem::Ref<Buffer>& dst, glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, uint32_t dstOffset = 0
+		) override;
+		virtual void ICopyImageToImage(
+			const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& srcSubresource, 
+			const ge::mem::Ref<Image>& dst, const ImageSubresourceLayers& dstSubresource, 
+			glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, glm::uvec3 dstOffset = {0,0,0}
+		) override;
+
+		virtual void ILoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) override;
+		virtual void ILoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) override;
 
 		virtual void SetBeginDebugLabel(std::string_view label) override;
 		virtual void SetEndDebugLabel() override;
@@ -44,10 +62,10 @@ namespace ge::renderer {
 		bool _frameStarted = false;
 
 		// translates image layout to Vulkan_OptimalImageLayout() when called End*Pass() func
-		std::unordered_set<Vulkan_Image*> _image_layout_transition_set;
-		// TODO(dnm): maybe we track buffers
-		void TransitionImageLayouts();
-
+		std::unordered_set<Vulkan_Image*> _barriersForImages; // TODO (0x): better name
+		std::unordered_set<Vulkan_Buffer*> _barriersForBuffers; // TODO (0x): better name
+		
+		void Barrier();
 		GEVector<ge::mem::Scope<Vulkan_Buffer>> staging_buffers;
 	};
 }

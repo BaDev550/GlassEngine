@@ -1,8 +1,10 @@
 #pragma once
 #include <cstdint>
 #include <glm/detail/qualifier.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
 #include <glm/ext/vector_uint2.hpp>
+#include <glm/ext/vector_uint3.hpp>
 #include <glm/ext/vector_uint4.hpp>
 #include <span>
 #include <iostream>
@@ -51,6 +53,8 @@ namespace ge::renderer {
 		ClearColor clearColor;
 		AttachmentLoadOp loadOp;
 		AttachmentStoreOp storeOp;
+
+		bool isSwapchainImage;
 	};
 
 	struct BeginRenderPassSpec {
@@ -58,6 +62,12 @@ namespace ge::renderer {
 		Attachment depth_stencil;
 		glm::uvec2 extent;
 		ImageSampleCount sampleCount;
+	};
+
+	struct ImageSubresourceLayers {
+		uint32_t mipLevel;
+		uint32_t baseArrayLayer;
+		uint32_t layerCount;
 	};
 
 	class RenderAPI : public RenderObject {
@@ -79,8 +89,26 @@ namespace ge::renderer {
 		virtual void BeginRenderPass(const BeginRenderPassSpec&) = 0;
 		virtual void EndRenderPass() = 0;
 
-		virtual void LoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) = 0;
-		virtual void LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) = 0;
+		void CopyBufferToBuffer(
+			const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Buffer>& dst, 
+			uint32_t size, uint32_t srcOffset = 0, uint32_t dstOffset = 0
+		);
+		void CopyBufferToImage(
+			const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Image>& dst, 
+			const ImageSubresourceLayers& imageSubresource, glm::uvec3 extent, uint32_t srcOffset = 0, glm::uvec3 dstOffset = {0,0,0}
+		);
+		void CopyImageToBuffer(
+			const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& imageSubresource, 
+			const ge::mem::Ref<Buffer>& dst, glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, uint32_t dstOffset = 0
+		);
+		void CopyImageToImage(
+			const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& srcSubresource, 
+			const ge::mem::Ref<Image>& dst, const ImageSubresourceLayers& dstSubresource, 
+			glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, glm::uvec3 dstOffset = {0,0,0}
+		);
+
+		void LoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize);
+		void LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize);
 
 		static inline RenderStats GetRenderStats() { return _renderStats; }
 		static inline GraphicsAPI GetAPI() { return _graphicsAPI; }
@@ -91,6 +119,27 @@ namespace ge::renderer {
 		virtual void SetEndDebugLabel() = 0;
 		virtual void SetDebugName(GEString name) const noexcept final {}
 	protected:
+		virtual void ICopyBufferToBuffer(
+			const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Buffer>& dst, 
+			uint32_t size, uint32_t srcOffset = 0, uint32_t dstOffset = 0
+		) = 0;
+		virtual void ICopyBufferToImage(
+			const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Image>& dst, 
+			const ImageSubresourceLayers& imageSubresource, glm::uvec3 extent, uint32_t srcOffset = 0, glm::uvec3 dstOffset = {0,0,0}
+		) = 0;
+		virtual void ICopyImageToBuffer(
+			const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& imageSubresource, 
+			const ge::mem::Ref<Buffer>& dst, glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, uint32_t dstOffset = 0
+		) = 0;
+		virtual void ICopyImageToImage(
+			const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& srcSubresource, 
+			const ge::mem::Ref<Image>& dst, const ImageSubresourceLayers& dstSubresource, 
+			glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, glm::uvec3 dstOffset = {0,0,0}
+		) = 0;
+
+		virtual void ILoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) = 0;
+		virtual void ILoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) = 0;
+
 		static RenderStats _renderStats;
 		static GraphicsAPI _graphicsAPI;
 	};
