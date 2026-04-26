@@ -291,22 +291,42 @@ namespace ge::renderer {
 			);
 		}
 
+		auto vk_image = spec.depth_stencil.image.Cast<Vulkan_Image>();
+
+		const VkRenderingAttachmentInfo depthStencilAttachment
+		 	= vk_image ? VkRenderingAttachmentInfo{} : VkRenderingAttachmentInfo{
+			VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+			nullptr,
+			vk_image->CreateGetImageView(spec.depth_stencil.subresource),
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VkResolveModeFlagBits{},
+			VkImageView{},
+			VkImageLayout{},
+			utility::Vulkan_GetLoadOp(spec.depth_stencil.loadOp),
+			utility::Vulkan_GetStoreOp(spec.depth_stencil.storeOp),
+			VkClearValue{.depthStencil{
+				spec.depth_stencil.clearColor.depthClear,
+				spec.depth_stencil.clearColor.stencilClear
+			}}
+		};
+
 		VkRenderingInfo renderingInfo{};
 		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-		// renderingInfo.renderArea = VkRect2D({ 0, 0 }, extent);
+		renderingInfo.renderArea = VkRect2D({ 0, 0 }, {spec.extent.x, spec.extent.y});
 		renderingInfo.layerCount = 1;
 		renderingInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
 		renderingInfo.pColorAttachments = colorAttachments.data();
-		//renderingInfo.pDepthAttachment = 
+		renderingInfo.pDepthAttachment = &depthStencilAttachment;
+		renderingInfo.pStencilAttachment = &depthStencilAttachment;
 		
-		// VkViewport viewport{ 0, 0, (float)extent.width, (float)extent.height };
-		// viewport.minDepth = 0;
-		// viewport.maxDepth = 1;
-		// VkRect2D scissor{ {0,0}, extent };
+		VkViewport viewport{ 0, 0, (float)spec.extent.x, (float)spec.extent.y };
+		viewport.minDepth = 0;
+		viewport.maxDepth = 1;
+		VkRect2D scissor{ {0,0}, {spec.extent.x, spec.extent.y} };
 
 		vkCmdBeginRendering(cmd, &renderingInfo);
-		// vkCmdSetViewport(cmd, 0, 1, &viewport);
-		// vkCmdSetScissor(cmd, 0, 1, &scissor);
+		vkCmdSetViewport(cmd, 0, 1, &viewport);
+		vkCmdSetScissor(cmd, 0, 1, &scissor);
 	}
 
 	void Vulkan_RenderAPI::EndRenderPass() {

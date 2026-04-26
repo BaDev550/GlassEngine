@@ -20,6 +20,9 @@ namespace ge::renderer {
 		spec.inputAssemblySpec.vertexBindings = {
 			VertexBinding{40, 0, VertexInputRate::Vertex}
 		};
+		spec.depthStencilSpec.depthTestEnable = true;
+		spec.depthStencilSpec.depthWriteEnable = true;
+		spec.depthStencilSpec.depthTestCompareOp = CompareOp::Less;
 		spec.shader = Renderer3D::GetShaderLibrary().GetShader("dnm");
 		spec.targetFramebuffer = _framebuffer;
 		_pipeline = Pipeline::Create(spec);

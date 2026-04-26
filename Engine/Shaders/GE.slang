@@ -113,7 +113,7 @@ T GetBindless<T>(uint handle)
     }
 }
 
-// CameraData GetCamaraData() {
+// __EngineGlobalCameraBuffer__ GetCamaraData() {
 //     __target_switch
 //     {
 //     case spirv:
