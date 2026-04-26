@@ -28,6 +28,7 @@ namespace ge::renderer {
 		spec.depthStencilSpec.depthTestEnable = true;
 		spec.depthStencilSpec.depthWriteEnable = true;
 		spec.depthStencilSpec.depthTestCompareOp = CompareOp::Less;
+		spec.resterizerSpec.cullMode = CullMode::Back;
 		spec.shader = Renderer3D::GetShaderLibrary().GetShader("dnm");
 		spec.targetFramebuffer = _framebuffer;
 		_pipeline = Pipeline::Create(spec);
@@ -44,6 +45,8 @@ namespace ge::renderer {
 			std::memcpy(_cameraBuffer->GetMappedPtr(), &_cameraData, sizeof(CameraData));
 			Application::Get()->GetWindow().GetRenderContext().SetUniformBuffer(_cameraBuffer, 0);
 		}
+
+		_endlessGrid = mem::Ref<EndlessGrid>::Create(_framebuffer);
 	}
 	
 	SceneRenderer::~SceneRenderer() {}
@@ -52,9 +55,12 @@ namespace ge::renderer {
 	{
 		_cameraData.view = camera->GetView();
 		_cameraData.proj = camera->GetProjection();
+		_cameraData.pos = camera->GetPosition();
 		std::memcpy(_cameraBuffer->GetMappedPtr(), &_cameraData, sizeof(CameraData));
 
 		_renderPass->Begin();
+		_endlessGrid->Draw();
+
 		auto view = _scene->GetRegistry().view<const TransformComponent, StaticMeshComponent>();
 		view.each([&](const TransformComponent& tc, StaticMeshComponent& smc) {
 			if (smc.isVisible) {
@@ -70,6 +76,7 @@ namespace ge::renderer {
 				Renderer3D::DrawStaticMesh(_pipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
 			}
 			});
+
 		_renderPass->End();
 	}
 }

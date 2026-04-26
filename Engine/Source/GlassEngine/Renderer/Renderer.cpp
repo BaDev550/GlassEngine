@@ -33,6 +33,7 @@ namespace ge::renderer {
 		GE_ADD_CONSOLE_COMMAND("r", "reload_shaders", [](const GEVector<GEString>& args) { GetShaderLibrary().ReloadAll(); });
 		GE_ADD_CONSOLE_COMMAND("r", "reload_shader", [](const GEVector<GEString>& args) { GetShaderLibrary().ReloadShader(GEString(args[0])); }, "reload_shader <name>");
 		GetShaderLibrary().AddShader("dnm");
+		GetShaderLibrary().AddShader("grid");
 
 		{
 			TextureSpec whiteTextureData{};
@@ -68,11 +69,11 @@ namespace ge::renderer {
 		g_frameIndex = (g_frameIndex + 1) % MaxFramesInFlight;
 	}
 
-	void Renderer3D::DrawVertex(uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex, uint32_t firstInstance) {
-		g_renderAPI->Draw(vertexCount, instanceCount, vertexBuffer, firstVertex, firstInstance);
+	void Renderer3D::DrawVertex(ge::mem::Ref<Pipeline>& pipeline, uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex, uint32_t firstInstance) {
+		g_renderAPI->Draw(pipeline, vertexCount, instanceCount, vertexBuffer, firstVertex, firstInstance);
 	}
-	void Renderer3D::DrawIndexed(uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex, uint32_t firstInstance, int32_t vertexOffset) {
-		g_renderAPI->DrawIndexed(indexCount, instanceCount, vertexBuffer, indexBuffer, firstIndex, firstInstance, vertexOffset);
+	void Renderer3D::DrawIndexed(ge::mem::Ref<Pipeline>& pipeline, uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex, uint32_t firstInstance, int32_t vertexOffset) {
+		g_renderAPI->DrawIndexed(pipeline, indexCount, instanceCount, vertexBuffer, indexBuffer, firstIndex, firstInstance, vertexOffset);
 	}
 	void Renderer3D::DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex, ge::mem::Ref<MaterialTable> materialTable, const glm::mat4& transform) {
 		g_renderAPI->DrawStaticMesh(pipeline, mesh, lodIndex, materialTable, transform);

@@ -2,6 +2,7 @@
 #include "GlassEngine/Core/Core.h"
 #include "RenderPass.h"
 #include "Camera.h"
+#include "EndlessGrid.h"
 
 namespace ge { class Scene; }
 namespace ge::renderer {
@@ -21,7 +22,9 @@ namespace ge::renderer {
 		struct CameraData {
 			glm::mat4 proj;
 			glm::mat4 view;
+			glm::vec3 pos;
 		} _cameraData;
 		ge::mem::Ref<Buffer> _cameraBuffer;
+		ge::mem::Ref<EndlessGrid> _endlessGrid;
 	};
 }

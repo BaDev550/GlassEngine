@@ -21,23 +21,23 @@ struct VertexOutput {
 };
 
 [shader("vertex")]
-VertexOutput vertexMain(uint vertexID : SV_VertexID)
+VertexOutput VertMain(uint vertexID : SV_VertexID)
 {
     VertexOutput output;
-
+    
     int Index = Indices[vertexID];
     float3 vPos3D = Pos[Index] * GridSize;
 
-    vPos3D.x += uCamera.position.x;
-    vPos3D.z += uCamera.position.z;
+    vPos3D.x += __EngineGlobalCameraBuffer__.pos.x;
+    vPos3D.z += __EngineGlobalCameraBuffer__.pos.z;
 
     output.GridSize = GridSize;
-    output.CameraPosition = uCamera.position;
+    output.CameraPosition = __EngineGlobalCameraBuffer__.pos;
     output.WorldPos = vPos3D;
 
     float4 vPos = float4(vPos3D, 1.0f);
     
-    output.position = mul(uCamera.proj, mul(uCamera.view, vPos));
+    output.position = mul(__EngineGlobalCameraBuffer__.proj, mul(__EngineGlobalCameraBuffer__.view, vPos));
     return output;
 }
 
@@ -67,7 +67,7 @@ float2 glsl_mod(float2 x, float y) {
 }
 
 [shader("fragment")]
-float4 fragmentMain(VertexOutput input) : SV_Target
+float4 FragMain(VertexOutput input) : SV_Target
 {
     float2 dvx = float2(ddx(input.WorldPos.x), ddy(input.WorldPos.x));
     float2 dvy = float2(ddx(input.WorldPos.z), ddy(input.WorldPos.z));
