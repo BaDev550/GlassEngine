@@ -45,9 +45,15 @@ public:
 	virtual void OnDetach() override {}
 	virtual void OnUpdate(float deltaTime) override {
 		_camera->Update(deltaTime);
-		_camera->SetProccessingMouse(true);
 
 		_scene->OnEditorUpdate(deltaTime, _camera);
+
+		if (ge::Input::IsKeyJustPressed(ge::key::Tab)) {
+			_cursor = !_cursor;
+			_camera->SetProccessingMouse(!_cursor);
+			_camera->SetFirstMouse();
+			ge::Application::Get()->GetWindow().SetCursor(_cursor);
+		}
 	}
 
 	virtual void OnImGuiRender() override {
@@ -64,6 +70,7 @@ private:
 	ge::mem::Ref<ge::Scene> _scene;
 	ge::mem::Ref<ge::renderer::FreeCamera> _camera;
 
+	bool _cursor = false;
 	ge::Entity* entity;
 };
 
