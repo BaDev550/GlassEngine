@@ -1,4 +1,5 @@
 #include "SceneRenderer.h"
+#include "GlassEngine/Core/Application.h"
 #include "GlassEngine/Renderer/Pipeline.h"
 #include "GlassEngine/Renderer/Types.h"
 #include "GlassEngine/Scene/Scene.h"
@@ -8,8 +9,13 @@
 namespace ge::renderer {
 	SceneRenderer::SceneRenderer(Scene* scene) : _scene(scene) {
 		FramebufferSpec fspec{};
-		fspec.Attachments = { FramebufferAttachment(ImageFormat::D32S8) };
-		fspec.IsSwapchain = true;
+		fspec.attachments = { 
+			FramebufferAttachment{true},
+			FramebufferAttachment{ImageFormat::D32S8}
+		};
+		fspec.attachments[1].clearValue = {1.f, 0};
+		fspec.width = Application::Get()->GetWindow().GetWidth();
+		fspec.height = Application::Get()->GetWindow().GetHeight();
 		_framebuffer = Framebuffer::Create(fspec);
 		_renderPass = RenderPass::Create(_framebuffer, "SCENE_RENDER_PASS");
 
@@ -42,6 +48,7 @@ namespace ge::renderer {
 			Application::Get()->GetWindow().GetRenderContext().SetUniformBuffer(_cameraBuffer, 0);
 		}
 	}
+	
 	SceneRenderer::~SceneRenderer() {}
 
 	void SceneRenderer::DrawScene(const ge::mem::Ref<Camera>& camera)

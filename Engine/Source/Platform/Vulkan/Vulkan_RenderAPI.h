@@ -48,8 +48,8 @@ namespace ge::renderer {
 		virtual void ILoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) override;
 		virtual void ILoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) override;
 
-		virtual void SetBeginDebugLabel(std::string_view label) override;
-		virtual void SetEndDebugLabel() override;
+		virtual void BeginDebugLabel(std::string_view label) override;
+		virtual void EndDebugLabel() override;
 
 		VkCommandBuffer GetCurrentCommandBuffer();
 	private:
@@ -60,6 +60,8 @@ namespace ge::renderer {
 			GEVector<RenderObject> renderObjects;
 		} _frames[Renderer3D::MaxFramesInFlight]; // TEMP ig
 		bool _frameStarted = false;
+
+		VkImageMemoryBarrier2 GetMemoryBarrier(Vulkan_Image& image, const VkImageLayout newImageLayout);
 
 		// translates image layout to Vulkan_OptimalImageLayout() when called End*Pass() func
 		std::unordered_set<Vulkan_Image*> _barriersForImages; // TODO (0x): better name

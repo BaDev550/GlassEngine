@@ -8,10 +8,12 @@ namespace ge::renderer {
 	public:
 		RenderPass(const ge::mem::Ref<Framebuffer>& framebuffer, std::string_view debugName) : _framebuffer(framebuffer), _debugName(debugName) {}
 		
-		virtual void Begin(uint32_t layer = 0) = 0;
-		virtual void End(uint32_t layer = 0) = 0;
+		void Begin(uint32_t layer = 0);
+		void End(uint32_t layer = 0);
 
-		static ge::mem::Ref<RenderPass> Create(const ge::mem::Ref<Framebuffer>& framebuffer, std::string_view debugName = "");
+		static ge::mem::Ref<RenderPass> Create(const ge::mem::Ref<Framebuffer>& framebuffer, std::string_view debugName) {
+			return ge::mem::Ref<RenderPass>::Create(framebuffer, debugName);
+		}
 	protected:
 		ge::mem::Ref<Framebuffer> _framebuffer;
 		GEString _debugName;

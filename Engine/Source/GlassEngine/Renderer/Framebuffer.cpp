@@ -1,19 +1,51 @@
 #include "gepch.h"
 #include "Framebuffer.h"
 
-#include "Platform/Vulkan/Vulkan_Framebuffer.h"
-
 namespace ge::renderer {
-	ge::mem::Ref<Framebuffer> Framebuffer::Create(const FramebufferSpec& spec) {
-		switch (RenderAPI::GetAPI())
-		{
-		case GraphicsAPI::Vulkan: return ge::mem::Ref<Vulkan_Framebuffer>::Create(spec);
-		case GraphicsAPI::DirectX11: return nullptr;
-		case GraphicsAPI::OpenGL: return nullptr;
-		default:
-			GE_CORE_ERROR("Failed to select api");
-			break;
+	Framebuffer::Framebuffer(const FramebufferSpec& spec) 
+	: _specs(spec) {
+		Invalidate(spec);
+	}
+
+	void Framebuffer::Invalidate(const FramebufferSpec& spec) {
+		_specs = spec;
+		_colorAttachments.clear();
+		for (auto& attachment : _specs.attachments) {
+			if (attachment.isSwapchain) {
+				continue;
+			}
+			else if (attachment.existingImage) {
+				if (utility::IsDepthFormat(attachment.existingImage->GetSpec().imageFormat) 
+				|| utility::IsDepthStencilFormat(attachment.existingImage->GetSpec().imageFormat)) {
+					_depthStencilAttachment = attachment.existingImage;
+				}
+				else {
+					_colorAttachments.emplace_back(attachment.existingImage);
+				}
+				continue;
+			}
+
+			ImageSpec imageSpec{};
+			imageSpec.imageFormat = attachment.format;
+			imageSpec.extent.x = spec.width;
+			imageSpec.extent.y = spec.height;
+			imageSpec.extent.z = 1;
+			if (utility::IsDepthFormat(attachment.format) 
+			|| utility::IsDepthStencilFormat(attachment.format)) {
+				imageSpec.usageFlags |= ImageUsageFlagsBits::DepthStencilAttachment;
+				_depthStencilAttachment = Image::Create(imageSpec);
+				attachment.existingImage = _depthStencilAttachment;
+			}
+			else {
+				imageSpec.usageFlags |= ImageUsageFlagsBits::ColorAttachment;
+				attachment.existingImage = _colorAttachments.emplace_back(Image::Create(imageSpec));
+			}
 		}
-		return nullptr;
+	}
+
+	void Framebuffer::Resize(uint32_t width, uint32_t height) {
+		_specs.height = width;
+		_specs.width = height;
+		Invalidate(_specs);
 	}
 }

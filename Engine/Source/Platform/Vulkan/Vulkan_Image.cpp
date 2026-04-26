@@ -44,7 +44,6 @@ namespace ge::renderer {
 
 		if (imageView == VK_NULL_HANDLE)
 		{
-			// TODO (dnm):
 			VkImageSubresourceRange vkSubresource{};
 			vkSubresource.aspectMask = _aspectFlags;
 			vkSubresource.baseArrayLayer = subresource.baseLayer;

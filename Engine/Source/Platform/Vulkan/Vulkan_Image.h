@@ -19,7 +19,7 @@ namespace ge::renderer {
 
 		virtual void SetDebugName(GEString name) const noexcept override;
 	private:
-		VkImage _image;
+		VkImage _image{};
 		VmaAllocation _allocation;
 		VkFormat _format;
 		VkImageAspectFlags _aspectFlags;

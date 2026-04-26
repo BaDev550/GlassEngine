@@ -29,28 +29,11 @@ namespace ge::renderer {
 		DirectX11,
 		DirectX12
 	};
-	struct ColorClearColor {
-		glm::vec4 color;
-	};
-
-	struct DepthStencilClearColor {
-		float depth_clear;
-		uint8_t stencil_clear;
-	};
-
-	struct ClearColor {
-		ClearColor(float depth, uint8_t stencil) : depthClear(depth), stencilClear(stencil) {}
-		ClearColor(glm::vec4 color) : colorClear(color) {}
-		union {
-			glm::vec4 colorClear;
-			struct { float depthClear; uint8_t stencilClear; };
-		};
-	};
 
 	struct Attachment {
 		ge::mem::Ref<Image> image;
 		ImageSubresource subresource;
-		ClearColor clearColor;
+		ClearValue clearValue;
 		AttachmentLoadOp loadOp;
 		AttachmentStoreOp storeOp;
 
@@ -58,8 +41,8 @@ namespace ge::renderer {
 	};
 
 	struct BeginRenderPassSpec {
-		std::span<const Attachment> color_attachments;
-		Attachment depth_stencil;
+		std::span<const Attachment> colorAttachments;
+		Attachment depthStencilAttachment;
 		glm::uvec2 extent;
 		ImageSampleCount sampleCount;
 	};
@@ -102,8 +85,8 @@ namespace ge::renderer {
 		static void SetAPI(GraphicsAPI api) { _graphicsAPI = api; }
 		static ge::mem::Ref<RenderAPI> Create();
 
-		virtual void SetBeginDebugLabel(std::string_view label) = 0;
-		virtual void SetEndDebugLabel() = 0;
+		virtual void BeginDebugLabel(std::string_view label) = 0;
+		virtual void EndDebugLabel() = 0;
 		virtual void SetDebugName(GEString name) const noexcept final {}
 	protected:
 		virtual void ICopyBufferToBuffer(

@@ -45,7 +45,7 @@ namespace ge::renderer {
 				case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
 					return VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
 				case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-					return VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+					return VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 				case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
 					return VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 				case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
@@ -58,29 +58,31 @@ namespace ge::renderer {
 			}
 		}
 
-		static VkImageMemoryBarrier2 GetMemoryBarrier(const Vulkan_Image& image, const VkImageLayout newImageLayout) {
-			const auto oldImageLayout = image.GetImageLayout();
-			return {
-				VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-				nullptr,
-				utility::Vulkan_GetPipelineStageFlagsFromLayout(oldImageLayout),
-				utility::Vulkan_GetAccessFlagsFromLayout(oldImageLayout),
-				utility::Vulkan_GetPipelineStageFlagsFromLayout(newImageLayout),
-				utility::Vulkan_GetAccessFlagsFromLayout(newImageLayout),
-				oldImageLayout,
-				newImageLayout,
-				VK_QUEUE_FAMILY_IGNORED,
-				VK_QUEUE_FAMILY_IGNORED,
-				image.GetImage(),
-				VkImageSubresourceRange{
-					.aspectMask = image.GetAspectFlags(),
-					.baseMipLevel = 0,
-					.levelCount = VK_REMAINING_MIP_LEVELS,
-					.baseArrayLayer = 0,
-					.layerCount =  VK_REMAINING_ARRAY_LAYERS
-				}
-			};
-		}
+	}
+
+	VkImageMemoryBarrier2 Vulkan_RenderAPI::GetMemoryBarrier(Vulkan_Image& image, const VkImageLayout newImageLayout) {
+		const auto oldImageLayout = image.GetImageLayout();
+		image._imageLayout = newImageLayout;
+		return {
+			VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+			nullptr,
+			utility::Vulkan_GetPipelineStageFlagsFromLayout(oldImageLayout),
+			utility::Vulkan_GetAccessFlagsFromLayout(oldImageLayout),
+			utility::Vulkan_GetPipelineStageFlagsFromLayout(newImageLayout),
+			utility::Vulkan_GetAccessFlagsFromLayout(newImageLayout),
+			oldImageLayout,
+			newImageLayout,
+			VK_QUEUE_FAMILY_IGNORED,
+			VK_QUEUE_FAMILY_IGNORED,
+			image.GetImage(),
+			VkImageSubresourceRange{
+				.aspectMask = image.GetAspectFlags(),
+				.baseMipLevel = 0,
+				.levelCount = VK_REMAINING_MIP_LEVELS,
+				.baseArrayLayer = 0,
+				.layerCount =  VK_REMAINING_ARRAY_LAYERS
+			}
+		};
 	}
 
 	Vulkan_RenderAPI::Vulkan_RenderAPI()
@@ -230,9 +232,10 @@ namespace ge::renderer {
 		auto vulkanPipeline = pipeline.Cast<Vulkan_Pipeline>()->GetPipeline();
 
 		vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
+		PushConstant(&transform, sizeof(glm::mat4), 0);
 		for (const Submesh& submesh : currentLOD.submesh) {
 			auto material = materialAssets[submesh.materialIndex]->GetMaterial();
-			PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), 0);
+            PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), sizeof(glm::mat4));
 			DrawIndexed(submesh.indexCount, 1, mesh->GetVertexBuffer(), mesh->GetIndexBuffer(), submesh.indexOffset, 0, submesh.vertexOffset);
 		}
 	}
@@ -258,26 +261,24 @@ namespace ge::renderer {
 		const auto& window = Application::Get()->GetWindow();
 		const uint32_t imageIndex = window.GetImageIndex();
 
-		const auto unifiedImageLayouts = VK_RENDER_CONTEXT->GetDeviceFeatures().unifiedImageLayouts;
-		
 		GEVector<VkRenderingAttachmentInfo> colorAttachments;
-		colorAttachments.reserve(spec.color_attachments.size());
+		colorAttachments.reserve(spec.colorAttachments.size());
 
 		GEVector<VkImageMemoryBarrier2> memBarriers;
-		memBarriers.reserve(spec.color_attachments.size() + 1);
+		memBarriers.reserve(spec.colorAttachments.size() + 1);
 
-		for (const auto& attachment : spec.color_attachments) {
+		for (const auto& attachment : spec.colorAttachments) {
 			auto vk_image = attachment.image.Cast<Vulkan_Image>();
 
 			if (!attachment.isSwapchainImage && vk_image->GetImageLayout() != VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
 				memBarriers.emplace_back(
-					utility::GetMemoryBarrier(
+					GetMemoryBarrier(
 						*vk_image, 
 						VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 					)
 				);
+				_barriersForImages.emplace(vk_image.Get());
 			}
-			_barriersForImages.emplace(vk_image.Get());
 
 			colorAttachments.emplace_back(
 				VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
@@ -292,13 +293,45 @@ namespace ge::renderer {
 				utility::Vulkan_GetLoadOp(attachment.loadOp),
 				utility::Vulkan_GetStoreOp(attachment.storeOp),
 				VkClearValue{.color{
-					attachment.clearColor.colorClear.r, 
-					attachment.clearColor.colorClear.g, 
-					attachment.clearColor.colorClear.b, 
-					attachment.clearColor.colorClear.a
+					attachment.clearValue.colorClear.r, 
+					attachment.clearValue.colorClear.g, 
+					attachment.clearValue.colorClear.b, 
+					attachment.clearValue.colorClear.a
 				}}
 			);
 		}
+
+		auto vk_depthStencilImage = spec.depthStencilAttachment.image.Cast<Vulkan_Image>();
+		const auto has_depth = vk_depthStencilImage != nullptr;
+		const auto has_stencil = has_depth ? 
+			utility::IsDepthStencilFormat(vk_depthStencilImage->GetSpecRef().imageFormat) : false;
+
+		if (has_depth && vk_depthStencilImage->GetImageLayout() != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+			memBarriers.emplace_back(
+				GetMemoryBarrier(
+					*vk_depthStencilImage, 
+					VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+				)
+			);
+		}
+		if (has_depth) _barriersForImages.emplace(vk_depthStencilImage.Get());
+
+		const VkRenderingAttachmentInfo depthStencilAttachment
+		 	= !has_depth ? VkRenderingAttachmentInfo{} : VkRenderingAttachmentInfo{
+			VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+			nullptr,
+			vk_depthStencilImage->CreateGetImageView(spec.depthStencilAttachment.subresource),
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VkResolveModeFlagBits{},
+			VkImageView{},
+			VkImageLayout{},
+			utility::Vulkan_GetLoadOp(spec.depthStencilAttachment.loadOp),
+			utility::Vulkan_GetStoreOp(spec.depthStencilAttachment.storeOp),
+			VkClearValue{.depthStencil{
+				spec.depthStencilAttachment.clearValue.depthClear,
+				spec.depthStencilAttachment.clearValue.stencilClear
+			}}
+		};
 
 		VkDependencyInfo dependencyInfo{};
 		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
@@ -306,37 +339,6 @@ namespace ge::renderer {
 		dependencyInfo.imageMemoryBarrierCount = memBarriers.size();
 
 		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
-
-		auto vk_image = spec.depth_stencil.image.Cast<Vulkan_Image>();
-		const auto has_depth = vk_image != nullptr;
-		const auto has_stencil = has_depth ? 
-			utility::IsDepthStencilFormat(vk_image->GetSpecRef().imageFormat) : false;
-
-		if (has_depth && vk_image->GetImageLayout() != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
-			memBarriers.emplace_back(
-				utility::GetMemoryBarrier(
-					*vk_image, 
-					VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-				)
-			);
-		}
-		_barriersForImages.emplace(vk_image.Get());
-		const VkRenderingAttachmentInfo depthStencilAttachment
-		 	= has_depth ? VkRenderingAttachmentInfo{} : VkRenderingAttachmentInfo{
-			VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-			nullptr,
-			vk_image->CreateGetImageView(spec.depth_stencil.subresource),
-			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			VkResolveModeFlagBits{},
-			VkImageView{},
-			VkImageLayout{},
-			utility::Vulkan_GetLoadOp(spec.depth_stencil.loadOp),
-			utility::Vulkan_GetStoreOp(spec.depth_stencil.storeOp),
-			VkClearValue{.depthStencil{
-				spec.depth_stencil.clearColor.depthClear,
-				spec.depth_stencil.clearColor.stencilClear
-			}}
-		};
 
 		VkRenderingInfo renderingInfo{};
 		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
@@ -358,7 +360,9 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderAPI::EndRenderPass() {
-		_barriersForImages.clear();
+		VkCommandBuffer cmd = Renderer3D::GetRenderAPI().Cast<Vulkan_RenderAPI>()->GetCurrentCommandBuffer();
+		vkCmdEndRendering(cmd);
+		Barrier();
 	}
 
 	void Vulkan_RenderAPI::ILoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) {
@@ -398,7 +402,7 @@ namespace ge::renderer {
 		auto vk_image = texture.GetImage().Cast<Vulkan_Image>();
 
 		const VkImageMemoryBarrier2 barrier 
-			= utility::GetMemoryBarrier(*vk_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			= GetMemoryBarrier(*vk_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		VkDependencyInfo dependencyInfo{};
 		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
@@ -438,7 +442,7 @@ namespace ge::renderer {
 		_barriersForImages.emplace(vk_image.Get());
 	}
 	
-	void Vulkan_RenderAPI::SetBeginDebugLabel(std::string_view label) {
+	void Vulkan_RenderAPI::BeginDebugLabel(std::string_view label) {
 		VkDebugUtilsLabelEXT label_desc{};
 		label_desc.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
 		label_desc.pLabelName = label.data();
@@ -449,7 +453,7 @@ namespace ge::renderer {
 		vkCmdBeginDebugUtilsLabelEXT(GetCurrentCommandBuffer(), &label_desc);
 	}
 
-	void Vulkan_RenderAPI::SetEndDebugLabel() {
+	void Vulkan_RenderAPI::EndDebugLabel() {
 		vkCmdEndDebugUtilsLabelEXT(GetCurrentCommandBuffer());
 	}
 
@@ -459,11 +463,11 @@ namespace ge::renderer {
 		imageBarriers.reserve(_barriersForImages.size());
 		bufferBarriers.reserve(_barriersForBuffers.size());
 
-		for (const auto* image : _barriersForImages) {
+		for (auto* image : _barriersForImages) {
 			const auto newLayout = utility::Vulkan_OptimalImageLayout(image->GetSpecRef().usageFlags);
 
 			imageBarriers.emplace_back(
-				utility::GetMemoryBarrier(
+				GetMemoryBarrier(
 						*image, 
 						newLayout
 					)
@@ -551,7 +555,7 @@ namespace ge::renderer {
 		auto &vk_dst = *dst.Cast<Vulkan_Image>(); 
 
 		const VkImageMemoryBarrier2 barrier 
-			= utility::GetMemoryBarrier(vk_dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			= GetMemoryBarrier(vk_dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		VkDependencyInfo dependencyInfo{};
 		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
@@ -592,7 +596,7 @@ namespace ge::renderer {
 		auto &vk_dst = *dst.Cast<Vulkan_Buffer>(); 
 
 		const VkImageMemoryBarrier2 barrier 
-			= utility::GetMemoryBarrier(vk_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+			= GetMemoryBarrier(vk_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
 		VkDependencyInfo dependencyInfo{};
 		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
@@ -633,7 +637,7 @@ namespace ge::renderer {
 		auto &vk_dst = *dst.Cast<Vulkan_Image>(); 
 
 		const VkImageMemoryBarrier2 barrier 
-			= utility::GetMemoryBarrier(vk_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+			= GetMemoryBarrier(vk_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
 		VkDependencyInfo dependencyInfo{};
 		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;

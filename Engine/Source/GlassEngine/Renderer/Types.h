@@ -4,6 +4,7 @@
 #include "GlassEngine/Utilities/Blob.h"
 #include "GlassEngine/Memory/Memory.h"
 #include "GlassEngine/Core/Core.h"
+#include <glm/glm.hpp>
 
 namespace ge::renderer {
 	enum class FilterType : uint8_t {
@@ -155,6 +156,16 @@ namespace ge::renderer {
 		Graphics,
 		Compute,
 	};
+	
+	struct ClearValue {
+		ClearValue(float depth, uint8_t stencil) : depthClear(depth), stencilClear(stencil) {}
+		ClearValue(glm::vec4 color) : colorClear(color) {}
+		ClearValue() : colorClear(0,0,0,0) {}
+		union {
+			glm::vec4 colorClear;
+			struct { float depthClear; uint8_t stencilClear; };
+		};
+	};
 
 	struct ShaderResource {
 		GEString name;
@@ -178,7 +189,6 @@ namespace ge::renderer {
 		GEVector<char> spirvByteCode;
 		GEUnorderedMap<GEString, GEVector<char>> dxilByteCodes;
 	};
-
 
 	struct ImageSubresource {
 		uint16_t baseLayer = 0;

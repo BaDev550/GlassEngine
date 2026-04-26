@@ -11,7 +11,7 @@
 
 namespace ge::renderer {
 	struct ImageSpec {
-		glm::uvec3 extent;
+		glm::uvec3 extent {1,1,1};
 		ImageUsageFlags usageFlags;
 		ImageSampleCount sampleCount = ImageSampleCount::e1;
 		ImageFormat imageFormat;

@@ -47,7 +47,7 @@ namespace ge::renderer {
 		GE_ASSERT(src->GetSpecRef().usageFlags.Has(ge::renderer::ImageUsageFlagsBits::TransferSrc), "src has ImageUsageFlagsBits::TransferSrc bit");
 		GE_ASSERT(dst->GetSpecRef().usageFlags.Has(ge::renderer::BufferUsageFlagsBits::TransferDst), "dst has BufferUsageFlagsBits::TransferDst bit");
 
-		CopyImageToBuffer(src, imageSubresource, dst, extent, srcOffset, dstOffset);
+		ICopyImageToBuffer(src, imageSubresource, dst, extent, srcOffset, dstOffset);
 	}
 
 	void RenderAPI::CopyImageToImage(
