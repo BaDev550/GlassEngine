@@ -23,6 +23,7 @@ namespace ge {
 		uint32_t GetWidth() const { return _specs.width; }
 		uint32_t GetHeight() const { return _specs.height; }
 		uint32_t GetImageIndex() const;
+		void SetCursor(bool enabled);
 		void PollEvents() const;
 		void SetIcon(std::vector<uint8_t> data, uint32_t width, uint32_t height);
 		void SetIcon(const GEString& iconPath);

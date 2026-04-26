@@ -23,7 +23,7 @@ namespace ge::renderer {
 		else
 			createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 
-		return ge::mem::Ref<Texture2D>(new Texture2D(Image::Create(createDesc), ImageSubresource{}, spec));
+		return ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
 	}
 
 	ge::mem::Ref<Texture2D> Texture2D::Create(const TextureSpec& spec, const std::filesystem::path& filePath)
@@ -41,7 +41,7 @@ namespace ge::renderer {
 		else
 			createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 
-		auto texture = ge::mem::Ref<Texture2D>(new Texture2D(Image::Create(createDesc), ImageSubresource{}, spec));
+		auto texture = ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
 		// Renderer3D::GetRenderAPI()->LoadDataToTexture2D({}, *texture, data, width * height * utility::GetPixelSize(spec.format));
 		return texture;
 	}

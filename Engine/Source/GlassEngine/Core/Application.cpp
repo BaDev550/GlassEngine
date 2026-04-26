@@ -23,6 +23,7 @@ namespace ge {
 
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		_window->SetIcon("Resources/icon-512.png");
+		_window->SetCursor(true);
 		renderer::Renderer3D::Init();
 		_imGuiLayer = ImGuiLayer::Create();
 		Input::Init();

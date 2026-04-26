@@ -24,7 +24,7 @@ public:
 		GetPanelManager().RegisterPanel<ge::editor::EditorECSDebugPanel>("E_ecs", _scene.Get());
 
 		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_c");
-		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_ecs");
+		//GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_ecs");
 
 #if 1
 		auto mario = ge::Application::Get()->GetAssetManager()->GetOrImportAsset("Resources/DamagedHelmet/DamagedHelmet.gltf").Cast<ge::renderer::StaticMesh>();

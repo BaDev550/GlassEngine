@@ -17,7 +17,6 @@ VertexOut VertMain(VertexIn in) {
     VertexOut out;
     out.uv = in.uv;
     out.normal = in.normal.xyz;
-    out.vertPos = in.position;
     out.vertPos = mul(__EngineGlobalCameraBuffer__.proj, mul(__EngineGlobalCameraBuffer__.view, in.position));
     return out;
 };

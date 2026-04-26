@@ -16,7 +16,7 @@ namespace ge::renderer {
 		_forward.y = sinf(_direction.x);
 		_forward.z = -cosf(_direction.x) * cosf(_direction.y);
 		_forward = glm::normalize(_forward);
-
+		
 		auto& window = Application::Get()->GetWindow();
 		float width = (float)window.GetWidth();
 		float height = (float)window.GetHeight();
