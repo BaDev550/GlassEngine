@@ -44,9 +44,9 @@ namespace ge {
 
 				for (uint32_t v = 0; v < aimesh->mNumVertices; v++) {
 					renderer::Vertex vertex{};
-					vertex.position = { aimesh->mVertices[v].x, aimesh->mVertices[v].y, aimesh->mVertices[v].z, 0.0f }; // TODO(0x): write a math util for conversations
+					vertex.position = { aimesh->mVertices[v].x, aimesh->mVertices[v].y, aimesh->mVertices[v].z, 1.0f }; // TODO(0x): write a math util for conversations
 					if (aimesh->HasNormals())
-						vertex.normal = { aimesh->mNormals[v].x, aimesh->mNormals[v].y, aimesh->mNormals[v].z, 0.0f };
+						vertex.normal = { aimesh->mNormals[v].x, aimesh->mNormals[v].y, aimesh->mNormals[v].z, 1.0f };
 					if (aimesh->HasTextureCoords(0))
 						vertex.texCoords = { aimesh->mTextureCoords[0][v].x, aimesh->mTextureCoords[0][v].y };
 					lod0.vertices.push_back(vertex);

@@ -39,6 +39,11 @@ namespace ge {
 		return _imageIndex;
 	}
 
+	void Window::SetCursor(bool enabled)
+	{
+		glfwSetInputMode(_handle, GLFW_CURSOR, enabled ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+	}
+
 	void Window::PollEvents() const {
 		glfwPollEvents();
 	}

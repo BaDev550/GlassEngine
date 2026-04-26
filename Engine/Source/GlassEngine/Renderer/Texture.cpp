@@ -23,7 +23,7 @@ namespace ge::renderer {
 		else
 			createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 
-		return ge::mem::Ref<Texture2D>(new Texture2D(Image::Create(createDesc), ImageSubresource{}, spec));
+		return ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
 	}
 
 	ge::mem::Ref<Texture2D> Texture2D::Create(const TextureSpec& spec, const std::filesystem::path& filePath)

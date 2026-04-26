@@ -22,6 +22,8 @@ namespace ge {
 		_runtimeAssetManager = (_specs.mode == ApplicationMode::Runtime) ? mem::CreateScope<RuntimeAssetManager>("assets.pak", "assets_manifest.bin") : nullptr;
 
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
+		_window->SetIcon("Resources/icon-512.png");
+		_window->SetCursor(true);
 		// _window->SetIcon("Resources/icon-512.png");
 		renderer::Renderer3D::Init();
 		_imGuiLayer = ImGuiLayer::Create();
