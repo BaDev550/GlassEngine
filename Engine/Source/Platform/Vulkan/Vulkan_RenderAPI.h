@@ -1,8 +1,10 @@
 #pragma once
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Memory/Ref.h"
 #include "GlassEngine/Renderer/RenderAPI.h"
 #include "GlassEngine/Renderer/RenderObject.h"
 #include "GlassEngine/Renderer/Renderer.h"
+#include "GlassEngine/Renderer/Texture.h"
 #include "Vulkan_RenderContext.h"
 #include <unordered_set>
 
@@ -25,7 +27,8 @@ namespace ge::renderer {
 		virtual void BeginRenderPass(const BeginRenderPassSpec&) override;
 		virtual void EndRenderPass() override;
 
-		virtual void LoadDataToTexture2D(Texture2D& texture, void* data, uint64_t dataSize) override;
+		virtual void LoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) override;
+		virtual void LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) override;
 
 		virtual void SetBeginDebugLabel(std::string_view label) override;
 		virtual void SetEndDebugLabel() override;
@@ -44,5 +47,7 @@ namespace ge::renderer {
 		std::unordered_set<Vulkan_Image*> _image_layout_transition_set;
 		// TODO(dnm): maybe we track buffers
 		void TransitionImageLayouts();
+
+		GEVector<ge::mem::Scope<Vulkan_Buffer>> staging_buffers;
 	};
 }

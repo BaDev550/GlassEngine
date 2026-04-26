@@ -79,7 +79,8 @@ namespace ge::renderer {
 		virtual void BeginRenderPass(const BeginRenderPassSpec&) = 0;
 		virtual void EndRenderPass() = 0;
 
-		virtual void LoadDataToTexture2D(Texture2D& texture, void* data, uint64_t dataSize) = 0;
+		virtual void LoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) = 0;
+		virtual void LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) = 0;
 
 		static inline RenderStats GetRenderStats() { return _renderStats; }
 		static inline GraphicsAPI GetAPI() { return _graphicsAPI; }

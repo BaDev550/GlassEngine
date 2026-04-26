@@ -47,7 +47,7 @@ namespace ge::renderer::utility {
 	}
 
 	[[nodiscard]] constexpr VkImageAspectFlags Vulkan_GetAspectFlags(ImageFormat imageFormat) noexcept {
-		if (IsDepthFormat(imageFormat)) return VK_IMAGE_ASPECT_COLOR_BIT;
+		if (IsColorFormat(imageFormat)) return VK_IMAGE_ASPECT_COLOR_BIT;
 		else if (IsDepthFormat(imageFormat)) return VK_IMAGE_ASPECT_DEPTH_BIT;
 		else if (IsDepthStencilFormat(imageFormat)) return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 		return {};

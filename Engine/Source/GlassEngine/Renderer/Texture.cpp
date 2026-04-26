@@ -30,6 +30,8 @@ namespace ge::renderer {
 	{
 		int width, height, channes;
 		stbi_uc* data = stbi_load(filePath.string().c_str(), &width, &height, &channes, STBI_rgb_alpha);
+		const auto* dataPtr = reinterpret_cast<const uint8_t*>(data);
+		const auto dataSize = spec.width * spec.height * utility::GetPixelSize(spec.format);
 
 		ImageSpec createDesc{};
 		createDesc.imageFormat = spec.format;
@@ -37,12 +39,16 @@ namespace ge::renderer {
 		createDesc.usageFlags |= ImageUsageFlagsBits::Readonly;
 		if (spec.attachment)
 			createDesc.usageFlags |= utility::IsColorFormat(spec.format) ?
-			ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
+				ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
 		else
 			createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 
 		auto texture = ge::mem::Ref<Texture2D>(new Texture2D(Image::Create(createDesc), ImageSubresource{}, spec));
-		// Renderer3D::GetRenderAPI()->LoadDataToTexture2D({}, *texture, data, width * height * utility::GetPixelSize(spec.format));
+		Renderer3D::GetRenderAPI()->BeginFrame();
+		Renderer3D::GetRenderAPI()->BeginCopyPass();
+		Renderer3D::GetRenderAPI()->LoadDataToTexture2D(*texture, dataPtr, dataSize);
+		Renderer3D::GetRenderAPI()->EndCopyPass();	
+		Renderer3D::GetRenderAPI()->EndFrame();
 		return texture;
 	}
 
@@ -56,13 +62,18 @@ namespace ge::renderer {
 		createDesc.usageFlags |= ImageUsageFlagsBits::Readonly;
 		if (spec.attachment)
 			createDesc.usageFlags |= utility::IsColorFormat(spec.format) ?
-			ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
+				ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
 		else
 			createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
 
 		auto texture = ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
 		texture->_data = std::vector<uint8_t>(dataPtr, dataPtr + dataSize);
-		// Renderer3D::GetRenderAPI()->LoadDataToTexture2D({}, *texture, data, dataSize);
+
+		Renderer3D::GetRenderAPI()->BeginFrame();
+		Renderer3D::GetRenderAPI()->BeginCopyPass();
+		Renderer3D::GetRenderAPI()->LoadDataToTexture2D(*texture, dataPtr, dataSize);
+		Renderer3D::GetRenderAPI()->EndCopyPass();
+		Renderer3D::GetRenderAPI()->EndFrame();
 		return texture;
 	}
 

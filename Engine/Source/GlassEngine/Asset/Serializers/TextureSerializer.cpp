@@ -26,7 +26,7 @@ namespace ge {
         out.WriteData(TEXTURE_MAGIC, 4);
         out.WriteData(reinterpret_cast<const char*>(&width), sizeof(uint32_t));
         out.WriteData(reinterpret_cast<const char*>(&height), sizeof(uint32_t));
-        out.WriteData(reinterpret_cast<const char*>(&asset), sizeof(renderer::TextureSpec));
+        out.WriteData(reinterpret_cast<const char*>(asset.textureSpecs), sizeof(renderer::TextureSpec));
         out.WriteData(reinterpret_cast<const char*>(pixels), dataSize);
 
         stbi_image_free(pixels);

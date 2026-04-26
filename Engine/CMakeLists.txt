@@ -35,6 +35,7 @@ target_include_directories(Engine
 target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Source/gepch.h>")
 target_compile_definitions(
     Engine PRIVATE
+    GLFW_INCLUDE_VULKAN
     $<$<CONFIG:Debug>:_DEBUG>
 )
 if(WIN32)

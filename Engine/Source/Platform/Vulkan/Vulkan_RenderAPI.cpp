@@ -1,4 +1,6 @@
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Memory/Memory.h"
+#include "GlassEngine/Renderer/Buffer.h"
 #include "GlassEngine/Renderer/Swapchain.h"
 #include "GlassEngine/Renderer/Types.h"
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
@@ -11,6 +13,7 @@
 #include "Vulkan_DescriptorManager.h"
 #include "Vulkan_Sampler.h"
 #include "Vulkan_Pipeline.h"
+#include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 namespace ge::renderer {
@@ -310,7 +313,71 @@ namespace ge::renderer {
 		_image_layout_transition_set.clear();
 	}
 
-	void Vulkan_RenderAPI::LoadDataToTexture2D(Texture2D& texture, void* data, uint64_t dataSize) {}
+	void Vulkan_RenderAPI::LoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) {
+		
+	}
+
+	void Vulkan_RenderAPI::LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) {
+		auto vk_image = texture.GetImage().Cast<Vulkan_Image>();
+
+		const VkImageMemoryBarrier2 barrier{
+			VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+			nullptr,
+			utility::Vulkan_GetPipelineStageFlagsFromLayout(vk_image->GetImageLayout()),
+			utility::Vulkan_GetAccessFlagsFromLayout(vk_image->GetImageLayout()),
+			utility::Vulkan_GetPipelineStageFlagsFromLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL),
+			utility::Vulkan_GetAccessFlagsFromLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL),
+			vk_image->GetImageLayout(),
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			VK_QUEUE_FAMILY_IGNORED,
+			VK_QUEUE_FAMILY_IGNORED,
+			vk_image->GetImage(),
+			VkImageSubresourceRange{
+				.aspectMask = vk_image->GetAspectFlags(),
+				.baseMipLevel = 0,
+				.levelCount = VK_REMAINING_MIP_LEVELS,
+				.baseArrayLayer = 0,
+				.layerCount =  VK_REMAINING_ARRAY_LAYERS
+			}
+		};
+
+		VkDependencyInfo dependencyInfo{};
+		dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+		dependencyInfo.pImageMemoryBarriers = &barrier;
+		dependencyInfo.imageMemoryBarrierCount = 1;
+
+		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
+
+		const auto &buffer = staging_buffers.emplace_back(ge::mem::CreateScope<Vulkan_Buffer>(BufferSpec{
+			.elementSize = static_cast<uint32_t>(dataSize),
+			.elementCount = 1,
+			.usageFlags = BufferUsageFlagsBits::TransferSrc,
+			.cpuAccess = BufferCpuAccess::Write,
+			.memoryType = BufferMemoryType::Auto,
+		}));
+
+		std::memcpy(buffer->GetMappedPtr(), data, dataSize);
+
+		VkBufferImageCopy region{};
+		region.imageExtent = {texture.GetWidth(), texture.GetHeight(), 1};
+		region.imageSubresource = VkImageSubresourceLayers{
+			vk_image->GetAspectFlags(),
+			texture.GetSubresource().baseMipmap,
+			texture.GetSubresource().baseLayer,
+			1
+		};
+
+		vkCmdCopyBufferToImage(
+			GetCurrentCommandBuffer(), 
+			buffer->GetVkBuffer(), 
+			vk_image->GetImage(),
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+			1, 
+			&region);
+
+		vk_image->_imageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		_image_layout_transition_set.emplace(vk_image.Get());
+	}
 	
 	void Vulkan_RenderAPI::SetBeginDebugLabel(std::string_view label) {
 		VkDebugUtilsLabelEXT label_desc{};
