@@ -135,6 +135,9 @@ namespace ge::renderer {
     }
 
     bool CompileShader(const std::filesystem::path& shaderDir, std::string_view shaderName, ShaderData& shaderData) {
+        const auto shaderPath = shaderDir / (GEString(shaderName) + ".slang");
+
+        GE_CORE_INFO("Compiling shader - name:{} path:{}", shaderName, shaderPath.string());
         Slang::ComPtr<slang::IGlobalSession> globalSession;
         Slang::ComPtr<slang::ISession> session;
 
@@ -162,7 +165,6 @@ namespace ge::renderer {
 
         globalSession->createSession(sessionDesc, session.writeRef());
 
-        const auto shaderPath = shaderDir / (GEString(shaderName) + ".slang");
         if (!std::filesystem::exists(shaderPath)) {
             GE_GRAPHICS_WARN("Shader not found: {}", shaderName);
             return false;
@@ -230,6 +232,7 @@ namespace ge::renderer {
             shaderData.reflection = {};// GetReflection(linkedProgram->getLayout());
             shaderData.spirvByteCode = GetSpirvCode(linkedProgram);
             //shaderData.dxilByteCodes = GetSpirvCode(linkedProgram);
+            GE_CORE_INFO("Shader compiled: {}", shaderName);
             return true;
         }
         catch (const std::exception& e) {
