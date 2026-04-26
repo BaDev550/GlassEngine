@@ -32,9 +32,9 @@ namespace ge::renderer {
 	};
 
 	struct ResterizerSpec {
-		PolygonMode polygonMode;
-		CullMode cullMode;
-		ImageSampleCount sampleCount;
+		PolygonMode polygonMode = PolygonMode::Fill;
+		CullMode cullMode = CullMode::None;
+		ImageSampleCount sampleCount = ImageSampleCount::e1;
 	};
 
 	struct DepthStencilSpec {
@@ -43,14 +43,14 @@ namespace ge::renderer {
 		StencilOpState stencilBackOp;
 		uint8_t stencilWriteMask;
 		uint8_t stencilCompareMask;
-		bool depthTestEnable;
-		bool depthWriteEnable;
-		bool stencilTestEnable;
+		bool depthTestEnable = false;
+		bool depthWriteEnable = false;
+		bool stencilTestEnable = false;
 	};
 
 	// TODO (dnm): more detailed spec
 	struct BlendSpec {
-		bool blendEnabled;
+		bool blendEnabled = false;
 	};
 
 	struct PipelineSpec {
