@@ -298,7 +298,7 @@ namespace ge::renderer {
 		VkWriteDescriptorSet writeSet{};
 		writeSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		writeSet.dstSet = _globalDescriptorSet;
-		writeSet.dstBinding = index;
+		writeSet.dstArrayElement = index;
 		writeSet.descriptorCount = 1;
 		writeSet.descriptorType = type;
 		writeSet.pImageInfo = imageInfo;
