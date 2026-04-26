@@ -159,7 +159,7 @@ namespace ge {
 						textureSpec.format = renderer::ImageFormat::RGBA8;
 						importData.textureSpecs = &textureSpec;
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
-						auto texture = Application::Get()->GetAssetManager()->GetOrImportAsset(texturePath, importData);
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);
 						matAsset->SetAlbedoTexture(texture->_assetHandle);
 					}
 					else {
@@ -175,13 +175,13 @@ namespace ge {
 						textureSpec.format = renderer::ImageFormat::RGBA8;
 						importData.textureSpecs = &textureSpec;
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
-						auto texture = Application::Get()->GetAssetManager()->GetOrImportAsset(texturePath, importData);
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);
 						matAsset->SetNormalTexture(texture->_assetHandle);
 					}
 					else {
 						matAsset->SetAlbedoTexture(whiteTexture->_assetHandle);
 					}
-					materialHandles[i] = Application::Get()->GetEditorAssetManager().CreateAsset(matTargetPath, matAsset);
+					materialHandles[i] = AssetManager::Editor_CreateAsset(matTargetPath, matAsset);
 				}
 			}
 
@@ -245,7 +245,7 @@ namespace ge {
 		auto materialTable = mem::Ref<renderer::MaterialTable>::Create();
 		for (uint32_t i = 0; i < materialCount; i++) {
 			AssetHandle handle = materialHandles[i];
-			mem::Ref<renderer::MaterialAsset> materialAsset = Application::Get()->GetAssetManager()->GetAsset(handle).Cast<renderer::MaterialAsset>();
+			mem::Ref<renderer::MaterialAsset> materialAsset = AssetManager::GetAsset<renderer::MaterialAsset>(handle);
 			materialTable->AddMaterial(i, materialAsset);
 		}
 		mesh->SetMaterialTable(materialTable);

@@ -73,7 +73,7 @@ namespace ge {
 		textureSpecs.filter = ge::renderer::ImageFilter::Linear;
 		textureSpecs.format = ge::renderer::ImageFormat::RGBA8;
 		assetData.textureSpecs = &textureSpecs;
-		auto iconAsset = Application::Get()->GetAssetManager()->GetOrImportAsset(iconPath.ToPath(), assetData).Cast<renderer::Texture2D>();
+		auto iconAsset = AssetManager::GetOrImportAsset<renderer::Texture2D>(iconPath.ToPath(), "", assetData);
  		SetIcon(iconAsset->GetData(), iconAsset->GetWidth(), iconAsset->GetHeight());
 	}
 }

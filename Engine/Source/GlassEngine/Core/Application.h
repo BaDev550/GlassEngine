@@ -42,13 +42,7 @@ namespace ge {
 		Window& GetWindow() { return *_window; }
 		LayerStack& GetLayerStack() { return _layerStack; }
 		ThreadManager& GetThreadManager() { return *_threadManager; }
-		EditorAssetManager& GetEditorAssetManager() { return *_editorAssetManager; }
-		RuntimeAssetManager& GetRuntimeAssetManager() { return *_runtimeAssetManager; }
 		ApplicationSpecification GetSpecs() const { return _specs; }
-		AssetManager* GetAssetManager() { // TODO (0x): a problem is when user/engine select runtime mode the editor resources still is created and loaded to the vector!!!
-			if (_specs.mode == ApplicationMode::Editor) return _editorAssetManager.get();
-			else return _runtimeAssetManager.get();
-		}
 	protected:
 		void PushLayer(Layer* layer) { _layerStack.PushLayer(layer); }
 		void PushOverlay(Layer* overlay) { _layerStack.PushOverlay(overlay); }
@@ -60,8 +54,6 @@ namespace ge {
 
 		mem::Scope<Window> _window;
 		mem::Scope<ThreadManager> _threadManager;
-		mem::Scope<EditorAssetManager> _editorAssetManager;
-		mem::Scope<RuntimeAssetManager> _runtimeAssetManager;
 
 		bool _forceClose = false;
 		float _lastTime = 0.0f;

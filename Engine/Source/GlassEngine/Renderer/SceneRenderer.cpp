@@ -58,7 +58,7 @@ namespace ge::renderer {
 		auto view = _scene->GetRegistry().view<const TransformComponent, StaticMeshComponent>();
 		view.each([&](const TransformComponent& tc, StaticMeshComponent& smc) {
 			if (smc.isVisible) {
-				auto staticMesh = Application::Get()->GetAssetManager()->GetAsset(smc.meshHandle).Cast<StaticMesh>();
+				auto staticMesh = AssetManager::GetAsset<StaticMesh>(smc.meshHandle);
 				uint32_t lodIndex;
 				if (smc.calculateLOD) {
 					lodIndex = staticMesh->GetLODManager().GetLODindex(staticMesh->GetLODs(), camera, tc.position);

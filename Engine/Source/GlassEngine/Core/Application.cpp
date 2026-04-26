@@ -2,7 +2,6 @@
 #include "Application.h"
 #include "GlassEngine/Renderer/Renderer.h"
 #include "GlassEngine/Renderer/Texture.h"
-#include "GlassEngine/Asset/AssetManager.h"
 #include "GlassEngine/Utilities/Timer.h"
 #include <stdexcept>
 #include <iostream>
@@ -17,10 +16,8 @@ namespace ge {
 		profile::Profiler::Init();
 		Console::Init();
 		Logger::Init();
+		AssetManager::Init(nullptr);
 		_threadManager = mem::CreateScope<ThreadManager>(1);
-		_editorAssetManager = (_specs.mode == ApplicationMode::Editor) ? mem::CreateScope<EditorAssetManager>() : nullptr;
-		_runtimeAssetManager = (_specs.mode == ApplicationMode::Runtime) ? mem::CreateScope<RuntimeAssetManager>("assets.pak", "assets_manifest.bin") : nullptr;
-
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		renderer::Renderer3D::Init();
 
@@ -39,8 +36,7 @@ namespace ge {
 		GE_GLOBAL_SINK->Dump("Log_" + Time::GetCurrentLocalTime() + ".txt");
 #endif
 		_layerStack.Clear();
-		_editorAssetManager = nullptr;
-		_runtimeAssetManager = nullptr;
+		AssetManager::Destroy();
 		delete _imGuiLayer;
 		_imGuiLayer = nullptr;
 		renderer::Renderer3D::Destroy();
