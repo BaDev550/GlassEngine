@@ -554,6 +554,10 @@ namespace ge::renderer {
 		return isSuitable;
 	}
 
+	void Vulkan_RenderContext::ISetUniformBuffer(Buffer& buffer, uint32_t binding) {
+		_descriptorManager->SetUniformBuffer(static_cast<const Vulkan_Buffer&>(buffer), binding);
+	}
+
 	void Vulkan_RenderContext::FindQueueFamilies()
 	{
 		uint32_t queueFamiliesCount;

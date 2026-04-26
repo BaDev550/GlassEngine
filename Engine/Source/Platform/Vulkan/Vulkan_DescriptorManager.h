@@ -5,6 +5,7 @@
 #include <string_view>
 #include <sys/types.h>
 #include <vulkan/vulkan_core.h>
+#include "GlassEngine/Renderer/Buffer.h"
 #include "Vulkan_Image.h"
 #include "Vulkan_Buffer.h"
 #include "Vulkan_Sampler.h"
@@ -18,6 +19,8 @@ namespace ge::renderer {
 		[[nodiscard]] virtual uint32_t RegisterWritableImage(Vulkan_Image &image, ImageSubresource subresource) = 0;
 		[[nodiscard]] virtual uint32_t RegisterSampler(const Vulkan_Sampler &sampler) = 0;
 		
+		virtual void SetUniformBuffer(const Vulkan_Buffer& buffer, uint32_t binding) = 0;
+
 		virtual void UnregisterReadonlyImage(uint32_t handle) = 0;
 		virtual void UnregisterWritableImage(uint32_t handle) = 0;
 		virtual void UnregisterSampler(uint32_t handle) = 0;
@@ -41,6 +44,7 @@ namespace ge::renderer {
 		virtual void UnregisterWritableImage(uint32_t handle) override;
 		virtual void UnregisterSampler(uint32_t handle) override;
 
+		virtual void SetUniformBuffer(const Vulkan_Buffer& buffer, uint32_t binding) override;
 		virtual void PushConstant(VkCommandBuffer cmd, const void *ptr, uint16_t size, uint16_t offset) override;
 		virtual void BindDescriptors(VkCommandBuffer cmd) override;
 
@@ -68,7 +72,7 @@ namespace ge::renderer {
 		void CreateBindlessDescriptorPoolAndSet(
 			VkDescriptorType type, uint32_t descriptorCount, bool partiallyBound, std::string_view debugName,
 			VkDescriptorPool& outPool, VkDescriptorSetLayout& outSetLayout, VkDescriptorSet& outSet);
-		void WriteDescriptor(VkDescriptorSet set, VkDescriptorType type, const VkDescriptorImageInfo *imageInfo, uint32_t index) noexcept;
+		void WriteDescriptorForBindless(VkDescriptorSet set, VkDescriptorType type, const VkDescriptorImageInfo *imageInfo, uint32_t index) noexcept;
 
 		uint32_t _readonlyImageUsageCount{};
 		uint32_t _writableImageUsageCount{};
