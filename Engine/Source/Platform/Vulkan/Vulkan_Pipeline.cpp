@@ -42,6 +42,11 @@ namespace ge::renderer {
 			);
 		}
 
+		VkShaderModuleCreateInfo shaderModuleInfo{};
+		shaderModuleInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		shaderModuleInfo.codeSize = shader->GetSpirvByteCode().size();
+		shaderModuleInfo.pCode = reinterpret_cast<const uint32_t*>(shader->GetSpirvByteCode().data());
+
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputInfo.vertexAttributeDescriptionCount = vertexAttribDescs.size();
@@ -52,14 +57,15 @@ namespace ge::renderer {
 		VkPipelineShaderStageCreateInfo vertexStageCreateInfo{};
 		vertexStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		vertexStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-		vertexStageCreateInfo.module = shader->GetShaderModule();
 		vertexStageCreateInfo.pName = "VertMain";
+		vertexStageCreateInfo.pNext = &shaderModuleInfo;
 
 		VkPipelineShaderStageCreateInfo fragStageCreateInfo{};
 		fragStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		fragStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		fragStageCreateInfo.module = shader->GetShaderModule();
 		fragStageCreateInfo.pName = "FragMain";
+		fragStageCreateInfo.pNext = &shaderModuleInfo;
+
 		const VkPipelineShaderStageCreateInfo shaderStageCreateInfos[] = { vertexStageCreateInfo, fragStageCreateInfo };
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState{};
