@@ -4,9 +4,9 @@
 
 namespace ge::renderer {
 	uint32_t Sampler::GetHandle() {
-		//if (_handle == static_cast<uint32_t>(-1)) {
-		//	_handle = _renderContext.GetSamplerHandle(*this);
-		//}
+		if (_handle == static_cast<uint32_t>(-1)) {
+			_handle = _renderContext.GetSamplerHandle(*this);
+		}
 		return _handle;
 	}
 

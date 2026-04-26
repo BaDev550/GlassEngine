@@ -240,7 +240,7 @@ namespace ge::renderer {
 
 		uint32_t index{};
 		if (_readonlyImageUsageCount + 1 < VULKAN_SAMPLED_IMAGE_COUNT) {
-			index = ++_readonlyImageUsageCount;
+			index = _readonlyImageUsageCount++;
 		}
 		else if (!_readonlyImageDeletedIndices.empty()) {
 			index = _readonlyImageDeletedIndices.back();
@@ -260,8 +260,8 @@ namespace ge::renderer {
 		imageInfo.imageView = image.CreateGetImageView(subresource);
 
 		uint32_t index{};
-		if (_writableImageUsageCount + 1 > VULKAN_STORAGE_IMAGE_COUNT) {
-			index = ++_writableImageUsageCount;
+		if (_writableImageUsageCount + 1 < VULKAN_STORAGE_IMAGE_COUNT) {
+			index = _writableImageUsageCount++;
 		}
 		else if (!_writableImageDeletedIndices.empty()) {
 			index = _writableImageDeletedIndices.back();
@@ -280,8 +280,8 @@ namespace ge::renderer {
 		imageInfo.sampler = sampler.GetSampler();
 
 		uint32_t index{};
-		if (_samplerUsageCount + 1 > VULKAN_SAMPLER_COUNT) {
-			index = ++_samplerUsageCount;
+		if (_samplerUsageCount + 1 < VULKAN_SAMPLER_COUNT) {
+			index = _samplerUsageCount++;
 		}
 		else if (!_samplerDeletedIndices.empty()) {
 			index = _samplerDeletedIndices.back();
