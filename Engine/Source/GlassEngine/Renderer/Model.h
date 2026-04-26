@@ -35,7 +35,7 @@ namespace ge::renderer {
 	public:
 		uint32_t GetLODindex(const GEVector<LODMesh>& lods, const ge::mem::Ref<Camera>& cam, const glm::vec3& objectPosition) const;
 	private:
-		GEVector<float> _lodLevels = { 100.0f, 250.0f, 500.0f, 1000.0f };
+		GEVector<float> _lodFractions = { 0.1f, 0.25f, 0.5f, 1.0f };
 	};
 
 	class SourceMesh : public Asset {

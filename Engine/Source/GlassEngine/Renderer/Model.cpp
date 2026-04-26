@@ -2,6 +2,7 @@
 #include "Camera.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/norm.hpp>
 
 namespace ge::renderer {
 	void SourceMesh::CreateGPUBuffers()
@@ -59,19 +60,19 @@ namespace ge::renderer {
 
 	uint32_t LODManager::GetLODindex(const GEVector<LODMesh>& lods, const ge::mem::Ref<Camera>& cam, const glm::vec3& objectPosition) const
 	{
-		if (lods.empty()) return 0;
-		if (lods.size() == 1) return 0;
+		if (lods.size() <= 1) return 0;
 
-		glm::vec3 camPos = cam->GetPosition();
-		float distSquared = glm::distance(camPos, objectPosition);
+		float distSquared = glm::length2(cam->GetPosition() - objectPosition);
+		float farPlane = cam->GetFarPlane();
 
-		for (size_t i = 0; i < _lodLevels.size(); ++i) {
-			float thresholdSquared = _lodLevels[i] * _lodLevels[i];
-
+		for (size_t i = 0; i < _lodFractions.size(); ++i) {
+			float threshold = _lodFractions[i] * farPlane;
+			float thresholdSquared = threshold * threshold;
 			if (distSquared < thresholdSquared) {
 				return std::min(static_cast<uint32_t>(i), static_cast<uint32_t>(lods.size() - 1));
 			}
 		}
+
 		return static_cast<uint32_t>(lods.size() - 1);
 	}
 }

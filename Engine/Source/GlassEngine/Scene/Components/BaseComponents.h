@@ -35,6 +35,7 @@ namespace ge {
 	struct StaticMeshComponent {
 		AssetHandle meshHandle;
 		bool isVisible = true;
+		bool calculateLOD = true;
 		uint32_t lodLevel = 0;
 		mem::Ref<renderer::MaterialTable> materialTable = nullptr;
 

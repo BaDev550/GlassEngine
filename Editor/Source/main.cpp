@@ -56,16 +56,7 @@ public:
 		}
 	}
 
-	virtual void OnImGuiRender() override {
-		ImGui::Begin("LOD Test");
-		if (entity) {
-			auto& smc = entity->GetComponent<ge::StaticMeshComponent>();
-			int lodLevel = smc.lodLevel;
-			if (ImGui::DragInt("LOD level: ", &lodLevel, 1.0f, 0, 3)) 
-				smc.lodLevel = lodLevel;
-		}
-		ImGui::End();
-	}
+	virtual void OnImGuiRender() override {}
 private:
 	ge::mem::Ref<ge::Scene> _scene;
 	ge::mem::Ref<ge::renderer::FreeCamera> _camera;

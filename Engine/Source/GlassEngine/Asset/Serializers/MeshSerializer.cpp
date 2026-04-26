@@ -111,20 +111,6 @@ namespace ge {
 							&error
 						);
 
-						if (new_indices > target_index_count * 1.2f && level >= 3) { // fallback
-							new_indices = meshopt_simplifySloppy(
-								submeshIndices.data(),
-								&prevLod.indices[prevSubmesh.indexOffset],
-								prevSubmesh.indexCount,
-								&newLod.vertices[0].position.x,
-								newLod.vertices.size(),
-								sizeof(renderer::Vertex),
-								target_index_count,
-								target_error,
-								&error
-							);
-						}
-
 						if (new_indices < prevSubmesh.indexCount) {
 							submeshIndices.resize(new_indices);
 							newLod.indices.insert(newLod.indices.end(), submeshIndices.begin(), submeshIndices.end());

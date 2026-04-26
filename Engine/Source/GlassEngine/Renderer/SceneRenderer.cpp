@@ -9,10 +9,7 @@
 namespace ge::renderer {
 	SceneRenderer::SceneRenderer(Scene* scene) : _scene(scene) {
 		FramebufferSpec fspec{};
-		fspec.attachments = { 
-			FramebufferAttachment{true},
-			FramebufferAttachment{ImageFormat::D32S8}
-		};
+		fspec.attachments = { FramebufferAttachment{true}, FramebufferAttachment{ImageFormat::D32S8} };
 		fspec.attachments[1].clearValue = {1.f, 0};
 		fspec.width = Application::Get()->GetWindow().GetWidth();
 		fspec.height = Application::Get()->GetWindow().GetHeight();
@@ -62,8 +59,15 @@ namespace ge::renderer {
 		view.each([&](const TransformComponent& tc, StaticMeshComponent& smc) {
 			if (smc.isVisible) {
 				auto staticMesh = Application::Get()->GetAssetManager()->GetAsset(smc.meshHandle).Cast<StaticMesh>();
-				uint32_t lodIndex = staticMesh->GetLODManager().GetLODindex(staticMesh->GetLODs(), camera, tc.position);
-				Renderer3D::DrawStaticMesh(_pipeline, staticMesh, smc.lodLevel, smc.materialTable, tc.Mat4());
+				uint32_t lodIndex;
+				if (smc.calculateLOD) {
+					lodIndex = staticMesh->GetLODManager().GetLODindex(staticMesh->GetLODs(), camera, tc.position);
+					smc.lodLevel = lodIndex;
+				}
+				else {
+					lodIndex = smc.lodLevel;
+				}
+				Renderer3D::DrawStaticMesh(_pipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
 			}
 			});
 		_renderPass->End();

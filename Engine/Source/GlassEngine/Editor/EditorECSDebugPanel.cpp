@@ -41,6 +41,14 @@ namespace ge::editor {
 				ImGui::DragFloat3("rotation", glm::value_ptr(tc.rotation), 0.1f);
 				ImGui::DragFloat3("scale", glm::value_ptr(tc.scale), 0.1f);
 			}
+			if (_selectedEntity->HasComponent<StaticMeshComponent>()) {
+				auto& smc = _selectedEntity->GetComponent<StaticMeshComponent>();
+				ImGui::Checkbox("Is Visible", &smc.isVisible);
+				ImGui::Checkbox("Calculate LOD", &smc.calculateLOD);
+				int lodLevel = smc.lodLevel;
+				if (ImGui::DragInt("LOD level: ", &lodLevel, 1.0f, 0, 3))
+					smc.lodLevel = lodLevel;
+			}
 		}
 		ImGui::End();
 	}
