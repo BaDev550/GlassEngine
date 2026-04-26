@@ -12,6 +12,7 @@ namespace ge {
 		void PushOverlay(Layer* overlay);
 		void PopLayer(Layer* layer);
 		void PopOverlay(Layer* overlay);
+		void Clear();
 		std::vector<Layer*>::iterator begin() { return _layers.begin(); }
 		std::vector<Layer*>::iterator end() { return _layers.end(); }
 		std::vector<Layer*>::const_iterator begin() const { return _layers.begin(); }

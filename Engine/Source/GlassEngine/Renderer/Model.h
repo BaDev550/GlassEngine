@@ -8,9 +8,9 @@
 namespace ge::renderer {
 	class Camera;
 	struct Vertex {
-		glm::vec3 position;
-		glm::vec3 normal;
-		glm::vec3 texCoords;
+		glm::vec4 position;
+		glm::vec4 normal;
+		glm::vec2 texCoords;
 	};
 
 	struct Submesh {

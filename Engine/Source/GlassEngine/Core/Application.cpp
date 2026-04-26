@@ -34,9 +34,13 @@ namespace ge {
 #ifdef GE_APPLICATION_DUMP_LOG_ON_CLOSE
 		GE_GLOBAL_SINK->Dump("Log_" + Time::GetCurrentLocalTime() + ".txt");
 #endif
+		_layerStack.Clear();
+		_editorAssetManager = nullptr;
+		_runtimeAssetManager = nullptr;
 		delete _imGuiLayer;
 		_imGuiLayer = nullptr;
 		renderer::Renderer3D::Destroy();
+		_window = nullptr;
 		Logger::Destroy();
 		Console::Destroy();
 		profile::Profiler::Destroy();
