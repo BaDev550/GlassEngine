@@ -303,10 +303,6 @@ namespace ge::renderer {
 					attachment.clearValue.colorClear.g, 
 					attachment.clearValue.colorClear.b, 
 					attachment.clearValue.colorClear.a
-					attachment.clearValue.colorClear.r, 
-					attachment.clearValue.colorClear.g, 
-					attachment.clearValue.colorClear.b, 
-					attachment.clearValue.colorClear.a
 				}}
 			);
 		}
@@ -337,11 +333,7 @@ namespace ge::renderer {
 			VkImageLayout{},
 			utility::Vulkan_GetLoadOp(spec.depthStencilAttachment.loadOp),
 			utility::Vulkan_GetStoreOp(spec.depthStencilAttachment.storeOp),
-			utility::Vulkan_GetLoadOp(spec.depthStencilAttachment.loadOp),
-			utility::Vulkan_GetStoreOp(spec.depthStencilAttachment.storeOp),
 			VkClearValue{.depthStencil{
-				spec.depthStencilAttachment.clearValue.depthClear,
-				spec.depthStencilAttachment.clearValue.stencilClear
 				spec.depthStencilAttachment.clearValue.depthClear,
 				spec.depthStencilAttachment.clearValue.stencilClear
 			}}

@@ -14,7 +14,6 @@ namespace ge::renderer {
 		
 		GEVector<Attachment> colorAttachments;
 		colorAttachments.reserve(_framebuffer->GetAttachmentCount());
-<<<<<<< Updated upstream
 	
 		beginSpec.extent = {_framebuffer->GetSpecification().width, _framebuffer->GetSpecification().height};
 		for (const auto attachment : _framebuffer->GetAttachments()) {
@@ -29,22 +28,13 @@ namespace ge::renderer {
 				);
 			}
 			else if (utility::IsColorFormat(attachment.existingImage->GetSpecRef().imageFormat)) {
-=======
-		
-		for (const auto attachment : _framebuffer->GetAttachments()) {
-			if (utility::IsColorFormat(attachment.existingImage->GetSpecRef().imageFormat)) {
->>>>>>> Stashed changes
 				colorAttachments.emplace_back(
 					attachment.existingImage,
 					attachment.subresource,
 					attachment.clearValue,
 					attachment.loadOp,
 					attachment.storeOp,
-<<<<<<< Updated upstream
 					false
-=======
-					attachment.isSwapchain
->>>>>>> Stashed changes
 				);
 			}
 			else {
@@ -58,10 +48,7 @@ namespace ge::renderer {
 				};
 			}
 		}
-<<<<<<< Updated upstream
 		beginSpec.colorAttachments = colorAttachments;
-=======
->>>>>>> Stashed changes
 
 		Renderer3D::GetRenderAPI()->BeginRenderPass(beginSpec);
 	}
