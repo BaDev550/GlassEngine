@@ -46,12 +46,11 @@ namespace ge::renderer {
 		{
 			// TODO (dnm):
 			VkImageSubresourceRange vkSubresource{};
-			vkSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			vkSubresource.aspectMask = _aspectFlags;
 			vkSubresource.baseArrayLayer = subresource.baseLayer;
 			vkSubresource.baseMipLevel = subresource.baseMipmap;
 			vkSubresource.layerCount = subresource.layerCount;
-			vkSubresource.baseMipLevel = subresource.baseMipmap;
-			vkSubresource.levelCount = 1;
+			vkSubresource.levelCount = subresource.mipmapCount;
 
 			VkImageViewCreateInfo createInfo{};
 			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

@@ -41,7 +41,7 @@ namespace ge::renderer {
 			createDesc.usageFlags |= utility::IsColorFormat(spec.format) ?
 				ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
 
-		auto texture = ge::mem::Ref<Texture2D>(new Texture2D(Image::Create(createDesc), ImageSubresource{}, spec));
+		auto texture = ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
 		Renderer3D::GetRenderAPI()->BeginFrame();
 		Renderer3D::GetRenderAPI()->BeginCopyPass();
 		Renderer3D::GetRenderAPI()->LoadDataToTexture2D(*texture, dataPtr, dataSize);

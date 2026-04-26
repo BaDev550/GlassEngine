@@ -27,13 +27,23 @@ namespace ge::renderer {
 		uint32_t frameIndex = Renderer3D::GetFrameIndex();
 		auto& framebufferSpecs = _framebuffer->GetSpecification();
 		auto& window = Application::Get()->GetWindow();
-		glm::vec3 clearValue{1.0f, 0.0f, 0.0f};
-		float depthClearValue{1.0f};
+		glm::vec3 clearValue{ 1.0f, 0.0f, 0.0f };
+		float depthClearValue{ 1.0f };
 
 		uint32_t activeAttachmentCount = framebufferSpecs.IsSwapchain ? 1 : _framebuffer->GetAttachmentCount();
+		bool hasDepthAttachment = _framebuffer->HasDepthStencilAttachment();
 		GEVector<VkRenderingAttachmentInfo> colorAttachments(activeAttachmentCount);
-		//VkRenderingAttachmentInfo depthAttachment;
+		VkRenderingAttachmentInfo depthAttachment{};
 		VkExtent2D extent;
+
+		if (hasDepthAttachment) {
+			auto image = _framebuffer->GetDepthStencilAttachmentTexture().Cast<Vulkan_Image>();
+			depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+			depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+			depthAttachment.imageView = image->CreateGetImageView(ImageSubresource{});
+			depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		}
 
 		for (int i = 0; i < activeAttachmentCount; i++) {
 			VkImage targetImage = VK_NULL_HANDLE;
@@ -71,7 +81,10 @@ namespace ge::renderer {
 		renderingInfo.layerCount = 1;
 		renderingInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
 		renderingInfo.pColorAttachments = colorAttachments.data();
-		//renderingInfo.pDepthAttachment = 
+		if (hasDepthAttachment) {
+			renderingInfo.pDepthAttachment = &depthAttachment;
+			renderingInfo.pStencilAttachment = &depthAttachment;
+		}
 		
 		VkViewport viewport{ 0, 0, (float)extent.width, (float)extent.height };
 		viewport.minDepth = 0;

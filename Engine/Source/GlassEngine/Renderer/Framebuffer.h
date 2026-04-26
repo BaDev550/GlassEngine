@@ -32,6 +32,7 @@ namespace ge::renderer {
 		GEVector<FramebufferAttachment>& GetAttachments() { return _specs.Attachments; }
 		ge::mem::Ref<Image>& GetColorAttachmentTexture(uint32_t index = 0) { return _colorAttachments[index]; };
 		ge::mem::Ref<Image>& GetDepthStencilAttachmentTexture() { return _depthStencilAttachment; };
+		bool HasDepthStencilAttachment() const { return _depthStencilAttachment; }
 		const FramebufferSpec& GetSpecification() const { return _specs; }
 
 		static ge::mem::Ref<Framebuffer> Create(const FramebufferSpec& spec);

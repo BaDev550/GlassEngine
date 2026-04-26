@@ -89,23 +89,10 @@ namespace ge::renderer {
 		virtual void BeginRenderPass(const BeginRenderPassSpec&) = 0;
 		virtual void EndRenderPass() = 0;
 
-		void CopyBufferToBuffer(
-			const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Buffer>& dst, 
-			uint32_t size, uint32_t srcOffset = 0, uint32_t dstOffset = 0
-		);
-		void CopyBufferToImage(
-			const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Image>& dst, 
-			const ImageSubresourceLayers& imageSubresource, glm::uvec3 extent, uint32_t srcOffset = 0, glm::uvec3 dstOffset = {0,0,0}
-		);
-		void CopyImageToBuffer(
-			const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& imageSubresource, 
-			const ge::mem::Ref<Buffer>& dst, glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, uint32_t dstOffset = 0
-		);
-		void CopyImageToImage(
-			const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& srcSubresource, 
-			const ge::mem::Ref<Image>& dst, const ImageSubresourceLayers& dstSubresource, 
-			glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, glm::uvec3 dstOffset = {0,0,0}
-		);
+		void CopyBufferToBuffer(const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Buffer>& dst, uint32_t size, uint32_t srcOffset = 0, uint32_t dstOffset = 0);
+		void CopyBufferToImage(const ge::mem::Ref<Buffer>& src, const ge::mem::Ref<Image>& dst, const ImageSubresourceLayers& imageSubresource, glm::uvec3 extent, uint32_t srcOffset = 0, glm::uvec3 dstOffset = {0,0,0});
+		void CopyImageToBuffer(const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& imageSubresource, const ge::mem::Ref<Buffer>& dst, glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, uint32_t dstOffset = 0);
+		void CopyImageToImage(const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& srcSubresource, const ge::mem::Ref<Image>& dst, const ImageSubresourceLayers& dstSubresource, glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, glm::uvec3 dstOffset = {0,0,0});
 
 		void LoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize);
 		void LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize);

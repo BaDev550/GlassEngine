@@ -89,22 +89,28 @@ namespace ge {
 
 						size_t target_index_count = (size_t)(prevSubmesh.indexCount * 0.5f); // Reduce by 50%
 						GEVector<uint32_t> submeshIndices(prevSubmesh.indexCount);
-						float target_error = 0.01f + (level * 0.03f);
+						const float target_error = 0.01f + (level * 0.03f);
+						const float attribute_weights[] = { 1.0f, 1.0f };
 						float error = 0.0f;
-						size_t new_indices = meshopt_simplify(
+						size_t new_indices = meshopt_simplifyWithAttributes(
 							submeshIndices.data(),
 							&prevLod.indices[prevSubmesh.indexOffset],
 							prevSubmesh.indexCount,
 							&newLod.vertices[0].position.x,
 							newLod.vertices.size(),
 							sizeof(renderer::Vertex),
+							&newLod.vertices[0].texCoords.x,
+							sizeof(renderer::Vertex),
+							attribute_weights,
+							2,
+							nullptr,
 							target_index_count,
 							target_error,
 							meshopt_SimplifyLockBorder,
 							&error
 						);
 
-						if (new_indices > target_index_count * 1.2f) { // fallback
+						if (new_indices > target_index_count * 1.2f && level >= 3) { // fallback
 							new_indices = meshopt_simplifySloppy(
 								submeshIndices.data(),
 								&prevLod.indices[prevSubmesh.indexOffset],

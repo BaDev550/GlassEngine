@@ -37,11 +37,11 @@ namespace ge::renderer {
 
 		{
 			FramebufferSpec framebufferSpec{};
+			framebufferSpec.Attachments = { FramebufferAttachment(ImageFormat::D32S8) };
 			framebufferSpec.IsSwapchain = true;
 			mem::Ref<Framebuffer> _defaultFramebuffer = Framebuffer::Create(framebufferSpec);
 			g_defaultRenderPass = RenderPass::Create(_defaultFramebuffer, "DEFAULT_PASS");
 			s_data._defaultSampler = Sampler::Create(SamplerSpec{});
-			[[maybe_unused]] auto borek = s_data._defaultSampler->GetHandle();
 		}
 	}
 

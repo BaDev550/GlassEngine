@@ -8,8 +8,10 @@
 namespace ge::renderer {
 	SceneRenderer::SceneRenderer(Scene* scene) : _scene(scene) {
 		FramebufferSpec fspec{};
+		fspec.Attachments = { FramebufferAttachment(ImageFormat::D32S8) };
 		fspec.IsSwapchain = true;
 		_framebuffer = Framebuffer::Create(fspec);
+		_renderPass = RenderPass::Create(_framebuffer, "SCENE_RENDER_PASS");
 
 		PipelineSpec spec{};
 		spec.inputAssemblySpec.vertexAttributes = {
@@ -48,7 +50,7 @@ namespace ge::renderer {
 		_cameraData.proj = camera->GetProjection();
 		std::memcpy(_cameraBuffer->GetMappedPtr(), &_cameraData, sizeof(CameraData));
 
-		Renderer3D::BeginDefaultPass();
+		_renderPass->Begin();
 		auto view = _scene->GetRegistry().view<const TransformComponent, StaticMeshComponent>();
 		view.each([&](const TransformComponent& tc, StaticMeshComponent& smc) {
 			if (smc.isVisible) {
@@ -57,6 +59,6 @@ namespace ge::renderer {
 				Renderer3D::DrawStaticMesh(_pipeline, staticMesh, smc.lodLevel, smc.materialTable, tc.Mat4());
 			}
 			});
-		Renderer3D::EndDefaultPass();
+		_renderPass->End();
 	}
 }

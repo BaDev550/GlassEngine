@@ -63,7 +63,7 @@ namespace ge::renderer::mem {
 		}
 
 		void AllocateImage(const VkImageCreateInfo& createInfo, const VmaAllocationCreateInfo& allocCreateInfo, VkImage& image, VmaAllocation& allocation, VmaAllocationInfo& allocInfo) {
-			vmaCreateImage(_allocator, &createInfo, &allocCreateInfo, &image, &allocation, &allocInfo);
+			VkResult result = vmaCreateImage(_allocator, &createInfo, &allocCreateInfo, &image, &allocation, &allocInfo);
 		}
 
 		void DestroyBuffer(VkBuffer& buffer, VmaAllocation& allocation) {

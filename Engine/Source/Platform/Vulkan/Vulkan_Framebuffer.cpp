@@ -35,7 +35,18 @@ namespace ge::renderer {
 					_colorAttachments.emplace_back(Image::Create(imageSpec));
 				}
 			}
-		} // if it is swapchain we got image views from swapchain
+		}
+		else {
+			if (utility::IsDepthStencilFormat(spec.Attachments[0].Format)) {
+				ImageSpec imageSpec{};
+				imageSpec.imageFormat = spec.Attachments[0].Format;
+				imageSpec.extent.x = Application::Get()->GetWindow().GetWidth();
+				imageSpec.extent.y = Application::Get()->GetWindow().GetHeight();
+				imageSpec.extent.z = 1.0f;
+				imageSpec.usageFlags |= ImageUsageFlagsBits::DepthStencilAttachment;
+				_depthStencilAttachment = Image::Create(imageSpec);
+			}
+		}
 	}
 
 	void Vulkan_Framebuffer::Resize(uint32_t width, uint32_t height)

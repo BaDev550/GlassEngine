@@ -56,6 +56,7 @@ namespace ge::renderer::utility {
 	[[nodiscard]] constexpr VkFormat Vulkan_GetImageFormat(ImageFormat imageFormat) noexcept {
 		switch (imageFormat) {
 		case ImageFormat::RGBA8: return VK_FORMAT_R8G8B8A8_UNORM;
+		case ImageFormat::D32S8: return VK_FORMAT_D32_SFLOAT_S8_UINT;
 		}
 		return {};
 	}

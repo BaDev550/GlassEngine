@@ -16,6 +16,7 @@ namespace ge::renderer {
 
 		ge::mem::Ref<Framebuffer> _framebuffer;
 		ge::mem::Ref<Pipeline> _pipeline;
+		ge::mem::Ref<RenderPass> _renderPass;
 
 		struct CameraData {
 			glm::mat4 proj;
