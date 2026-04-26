@@ -226,7 +226,6 @@ namespace ge::renderer {
         }
 
         try {
-            auto i = linkedProgram->getLayout();
             //shaderData.reflection = GetReflection(linkedProgram->getLayout());
             shaderData.reflection = {};// GetReflection(linkedProgram->getLayout());
             shaderData.spirvByteCode = GetSpirvCode(linkedProgram);

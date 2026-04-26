@@ -347,8 +347,8 @@ namespace ge::renderer {
 		VkWriteDescriptorSet writeSet{};
 		writeSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		writeSet.dstSet = _globalDescriptorSet;
-		writeSet.dstBinding = 0;
 		writeSet.dstBinding = binding;
+		writeSet.dstArrayElement = 0;
 		writeSet.descriptorCount = 1;
 		writeSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		writeSet.pBufferInfo = &info;

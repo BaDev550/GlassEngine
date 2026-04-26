@@ -2,12 +2,6 @@ static const constexpr uint DxilCameraBufferIndex = 0;
 static const constexpr uint DxilLightBufferIndex = 1;
 
 // TODO: better name
-class CameraData {
-    float4x4 proj;
-    float4x4 view;
-};
-
-// TODO: better name
 class LightData {
 };
 
@@ -70,8 +64,11 @@ extension ReadonlyImageCube : IBindlessDescriptor {}
 
 extension Sampler : IBindlessDescriptor {}
 
-// [vk::binding(0, 0)]
-// ConstantBuffer<CameraData> __EngineGlobalCameraBuffer__;
+[vk::binding(0, 0)]
+cbuffer __EngineGlobalCameraBuffer__ {
+    float4x4 proj;
+    float4x4 view;
+} __EngineGlobalCameraBuffer__;
 
 // [vk::binding(1, 0)]
 // ConstantBuffer<LightData> __EngineGlobalLightBuffer__;
@@ -117,17 +114,27 @@ T GetBindless<T>(uint handle)
 }
 
 // CameraData GetCamaraData() {
-// #ifdef __GE_SPIRV__
-//     return __EngineGlobalCameraBuffer__;
-// #else 
-//     return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
-// #endif
+//     __target_switch
+//     {
+//     case spirv:
+//         return __EngineGlobalCameraBuffer__;
+//     case hlsl: {
+//         return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
+//     }
+//     default: static_assert(false, "unsupported shader target");
+//         return {};
+//     }
 // }
 
 // LightData GetLightData() {
-// #ifdef __GE_SPIRV__
-//     return __EngineGlobalLightBuffer__;
-// #else
-//     return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
-// #endif
+//     __target_switch
+//     {
+//     case spirv:
+//         return __EngineGlobalLightBuffer__;
+//     case hlsl: {
+//         return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
+//     }
+//     default: static_assert(false, "unsupported shader target");
+//         return {};
+//     }
 // }
