@@ -273,7 +273,6 @@ namespace ge::renderer {
 		memBarriers.reserve(spec.colorAttachments.size() + 1);
 
 		for (const auto& attachment : spec.colorAttachments) {
-		for (const auto& attachment : spec.colorAttachments) {
 			auto vk_image = attachment.image.Cast<Vulkan_Image>();
 
 			if (!attachment.isSwapchainImage && vk_image->GetImageLayout() != VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
@@ -449,7 +448,6 @@ namespace ge::renderer {
 	}
 	
 	void Vulkan_RenderAPI::BeginDebugLabel(std::string_view label) {
-	void Vulkan_RenderAPI::BeginDebugLabel(std::string_view label) {
 		VkDebugUtilsLabelEXT label_desc{};
 		label_desc.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
 		label_desc.pLabelName = label.data();
@@ -460,7 +458,6 @@ namespace ge::renderer {
 		vkCmdBeginDebugUtilsLabelEXT(GetCurrentCommandBuffer(), &label_desc);
 	}
 
-	void Vulkan_RenderAPI::EndDebugLabel() {
 	void Vulkan_RenderAPI::EndDebugLabel() {
 		vkCmdEndDebugUtilsLabelEXT(GetCurrentCommandBuffer());
 	}
@@ -635,6 +632,7 @@ namespace ge::renderer {
 
 		_barriersForImages.emplace(&vk_src);
 	}
+
 	void Vulkan_RenderAPI::ICopyImageToImage(
 		const ge::mem::Ref<Image>& src, const ImageSubresourceLayers& srcSubresource, 
 		const ge::mem::Ref<Image>& dst, const ImageSubresourceLayers& dstSubresource, 

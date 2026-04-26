@@ -4,7 +4,7 @@
 #include "Vulkan_RenderContext.h"
 
 namespace ge::renderer {
-	class Vulkan_Pipeline : public Pipeline { // TODO (badev): look into this class again!
+	class Vulkan_Pipeline : public Pipeline {
 	public:
 		Vulkan_Pipeline(const PipelineSpec& specs);
 		~Vulkan_Pipeline();
