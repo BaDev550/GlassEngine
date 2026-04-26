@@ -8,14 +8,14 @@
 
 namespace ge::renderer {
 	struct SamplerSpec {
-		float anisotropy;
-		float maxLod;
-		float minLod;
-		float lodBias;
-		SamplerAddressMode addressMode;
-		FilterType filterType;
-		FilterType mipmapfilterType;
-		CompareOp compareOp;
+		float anisotropy = 1.f;
+		float maxLod = 1000.f;
+		float minLod = 0.f;
+		float lodBias = 0.f;
+		SamplerAddressMode addressMode = SamplerAddressMode::Repeat;
+		FilterType filterType = FilterType::Linear;
+		FilterType mipmapfilterType = FilterType::Linear;
+		CompareOp compareOp = CompareOp::None;
 	};
 
 	class Sampler : public RenderObject {

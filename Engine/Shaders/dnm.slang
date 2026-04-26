@@ -31,6 +31,6 @@ struct Material {
 
 [shader("fragment")]
 float4 FragMain(VertexOut vertOut) : SV_Target {
-    return float4(0);
+    // return float4(0);
     return GetBindless<ReadonlyImage2D>(pc.albedoTextureIndex).Sample(GetBindless<Sampler>(0), vertOut.uv);
 }

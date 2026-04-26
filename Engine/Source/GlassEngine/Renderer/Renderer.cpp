@@ -1,9 +1,15 @@
 #include "Renderer.h"
+#include "GlassEngine/Renderer/Texture.h"
+#include "GlassEngine/Renderer/Sampler.h"
 #include "ShaderLibrary.h"
 
 namespace ge::renderer {
 	struct RenderData {
 		mem::Scope<ShaderLibrary> _shaderLibrary = nullptr;
+		mem::Ref<Sampler> _defaultSampler = nullptr;
+		mem::Ref<Texture2D> _defaultWhiteTexture = nullptr;
+		mem::Ref<Texture2D> _defaultBlackTexture = nullptr;
+		mem::Ref<Texture2D> _defaultNormal = nullptr;
 	} static s_data;
 	static mem::Ref<RenderAPI> g_renderAPI = nullptr;
 	static mem::Ref<RenderPass> g_defaultRenderPass = nullptr;
@@ -34,6 +40,8 @@ namespace ge::renderer {
 			framebufferSpec.IsSwapchain = true;
 			mem::Ref<Framebuffer> _defaultFramebuffer = Framebuffer::Create(framebufferSpec);
 			g_defaultRenderPass = RenderPass::Create(_defaultFramebuffer, "DEFAULT_PASS");
+			s_data._defaultSampler = Sampler::Create(SamplerSpec{});
+			[[maybe_unused]] auto borek = s_data._defaultSampler->GetHandle();
 		}
 	}
 
