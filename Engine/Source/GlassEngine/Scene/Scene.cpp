@@ -1,12 +1,13 @@
 #include "gepch.h"
 #include "Scene.h"
 
+#include "SceneSerializer.h"
 #include "Components/BaseComponents.h"
 
 namespace ge {
 	Scene::Scene(const GEString& name) : _name(name) {
 		GE_ADD_CONSOLE_COMMAND("scene", "clear_scene", [this](const GEVector<GEString>& args) { Clear(); });
-
+		
 		_sceneRenderer = mem::Ref<renderer::SceneRenderer>::Create(this);
 	}
 	Scene::~Scene(){ Clear(); }

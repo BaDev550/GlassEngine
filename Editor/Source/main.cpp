@@ -8,6 +8,7 @@
 #include <GlassEngine/Renderer/Model.h>
 #include <GlassEngine/Renderer/FreeCamera.h>
 #include <GlassEngine/Scene/Scene.h>
+#include <GlassEngine/Scene/SceneSerializer.h>
 #include <GlassEngine/Editor/EditorConsole.h>
 #include <GlassEngine/Editor/EditorECSDebugPanel.h>
 
@@ -39,6 +40,16 @@ public:
 		auto& smc = entity->AddComponent<ge::StaticMeshComponent>();
 		smc.meshHandle = mario->_assetHandle;
 #endif
+
+		GE_ADD_CONSOLE_COMMAND("editor", "save_scene", [this](const GEVector<GEString>& args) {
+			ge::SceneSerializer serializer(_scene);
+			serializer.Serialize(args[0]);
+			}, "editor.save_scene <path>");
+
+		GE_ADD_CONSOLE_COMMAND("editor", "load_scene", [this](const GEVector<GEString>& args) { 
+			ge::SceneSerializer serializer(_scene);
+			serializer.Deserialize(args[0]);
+			}, "editor.load_scene <path>");
 	}
 
 	virtual void OnDetach() override {}

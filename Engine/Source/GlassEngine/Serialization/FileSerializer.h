@@ -12,6 +12,7 @@ namespace ge::file {
 		uint64_t GetStreamPosition() { return _stream.tellp(); }
 		void SetStreamPosition(uint64_t pos) { _stream.seekp(pos); }
 		bool WriteData(const char* data, size_t size) { _stream.write(data, size); return true; }
+		bool WriteString(const char* str, size_t) { _stream << str; return true; }
 	private:
 		std::filesystem::path _path;
 		std::ofstream _stream;

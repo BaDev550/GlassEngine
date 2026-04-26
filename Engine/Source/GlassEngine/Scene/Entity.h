@@ -24,7 +24,8 @@ namespace ge {
 		template<typename T>
 		void RemoveComponent();
 
-		const EntityID GetEntityID() const { return (EntityID)(uint64_t)_handle; }
+		const entt::entity GetEntityHandle() const { return _handle; }
+		const EntityID GetEntityID() const { return GetComponent<IdentityComponent>().id; }
 		const GEString& GetName() const { return GetComponent<IdentityComponent>().name; }
 
 		operator entt::entity() const { return _handle; }
