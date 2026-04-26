@@ -3,9 +3,9 @@
 
 namespace ge {
 	LayerStack::~LayerStack() {
-		for (Layer* layer : _layers)
-			delete layer;
+		Clear();
 	}
+
 	void LayerStack::PushLayer(Layer* layer) {
 		_layers.emplace(_layers.begin() + _layerInsertIndex, layer);
 		layer->OnAttach();
@@ -29,5 +29,18 @@ namespace ge {
 			overlay->OnDetach();
 			_layers.erase(it);
 		}
+	}
+
+	void LayerStack::Clear() {
+		if (_layers.empty()) return;
+		for (Layer* layer : _layers) {
+			if (layer) {
+				_layerInsertIndex--;
+				layer->OnDetach();
+				delete layer;
+				layer = nullptr;
+			}
+		}
+		_layers.clear();
 	}
 }
