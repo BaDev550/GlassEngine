@@ -2,8 +2,7 @@
 #include "Framebuffer.h"
 
 namespace ge::renderer {
-	Framebuffer::Framebuffer(const FramebufferSpec& spec) 
-	: _specs(spec) {
+	Framebuffer::Framebuffer(const FramebufferSpec& spec) {
 		Invalidate(spec);
 	}
 

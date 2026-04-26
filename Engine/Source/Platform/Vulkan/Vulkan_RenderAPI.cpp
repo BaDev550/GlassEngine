@@ -233,8 +233,10 @@ namespace ge::renderer {
 
 		vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
 		PushConstant(&transform, sizeof(glm::mat4), 0);
+		PushConstant(&transform, sizeof(glm::mat4), 0);
 		for (const Submesh& submesh : currentLOD.submesh) {
 			auto material = materialAssets[submesh.materialIndex]->GetMaterial();
+            PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), sizeof(glm::mat4));
             PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), sizeof(glm::mat4));
 			DrawIndexed(submesh.indexCount, 1, mesh->GetVertexBuffer(), mesh->GetIndexBuffer(), submesh.indexOffset, 0, submesh.vertexOffset);
 		}
@@ -261,12 +263,16 @@ namespace ge::renderer {
 		const auto& window = Application::Get()->GetWindow();
 		const uint32_t imageIndex = window.GetImageIndex();
 
+
 		GEVector<VkRenderingAttachmentInfo> colorAttachments;
+		colorAttachments.reserve(spec.colorAttachments.size());
 		colorAttachments.reserve(spec.colorAttachments.size());
 
 		GEVector<VkImageMemoryBarrier2> memBarriers;
 		memBarriers.reserve(spec.colorAttachments.size() + 1);
+		memBarriers.reserve(spec.colorAttachments.size() + 1);
 
+		for (const auto& attachment : spec.colorAttachments) {
 		for (const auto& attachment : spec.colorAttachments) {
 			auto vk_image = attachment.image.Cast<Vulkan_Image>();
 
@@ -293,6 +299,10 @@ namespace ge::renderer {
 				utility::Vulkan_GetLoadOp(attachment.loadOp),
 				utility::Vulkan_GetStoreOp(attachment.storeOp),
 				VkClearValue{.color{
+					attachment.clearValue.colorClear.r, 
+					attachment.clearValue.colorClear.g, 
+					attachment.clearValue.colorClear.b, 
+					attachment.clearValue.colorClear.a
 					attachment.clearValue.colorClear.r, 
 					attachment.clearValue.colorClear.g, 
 					attachment.clearValue.colorClear.b, 
@@ -327,7 +337,11 @@ namespace ge::renderer {
 			VkImageLayout{},
 			utility::Vulkan_GetLoadOp(spec.depthStencilAttachment.loadOp),
 			utility::Vulkan_GetStoreOp(spec.depthStencilAttachment.storeOp),
+			utility::Vulkan_GetLoadOp(spec.depthStencilAttachment.loadOp),
+			utility::Vulkan_GetStoreOp(spec.depthStencilAttachment.storeOp),
 			VkClearValue{.depthStencil{
+				spec.depthStencilAttachment.clearValue.depthClear,
+				spec.depthStencilAttachment.clearValue.stencilClear
 				spec.depthStencilAttachment.clearValue.depthClear,
 				spec.depthStencilAttachment.clearValue.stencilClear
 			}}
@@ -443,6 +457,7 @@ namespace ge::renderer {
 	}
 	
 	void Vulkan_RenderAPI::BeginDebugLabel(std::string_view label) {
+	void Vulkan_RenderAPI::BeginDebugLabel(std::string_view label) {
 		VkDebugUtilsLabelEXT label_desc{};
 		label_desc.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
 		label_desc.pLabelName = label.data();
@@ -453,6 +468,7 @@ namespace ge::renderer {
 		vkCmdBeginDebugUtilsLabelEXT(GetCurrentCommandBuffer(), &label_desc);
 	}
 
+	void Vulkan_RenderAPI::EndDebugLabel() {
 	void Vulkan_RenderAPI::EndDebugLabel() {
 		vkCmdEndDebugUtilsLabelEXT(GetCurrentCommandBuffer());
 	}
