@@ -19,8 +19,7 @@ namespace ge {
 
 		GE_CORE_INFO("Importing mesh from source: {}", source.string());
 		GE_PROFILE_SCOPE(std::format("MeshSourceSerializer::ImportFromSource - Assimp Import path: {}", source.string()));
-		std::filesystem::path fullSourcePath = std::filesystem::absolute(source);
-		std::filesystem::path meshDirectory = fullSourcePath.parent_path();
+		std::filesystem::path meshDirectory = source.parent_path();
 
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(source.string(), ASSIMP_FLAGS);
