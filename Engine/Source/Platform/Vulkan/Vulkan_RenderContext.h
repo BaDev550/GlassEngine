@@ -1,5 +1,10 @@
 #pragma once
+#ifndef GLFW_INCLUDE_VULKAN
+#define GLFW_INCLUDE_VULKAN
+#endif
+#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
+#include <GLFW/glfw3native.h>
 
 #include "GlassEngine/Renderer/RenderContext.h"
 #include "GlassEngine/Core/Core.h"
@@ -54,7 +59,7 @@ namespace ge::renderer {
 		[[nodiscard]] virtual uint32_t IGetReadonlyImageHandle(Image& image, ImageSubresource subresource) override;
 		[[nodiscard]] virtual uint32_t IGetWritableImageHandle(Image& image, ImageSubresource subresource) override;
 		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) override;
-		virtual void ISetUniformBuffer(Buffer& buffer, uint32_t binding) override;
+		virtual void ISetUniformBuffer(ge::mem::Ref<Buffer>& buffer, uint32_t binding) override;
 
 		[[nodiscard]] virtual bool UmaOrRebar() override { return _deviceFeatures.umaOrRebar; }
 

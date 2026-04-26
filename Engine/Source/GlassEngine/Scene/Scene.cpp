@@ -63,7 +63,7 @@ namespace ge {
 	{
 	}
 
-	void Scene::OnEditorUpdate(float DeltaTime, mem::Ref<renderer::Camera>& cam)
+	void Scene::OnEditorUpdate(float DeltaTime, const mem::Ref<renderer::Camera>& cam)
 	{
 		_sceneRenderer->DrawScene(cam);
 	}

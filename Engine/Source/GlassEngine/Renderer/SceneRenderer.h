@@ -10,11 +10,17 @@ namespace ge::renderer {
 		SceneRenderer(Scene* scene);
 		~SceneRenderer();
 
-		void DrawScene(ge::mem::Ref<Camera>& camera);
+		void DrawScene(const ge::mem::Ref<Camera>& camera);
 	private:
 		Scene* _scene;
 
 		ge::mem::Ref<Framebuffer> _framebuffer;
 		ge::mem::Ref<Pipeline> _pipeline;
+
+		struct CameraData {
+			glm::mat4 proj;
+			glm::mat4 view;
+		} _cameraData;
+		ge::mem::Ref<Buffer> _cameraBuffer;
 	};
 }

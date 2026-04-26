@@ -27,7 +27,7 @@ namespace ge::renderer {
 		uint32_t frameIndex = Renderer3D::GetFrameIndex();
 		auto& framebufferSpecs = _framebuffer->GetSpecification();
 		auto& window = Application::Get()->GetWindow();
-		glm::vec3 clearValue{1.0f, 1.0f, 1.0f};
+		glm::vec3 clearValue{1.0f, 0.0f, 0.0f};
 		float depthClearValue{1.0f};
 
 		uint32_t activeAttachmentCount = framebufferSpecs.IsSwapchain ? 1 : _framebuffer->GetAttachmentCount();

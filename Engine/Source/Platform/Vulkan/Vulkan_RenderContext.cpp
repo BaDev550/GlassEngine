@@ -1,10 +1,8 @@
-#include "GlassEngine/Utilities/Logger.h"
 #include "gepch.h"
+#include "GlassEngine/Utilities/Logger.h"
 #include "Vulkan_RenderContext.h"
 #include "Vulkan_Types.h"
 #include "Vulkan_DescriptorManager.h"
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 #include <exception>
 #include <set>
 #include <vulkan/vulkan_core.h>
@@ -554,8 +552,8 @@ namespace ge::renderer {
 		return isSuitable;
 	}
 
-	void Vulkan_RenderContext::ISetUniformBuffer(Buffer& buffer, uint32_t binding) {
-		_descriptorManager->SetUniformBuffer(static_cast<const Vulkan_Buffer&>(buffer), binding);
+	void Vulkan_RenderContext::ISetUniformBuffer(ge::mem::Ref<Buffer>& buffer, uint32_t binding) {
+		_descriptorManager->SetUniformBuffer(*buffer.Cast<Vulkan_Buffer>(), binding);
 	}
 
 	void Vulkan_RenderContext::FindQueueFamilies()

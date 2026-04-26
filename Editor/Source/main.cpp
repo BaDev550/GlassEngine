@@ -6,6 +6,7 @@
 #include <GlassEngine/Core/Core.h>
 #include <GlassEngine/Renderer/Renderer.h>
 #include <GlassEngine/Renderer/Model.h>
+#include <GlassEngine/Renderer/FreeCamera.h>
 #include <GlassEngine/Scene/Scene.h>
 #include <GlassEngine/Editor/EditorConsole.h>
 #include <GlassEngine/Editor/EditorECSDebugPanel.h>
@@ -17,7 +18,7 @@ public:
 	EditorLayer() : ge::Layer("LAYER_Editor") {}
 	virtual void OnAttach() override {
 		_scene = ge::mem::Ref<ge::Scene>::Create("Test Scene");
-		_camera = ge::mem::Ref<ge::renderer::Camera>::Create();
+		_camera = ge::mem::Ref<ge::renderer::FreeCamera>::Create();
 
 		GetPanelManager().RegisterPanel<ge::editor::Console>("E_c");
 		GetPanelManager().RegisterPanel<ge::editor::EditorECSDebugPanel>("E_ecs", _scene.Get());
@@ -43,6 +44,9 @@ public:
 
 	virtual void OnDetach() override {}
 	virtual void OnUpdate(float deltaTime) override {
+		_camera->Update(deltaTime);
+		_camera->SetProccessingMouse(true);
+
 		_scene->OnEditorUpdate(deltaTime, _camera);
 	}
 
@@ -58,7 +62,7 @@ public:
 	}
 private:
 	ge::mem::Ref<ge::Scene> _scene;
-	ge::mem::Ref<ge::renderer::Camera> _camera;
+	ge::mem::Ref<ge::renderer::FreeCamera> _camera;
 
 	ge::Entity* entity;
 };

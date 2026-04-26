@@ -66,8 +66,8 @@ extension Sampler : IBindlessDescriptor {}
 
 [vk::binding(0, 0)]
 cbuffer __EngineGlobalCameraBuffer__ {
-    float4x4 proj;
-    float4x4 view;
+    column_major float4x4 proj;
+    column_major float4x4 view;
 } __EngineGlobalCameraBuffer__;
 
 // [vk::binding(1, 0)]

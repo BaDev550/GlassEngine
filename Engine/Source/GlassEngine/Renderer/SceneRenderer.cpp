@@ -23,11 +23,28 @@ namespace ge::renderer {
 		spec.shader = Renderer3D::GetShaderLibrary().GetShader("dnm");
 		spec.targetFramebuffer = _framebuffer;
 		_pipeline = Pipeline::Create(spec);
+
+		// Camera buffer
+		{
+			BufferSpec spec{};
+			spec.cpuAccess = BufferCpuAccess::Write;
+			spec.elementSize = sizeof(CameraData);
+			spec.elementCount = 1;
+			spec.memoryType = BufferMemoryType::DeviceMemory;
+			spec.usageFlags = BufferUsageFlagsBits::Uniform;
+			_cameraBuffer = Buffer::Create(spec);
+			std::memcpy(_cameraBuffer->GetMappedPtr(), &_cameraData, sizeof(CameraData));
+			Application::Get()->GetWindow().GetRenderContext().SetUniformBuffer(_cameraBuffer, 0);
+		}
 	}
 	SceneRenderer::~SceneRenderer() {}
 
-	void SceneRenderer::DrawScene(ge::mem::Ref<Camera>& camera)
+	void SceneRenderer::DrawScene(const ge::mem::Ref<Camera>& camera)
 	{
+		_cameraData.view = camera->GetView();
+		_cameraData.proj = camera->GetProjection();
+		std::memcpy(_cameraBuffer->GetMappedPtr(), &_cameraData, sizeof(CameraData));
+
 		Renderer3D::BeginDefaultPass();
 		auto view = _scene->GetRegistry().view<const TransformComponent, StaticMeshComponent>();
 		view.each([&](const TransformComponent& tc, StaticMeshComponent& smc) {

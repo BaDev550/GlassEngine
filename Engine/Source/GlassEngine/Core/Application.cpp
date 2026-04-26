@@ -25,6 +25,7 @@ namespace ge {
 		_window->SetIcon("Resources/icon-512.png");
 		renderer::Renderer3D::Init();
 		_imGuiLayer = ImGuiLayer::Create();
+		Input::Init();
 
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "close", [this](const GEVector<GEString>& args) { _forceClose = true; });
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "writeProfile", [](const GEVector<GEString>& args) { profile::utils::WriteEventsToFile(profile::Profiler::Get().GetEvents(), args[0].ToPath());}, "writeProfile <filePath>");
@@ -54,6 +55,7 @@ namespace ge {
 			_lastTime = time;
 
 			_window->PollEvents();
+			Input::Update();
 
 			ge::renderer::Renderer3D::BeginFrame();
 			for (auto& layer : _layerStack) {

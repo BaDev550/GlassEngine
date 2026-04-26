@@ -8,6 +8,7 @@
 #include "GlassEngine/Utilities/Logger.h"
 #include "GlassEngine/Core/Window.h"
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Core/Input.h"
 #include "GlassEngine/Memory/Memory.h"
 #include "GlassEngine/Thread/ThreadManager.h"
 #include "GlassEngine/Utilities/Console.h"
