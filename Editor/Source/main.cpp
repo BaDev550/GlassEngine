@@ -35,7 +35,7 @@ public:
 			GE_APPLICATION_INFO(" -submeshC: {}", lod.submesh.size());
 		}
 
-		auto entity = _scene->CreateEntity("Mario");
+		entity = _scene->CreateEntity("Mario");
 		auto& smc = entity->AddComponent<ge::StaticMeshComponent>();
 		smc.meshHandle = mario->_assetHandle;
 #endif
@@ -46,10 +46,21 @@ public:
 		_scene->OnEditorUpdate(deltaTime, _camera);
 	}
 
-	virtual void OnImGuiRender() override {}
+	virtual void OnImGuiRender() override {
+		ImGui::Begin("LOD Test");
+		if (entity) {
+			auto& smc = entity->GetComponent<ge::StaticMeshComponent>();
+			int lodLevel = smc.lodLevel;
+			if (ImGui::DragInt("LOD level: ", &lodLevel, 1.0f, 0, 3)) 
+				smc.lodLevel = lodLevel;
+		}
+		ImGui::End();
+	}
 private:
 	ge::mem::Ref<ge::Scene> _scene;
 	ge::mem::Ref<ge::renderer::Camera> _camera;
+
+	ge::Entity* entity;
 };
 
 class EditorApp : public ge::Application {

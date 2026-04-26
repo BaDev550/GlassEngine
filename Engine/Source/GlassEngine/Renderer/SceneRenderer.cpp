@@ -34,7 +34,7 @@ namespace ge::renderer {
 			if (smc.isVisible) {
 				auto staticMesh = Application::Get()->GetAssetManager()->GetAsset(smc.meshHandle).Cast<StaticMesh>();
 				uint32_t lodIndex = staticMesh->GetLODManager().GetLODindex(staticMesh->GetLODs(), camera, tc.position);
-				Renderer3D::DrawStaticMesh(_pipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
+				Renderer3D::DrawStaticMesh(_pipeline, staticMesh, smc.lodLevel, smc.materialTable, tc.Mat4());
 			}
 			});
 		Renderer3D::EndDefaultPass();

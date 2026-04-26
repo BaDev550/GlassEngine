@@ -48,6 +48,9 @@ namespace ge::renderer {
 	void Renderer3D::Destroy() {
 		g_defaultRenderPass = nullptr;
 		s_data._shaderLibrary = nullptr;
+		s_data._defaultSampler = nullptr;
+		s_data._defaultWhiteTexture = nullptr;
+		s_data._defaultBlackTexture = nullptr;
 		g_renderAPI = nullptr;
 	}
 

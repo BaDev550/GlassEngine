@@ -35,6 +35,7 @@ namespace ge {
 	struct StaticMeshComponent {
 		AssetHandle meshHandle;
 		bool isVisible = true;
+		uint32_t lodLevel = 0;
 		mem::Ref<renderer::MaterialTable> materialTable = nullptr;
 
 		StaticMeshComponent(AssetHandle handle = GE_INVALID_ASSET_HANDLE) : meshHandle(handle) {}
