@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string_view>
 #include <sys/types.h>
+#include <vulkan/vulkan_core.h>
 #include "Vulkan_Image.h"
 #include "Vulkan_Buffer.h"
 #include "Vulkan_Sampler.h"
@@ -21,7 +22,7 @@ namespace ge::renderer {
 		virtual void UnregisterWritableImage(uint32_t handle) = 0;
 		virtual void UnregisterSampler(uint32_t handle) = 0;
 
-		virtual void PushConstant(VkCommandBuffer cmd, const void *ptr, uint8_t size, uint8_t offset) = 0;
+		virtual void PushConstant(VkCommandBuffer cmd, const void *ptr, uint16_t size, uint16_t offset) = 0;
 		virtual void BindDescriptors(VkCommandBuffer cmd) = 0;
 	protected:
 		Vulkan_RenderContext& _renderContext;
@@ -40,7 +41,7 @@ namespace ge::renderer {
 		virtual void UnregisterWritableImage(uint32_t handle) override;
 		virtual void UnregisterSampler(uint32_t handle) override;
 
-		virtual void PushConstant(VkCommandBuffer cmd, const void *ptr, uint8_t size, uint8_t offset) override;
+		virtual void PushConstant(VkCommandBuffer cmd, const void *ptr, uint16_t size, uint16_t offset) override;
 		virtual void BindDescriptors(VkCommandBuffer cmd) override;
 
 		[[nodiscard]] auto GetGlobalDescriptorSet() const noexcept { return _globalDescriptorSet; }
@@ -59,13 +60,15 @@ namespace ge::renderer {
 		[[nodiscard]] auto GetSamplerPool() const noexcept { return _samplerPool; }
 
 		[[nodiscard]] auto GetPipelineLayout() const noexcept { return _pipelineLayout; }
+
+		void GlobalDescriptor();
 	private:
 		void CreatePipelineLayout();
 		void CreateGlobalDescriptorPoolAndSet();
 		void CreateBindlessDescriptorPoolAndSet(
 			VkDescriptorType type, uint32_t descriptorCount, bool partiallyBound, std::string_view debugName,
 			VkDescriptorPool& outPool, VkDescriptorSetLayout& outSetLayout, VkDescriptorSet& outSet);
-		void WriteDescriptor(VkDescriptorType type, const VkDescriptorImageInfo *imageInfo, uint32_t index) noexcept;
+		void WriteDescriptor(VkDescriptorSet set, VkDescriptorType type, const VkDescriptorImageInfo *imageInfo, uint32_t index) noexcept;
 
 		uint32_t _readonlyImageUsageCount{};
 		uint32_t _writableImageUsageCount{};

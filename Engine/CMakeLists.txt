@@ -6,7 +6,7 @@ set_target_properties(Engine PROPERTIES
 
 find_package(Vulkan)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
-set(slang_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/slang/cmake")
+# set(slang_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/slang/cmake")
 find_package(slang CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)

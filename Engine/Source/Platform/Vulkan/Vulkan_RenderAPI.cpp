@@ -1,6 +1,8 @@
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Renderer/Swapchain.h"
+#include "GlassEngine/Renderer/Types.h"
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
+#include "Platform/Vulkan/Vulkan_Types.h"
 #include "gepch.h"
 #include "Vulkan_RenderAPI.h"
 #include "Vulkan_Swapchain.h"
@@ -81,7 +83,7 @@ namespace ge::renderer {
 		}
 	}
 
-	void Vulkan_RenderAPI::PushConstant(const void *ptr, uint8_t size, uint8_t offset) {
+	void Vulkan_RenderAPI::PushConstant(const void *ptr, uint16_t size, uint16_t offset) {
 		VK_RENDER_CONTEXT->GetDescriptorManager().PushConstant(GetCurrentCommandBuffer(), ptr, size, offset);
 	}
 
@@ -260,7 +262,48 @@ namespace ge::renderer {
 	}
 
 	void Vulkan_RenderAPI::BeginRenderPass(const BeginRenderPassSpec& spec) {
-		;	
+		VkCommandBuffer cmd = Renderer3D::GetRenderAPI().Cast<Vulkan_RenderAPI>()->GetCurrentCommandBuffer();
+		
+		GEVector<VkRenderingAttachmentInfo> colorAttachments;
+		colorAttachments.reserve(spec.color_attachments.size());
+
+		for (const auto& attachment : spec.color_attachments) {
+			auto vk_image = attachment.image.Cast<Vulkan_Image>();
+			colorAttachments.emplace_back(
+				VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+				nullptr,
+				vk_image->CreateGetImageView(attachment.subresource),
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VkResolveModeFlagBits{},
+				VkImageView{},
+				VkImageLayout{},
+				utility::Vulkan_GetLoadOp(attachment.loadOp),
+				utility::Vulkan_GetStoreOp(attachment.storeOp),
+				VkClearValue{.color{
+					attachment.clearColor.colorClear.r, 
+					attachment.clearColor.colorClear.g, 
+					attachment.clearColor.colorClear.b, 
+					attachment.clearColor.colorClear.a
+				}}
+			);
+		}
+
+		VkRenderingInfo renderingInfo{};
+		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+		// renderingInfo.renderArea = VkRect2D({ 0, 0 }, extent);
+		renderingInfo.layerCount = 1;
+		renderingInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
+		renderingInfo.pColorAttachments = colorAttachments.data();
+		//renderingInfo.pDepthAttachment = 
+		
+		// VkViewport viewport{ 0, 0, (float)extent.width, (float)extent.height };
+		// viewport.minDepth = 0;
+		// viewport.maxDepth = 1;
+		// VkRect2D scissor{ {0,0}, extent };
+
+		vkCmdBeginRendering(cmd, &renderingInfo);
+		// vkCmdSetViewport(cmd, 0, 1, &viewport);
+		// vkCmdSetScissor(cmd, 0, 1, &scissor);
 	}
 
 	void Vulkan_RenderAPI::EndRenderPass() {
@@ -273,7 +316,10 @@ namespace ge::renderer {
 		VkDebugUtilsLabelEXT label_desc{};
 		label_desc.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
 		label_desc.pLabelName = label.data();
-		// label_desc.color = {0.8f, 0.2f, 0.6f, 1.f};
+		label_desc.color[0] = 0.8f;
+		label_desc.color[1] = 0.2f;
+		label_desc.color[2] = 0.6f;
+		label_desc.color[3] = 1.f;
 		vkCmdBeginDebugUtilsLabelEXT(GetCurrentCommandBuffer(), &label_desc);
 	}
 

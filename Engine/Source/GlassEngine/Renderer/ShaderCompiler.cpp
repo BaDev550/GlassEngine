@@ -98,7 +98,7 @@ namespace ge::renderer {
         {
             Slang::ComPtr<slang::IBlob> diagnosticsBlob;
             linkedProgram->getTargetCode(
-                SpirvTargetIndex,
+                0,
                 blob.writeRef(),
                 diagnosticsBlob.writeRef());
 
@@ -143,7 +143,7 @@ namespace ge::renderer {
 
         std::array<slang::TargetDesc, 2> targetDesc;
         targetDesc[SpirvTargetIndex].format = SLANG_SPIRV;
-        targetDesc[SpirvTargetIndex].profile = globalSession->findProfile("spirv_1_3");
+        targetDesc[SpirvTargetIndex].profile = globalSession->findProfile("spirv_1_4");
 
         targetDesc[DxilTargetIndex].format = SLANG_DXIL;
         targetDesc[DxilTargetIndex].profile = globalSession->findProfile("sm_6_6");
@@ -226,6 +226,7 @@ namespace ge::renderer {
         }
 
         try {
+            auto i = linkedProgram->getLayout();
             //shaderData.reflection = GetReflection(linkedProgram->getLayout());
             shaderData.reflection = {};// GetReflection(linkedProgram->getLayout());
             shaderData.spirvByteCode = GetSpirvCode(linkedProgram);

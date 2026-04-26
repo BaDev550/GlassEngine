@@ -27,7 +27,6 @@ namespace ge::renderer {
 		DirectX11,
 		DirectX12
 	};
-
 	struct ColorClearColor {
 		glm::vec4 color;
 	};
@@ -38,27 +37,16 @@ namespace ge::renderer {
 	};
 
 	struct ClearColor {
-		ClearColor(DepthStencilClearColor color) : depthStencilColor(color) {}
-		ClearColor(ColorClearColor color) : clearColor(color) {}
+		ClearColor(float depth, uint8_t stencil) : depthClear(depth), stencilClear(stencil) {}
+		ClearColor(glm::vec4 color) : colorClear(color) {}
 		union {
-			ColorClearColor clearColor;
-			DepthStencilClearColor depthStencilColor;
+			glm::vec4 colorClear;
+			struct { float depthClear; uint8_t stencilClear; };
 		};
 	};
 
-	enum class AttachmentLoadOp : uint8_t {
-		Load,
-		Clear,
-		None,
-	};
-
-	enum class AttachmentStoreOp : uint8_t {
-		Store,
-		None
-	};
-
 	struct Attachment {
-		ge::mem::Ref<Image> attachment_image;
+		ge::mem::Ref<Image> image;
 		ImageSubresource subresource;
 		ClearColor clearColor;
 		AttachmentLoadOp loadOp;
@@ -84,7 +72,7 @@ namespace ge::renderer {
 		virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex = 0, uint32_t firstInstance = 0, int32_t vertexOffset = 0) = 0;
 		virtual void DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex = 0, ge::mem::Ref<MaterialTable> materialTable = nullptr, const glm::mat4& transform = glm::mat4(1.0f)) = 0;
 
-		virtual void PushConstant(const void *ptr, uint8_t size, uint8_t offset) = 0;
+		virtual void PushConstant(const void *ptr, uint16_t size, uint16_t offset) = 0;
 
 		virtual void BeginCopyPass() = 0;
 		virtual void EndCopyPass() = 0;

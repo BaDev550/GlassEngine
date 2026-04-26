@@ -1,4 +1,6 @@
 #include "SceneRenderer.h"
+#include "GlassEngine/Renderer/Pipeline.h"
+#include "GlassEngine/Renderer/Types.h"
 #include "GlassEngine/Scene/Scene.h"
 #include "ShaderLibrary.h"
 #include "Renderer.h"
@@ -10,6 +12,14 @@ namespace ge::renderer {
 		_framebuffer = Framebuffer::Create(fspec);
 
 		PipelineSpec spec{};
+		spec.inputAssemblySpec.vertexAttributes = {
+			VertexAttribute{VertexFormat::RGBA32Float, 0, 0, 0, },
+			VertexAttribute{VertexFormat::RGBA32Float, 16, 1, 0, },
+			VertexAttribute{VertexFormat::RG32Float, 32, 2, 0, }
+		};
+		spec.inputAssemblySpec.vertexBindings = {
+			VertexBinding{40, 0, VertexInputRate::Vertex}
+		};
 		spec.shader = Renderer3D::GetShaderLibrary().GetShader("dnm");
 		spec.targetFramebuffer = _framebuffer;
 		_pipeline = Pipeline::Create(spec);

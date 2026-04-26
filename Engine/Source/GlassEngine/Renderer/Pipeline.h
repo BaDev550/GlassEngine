@@ -2,6 +2,7 @@
 #include "GlassEngine/Renderer/RenderObject.h"
 #include "GlassEngine/Renderer/Shader.h"
 #include "GlassEngine/Renderer/Framebuffer.h"
+#include "GlassEngine/Renderer/Types.h"
 
 namespace ge::renderer {
 	struct VertexAttribute {
@@ -27,7 +28,7 @@ namespace ge::renderer {
 	struct InputAssemblySpec {
 		GEVector<VertexAttribute> vertexAttributes;
 		GEVector<VertexBinding> vertexBindings;
-		PrimitiveTopology topology;
+		PrimitiveTopology topology = PrimitiveTopology::TriangleList;
 	};
 
 	struct ResterizerSpec {

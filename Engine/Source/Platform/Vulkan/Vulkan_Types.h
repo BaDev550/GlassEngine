@@ -7,6 +7,7 @@
 #include <GlassEngine/Renderer/Types.h>
 #include <optional>
 #include <utility>
+#include <vulkan/vulkan_core.h>
 
 namespace ge::renderer::utility {
 	[[nodiscard]] constexpr VkBufferUsageFlags Vulkan_GetBufferUsageFlags(BufferUsageFlags bufferUsageFlags) noexcept {
@@ -55,14 +56,38 @@ namespace ge::renderer::utility {
 		switch (imageFormat) {
 		case ImageFormat::RGBA8: return VK_FORMAT_R8G8B8A8_UNORM;
 		}
+		return {};
 	}
 
-	[[nodiscard]] constexpr VkFormat Vulkan_GetVertexFormat(VertexFormat imageFormat) noexcept {
-		switch (imageFormat) {
-		case VertexFormat::RGBA32f: return VK_FORMAT_R32G32B32A32_SFLOAT;
+	[[nodiscard]] constexpr VkFormat Vulkan_GetVertexFormat(VertexFormat vertexFormat) noexcept {
+		switch (vertexFormat) {
+		case VertexFormat::RGBA32Float:  return VK_FORMAT_R32G32B32A32_SFLOAT;
+		case VertexFormat::RG32Float:    return VK_FORMAT_R32G32_SFLOAT;
+		case VertexFormat::R32Float:     return VK_FORMAT_R32_SFLOAT;
+
+		case VertexFormat::RGBA16Float:  return VK_FORMAT_R16G16B16A16_SFLOAT;
+		case VertexFormat::RG16Float:    return VK_FORMAT_R16G16_SFLOAT;
+		case VertexFormat::R16Float:     return VK_FORMAT_R16_SFLOAT;
+
+		case VertexFormat::RGBA32Int:    return VK_FORMAT_R32G32B32A32_SINT;
+		case VertexFormat::RG32Int:      return VK_FORMAT_R32G32_SINT;
+		case VertexFormat::R32Int:       return VK_FORMAT_R32_SINT;
+
+		case VertexFormat::RGBA16Int:    return VK_FORMAT_R16G16B16A16_SINT;
+		case VertexFormat::RG16Int:      return VK_FORMAT_R16G16_SINT;
+		case VertexFormat::R16Int:       return VK_FORMAT_R16_SINT;
+
+		case VertexFormat::RGBA32UInt:   return VK_FORMAT_R32G32B32A32_UINT;
+		case VertexFormat::RG32UInt:     return VK_FORMAT_R32G32_UINT;
+		case VertexFormat::R32UInt:      return VK_FORMAT_R32_UINT;
+
+		case VertexFormat::RGBA16UInt:   return VK_FORMAT_R16G16B16A16_UINT;
+		case VertexFormat::RG16UInt:     return VK_FORMAT_R16G16_UINT;
+		case VertexFormat::R16UInt:      return VK_FORMAT_R16_UINT;
 		}
+		return VK_FORMAT_UNDEFINED;
 	}
-
+	
 	[[nodiscard]] constexpr VkImageType Vulkan_GetImageType(ImageType imageType) noexcept {
 		switch (imageType) {
 		case ImageType::e1D: return VK_IMAGE_TYPE_1D;
@@ -93,23 +118,6 @@ namespace ge::renderer::utility {
 			out |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 		return out;
-	}
-
-	[[nodiscard]] constexpr uint32_t GetFormatSize(VkFormat format) noexcept {
-		switch (format)
-		{
-		case VK_FORMAT_UNDEFINED: return 0;
-		case VK_FORMAT_R8G8B8A8_UNORM: return 4;
-		case VK_FORMAT_R8G8B8A8_SRGB: return 4;
-		case VK_FORMAT_R16_SFLOAT: return 2;
-		case VK_FORMAT_R16G16_SFLOAT: return 4;
-		case VK_FORMAT_R16G16B16_SFLOAT: return 8;
-		case VK_FORMAT_R16G16B16A16_SFLOAT: return 16;
-		case VK_FORMAT_R32_SFLOAT: return 4;
-		case VK_FORMAT_R32G32_SFLOAT: return 8;
-		case VK_FORMAT_R32G32B32_SFLOAT: return 12;
-		case VK_FORMAT_R32G32B32A32_SFLOAT: return 16;
-		}
 	}
 
 	[[nodiscard]] constexpr VkDescriptorType ShaderReflectionTypeToVulkanType(const ShaderDataType& type) noexcept {
@@ -190,6 +198,7 @@ namespace ge::renderer::utility {
 			else if (flags.Has(ImageUsageFlagsBits::TransferSrc))
 				return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 		}
+		return VK_IMAGE_LAYOUT_GENERAL;
 	}
 
 	[[nodiscard]] constexpr VkImageViewType Vulkan_ImageViewType(ImageSubresourceType type) noexcept {
@@ -246,6 +255,21 @@ namespace ge::renderer::utility {
 		case StencilOp::Invert:            return VK_STENCIL_OP_INVERT;
 		case StencilOp::IncramentAndWarp:  return VK_STENCIL_OP_INCREMENT_AND_WRAP;
 		case StencilOp::DecrementAndWarp:  return VK_STENCIL_OP_DECREMENT_AND_WRAP;
+		}
+	}
+
+	[[nodiscard]] constexpr VkAttachmentLoadOp Vulkan_GetLoadOp(AttachmentLoadOp op) noexcept {
+		switch (op) {
+		case AttachmentLoadOp::Load:              return VK_ATTACHMENT_LOAD_OP_LOAD;
+		case AttachmentLoadOp::Clear:             return VK_ATTACHMENT_LOAD_OP_CLEAR;
+		case AttachmentLoadOp::None:              return VK_ATTACHMENT_LOAD_OP_NONE;
+		}
+	}
+
+	[[nodiscard]] constexpr VkAttachmentStoreOp Vulkan_GetStoreOp(AttachmentStoreOp op) noexcept {
+		switch (op) {
+		case AttachmentStoreOp::Store:              return VK_ATTACHMENT_STORE_OP_STORE;
+		case AttachmentStoreOp::None:              return VK_ATTACHMENT_STORE_OP_NONE;
 		}
 	}
 }

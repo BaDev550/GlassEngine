@@ -18,7 +18,7 @@ namespace ge::renderer {
 		virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex = 0, uint32_t firstInstance = 0, int32_t vertexOffset = 0) override;
 		virtual void DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex = 0, ge::mem::Ref<MaterialTable> materialTable = nullptr, const glm::mat4& transform = glm::mat4(1.0f)) override;
 
-		virtual void PushConstant(const void *ptr, uint8_t size, uint8_t offset) override;
+		virtual void PushConstant(const void *ptr, uint16_t size, uint16_t offset) override;
 
 		virtual void BeginCopyPass() override;
 		virtual void EndCopyPass() override;

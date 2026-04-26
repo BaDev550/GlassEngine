@@ -1,9 +1,5 @@
-#define __GE_SPIRV__
-
-#ifdef __GE_DXIL__
 static const constexpr uint DxilCameraBufferIndex = 0;
 static const constexpr uint DxilLightBufferIndex = 1;
-#endif
 
 // TODO: better name
 class CameraData {
@@ -74,13 +70,11 @@ extension ReadonlyImageCube : IBindlessDescriptor {}
 
 extension Sampler : IBindlessDescriptor {}
 
-#ifdef __GE_SPIRV__
-[vk::binding(0, 0)]
-ConstantBuffer<CameraData> __EngineGlobalCameraBuffer__;
+// [vk::binding(0, 0)]
+// ConstantBuffer<CameraData> __EngineGlobalCameraBuffer__;
 
-[vk::binding(1, 0)]
-ConstantBuffer<LightData> __EngineGlobalLightBuffer__;
-#endif
+// [vk::binding(1, 0)]
+// ConstantBuffer<LightData> __EngineGlobalLightBuffer__;
 
 [vk::binding(0, 1)]
 __DynamicResource<__DynamicResourceKind.General> __TextureHandles__[];
@@ -122,18 +116,18 @@ T GetBindless<T>(uint handle)
     }
 }
 
-CameraData GetCamaraData() {
-#ifdef __GE_SPIRV__
-    return __EngineGlobalCameraBuffer__;
-#else 
-    return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
-#endif
-}
+// CameraData GetCamaraData() {
+// #ifdef __GE_SPIRV__
+//     return __EngineGlobalCameraBuffer__;
+// #else 
+//     return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
+// #endif
+// }
 
-LightData GetLightData() {
-#ifdef __GE_SPIRV__
-    return __EngineGlobalLightBuffer__;
-#else
-    return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
-#endif
-}
+// LightData GetLightData() {
+// #ifdef __GE_SPIRV__
+//     return __EngineGlobalLightBuffer__;
+// #else
+//     return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
+// #endif
+// }

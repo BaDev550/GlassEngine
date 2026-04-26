@@ -3,6 +3,7 @@
 #include "GlassEngine/Utilities/Logger.h"
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
 #include "Platform/Vulkan/Vulkan_Types.h"
+#include <array>
 #include <cstdint>
 #include <ranges>
 #include <vulkan/vulkan_core.h>
@@ -249,7 +250,7 @@ namespace ge::renderer {
 			GE_GRAPHICS_ERROR("Bindless readonly image limit exceeded!");
 		}
 
-		WriteDescriptor(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, &imageInfo, index);
+		WriteDescriptor(_readonlyImageSet, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, &imageInfo, index);
 		return index;
 	}
 
@@ -270,7 +271,7 @@ namespace ge::renderer {
 			GE_GRAPHICS_ERROR("Bindless writable image limit exceeded!");
 		}
 
-		WriteDescriptor(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, &imageInfo, index);
+		WriteDescriptor(_writableImageSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, &imageInfo, index);
 		return index;
 	}
 
@@ -290,14 +291,15 @@ namespace ge::renderer {
 			GE_GRAPHICS_ERROR("Bindless sampler limit exceeded!");
 		}
 
-		WriteDescriptor(VK_DESCRIPTOR_TYPE_SAMPLER, &imageInfo, index);
+		WriteDescriptor(_samplerSet, VK_DESCRIPTOR_TYPE_SAMPLER, &imageInfo, index);
 		return index;
 	}
 
-	void Vulkan_DescriptorManagerDefault::WriteDescriptor(VkDescriptorType type, const VkDescriptorImageInfo *imageInfo, uint32_t index) noexcept{
+	void Vulkan_DescriptorManagerDefault::WriteDescriptor(VkDescriptorSet set, VkDescriptorType type, const VkDescriptorImageInfo *imageInfo, uint32_t index) noexcept{
 		VkWriteDescriptorSet writeSet{};
 		writeSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeSet.dstSet = _globalDescriptorSet;
+		writeSet.dstSet = set;
+		writeSet.dstBinding = 0;
 		writeSet.dstArrayElement = index;
 		writeSet.descriptorCount = 1;
 		writeSet.descriptorType = type;
@@ -318,7 +320,7 @@ namespace ge::renderer {
 		_samplerDeletedIndices.push_back(handle);
 	}
 
-	void Vulkan_DescriptorManagerDefault::PushConstant(VkCommandBuffer cmd, const void *ptr, uint8_t size, uint8_t offset) {
+	void Vulkan_DescriptorManagerDefault::PushConstant(VkCommandBuffer cmd, const void *ptr, uint16_t size, uint16_t offset) {
 		vkCmdPushConstants(cmd, _pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, offset, size, ptr);
 	}
 
@@ -332,6 +334,7 @@ namespace ge::renderer {
 
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 4, sets, 0, nullptr);
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, _pipelineLayout, 0, 4, sets, 0, nullptr);
+		std::array<uint8_t, 256> emptyConstant{};
+		PushConstant(cmd, emptyConstant.data(), 256, 0);
 	}
-
 }

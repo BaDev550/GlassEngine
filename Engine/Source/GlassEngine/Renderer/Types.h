@@ -81,7 +81,7 @@ namespace ge::renderer {
 
 	// TODO (dnm): complate this
 	enum class ImageFormat : uint8_t {
-		RGBA8 = 0,
+		RGBA8,
 		D16,
 		D32,
 		D32S8,
@@ -90,7 +90,24 @@ namespace ge::renderer {
 
 	// TODO (dnm): complate this
 	enum class VertexFormat : uint8_t {
-		RGBA32f = 0
+		RGBA32Float,
+		RG32Float,
+		R32Float,
+		RGBA16Float,
+		RG16Float,
+		R16Float,
+		RGBA32Int,
+		RG32Int,
+		R32Int,
+		RGBA16Int,
+		RG16Int,
+		R16Int,
+		RGBA32UInt,
+		RG32UInt,
+		R32UInt,
+		RGBA16UInt,
+		RG16UInt,
+		R16UInt,
 	};
 
 	enum class ImageFilter : uint8_t {
@@ -214,6 +231,17 @@ namespace ge::renderer {
 		DecrementAndWarp,
 	};
 
+	enum class AttachmentLoadOp : uint8_t {
+		Load,
+		Clear,
+		None,
+	};
+
+	enum class AttachmentStoreOp : uint8_t {
+		Store,
+		None
+	};
+
 	namespace utility {
 		[[nodiscard]] constexpr std::string_view ToString(ShaderResourceType type) {
 			switch (type) {
@@ -247,6 +275,35 @@ namespace ge::renderer {
 			case ImageFormat::D32S8: return 8;
 			case ImageFormat::D24S8: return 4;
 			}
+		}
+
+		[[nodiscard]] constexpr uint32_t GetVertexSize(VertexFormat vertexFormat) noexcept {
+			switch (vertexFormat) {
+			case VertexFormat::RGBA32Float:  return 16;
+			case VertexFormat::RG32Float:    return 8;
+			case VertexFormat::R32Float:     return 4;
+
+			case VertexFormat::RGBA16Float:  return 8;
+			case VertexFormat::RG16Float:    return 4;
+			case VertexFormat::R16Float:     return 2;
+
+			case VertexFormat::RGBA32Int:    return 16;
+			case VertexFormat::RG32Int:      return 8;
+			case VertexFormat::R32Int:       return 4;
+
+			case VertexFormat::RGBA16Int:    return 8;
+			case VertexFormat::RG16Int:      return 4;
+			case VertexFormat::R16Int:       return 2;
+
+			case VertexFormat::RGBA32UInt:   return 16;
+			case VertexFormat::RG32UInt:     return 8;
+			case VertexFormat::R32UInt:      return 4;
+
+			case VertexFormat::RGBA16UInt:   return 8;
+			case VertexFormat::RG16UInt:     return 4;
+			case VertexFormat::R16UInt:      return 2;
+			}
+			return 0;
 		}
 	}
 }

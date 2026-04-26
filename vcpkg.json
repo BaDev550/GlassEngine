@@ -4,6 +4,7 @@
     "glm",
     "assimp",
     "entt",
+    "shader-slang",
     "vulkan-memory-allocator",
     {
       "name": "glfw3",

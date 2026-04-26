@@ -26,7 +26,7 @@ public:
 		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_ecs");
 
 #if 1
-		auto mario = ge::Application::Get()->GetAssetManager()->GetOrImportAsset("Resources/mario_2/mario_2.obj").Cast<ge::renderer::StaticMesh>();
+		auto mario = ge::Application::Get()->GetAssetManager()->GetOrImportAsset("Resources/DamagedHelmet/DamagedHelmet.gltf").Cast<ge::renderer::StaticMesh>();
 		for (int i = 0; i < mario->GetLODs().size(); i++) {
 			auto& lod = mario->GetLODs()[i];
 			GE_APPLICATION_INFO("LOD: {}", i);
