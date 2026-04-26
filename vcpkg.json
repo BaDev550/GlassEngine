@@ -7,15 +7,7 @@
     "shader-slang",
     "vulkan-memory-allocator",
     {
-      "name": "glfw3",
-      "platform": "windows"
-    },
-    {
-      "name": "glfw3",
-      "platform": "linux",
-      "features": [
-        "wayland"
-      ]
+      "name": "glfw3"
     },
     {
       "name": "imgui",
