@@ -13,7 +13,7 @@ struct VertexOut {
 };
 
 struct Material {
-    column_major float4x4 model;
+    float4x4 model;
     uint albedoTextureIndex;
     uint roughnessTextureIndex;
     uint normalTextureIndex;

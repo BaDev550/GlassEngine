@@ -151,11 +151,13 @@ namespace ge::renderer {
         targetDesc[DxilTargetIndex].format = SLANG_DXIL;
         targetDesc[DxilTargetIndex].profile = globalSession->findProfile("sm_6_6");
 
-        std::array<slang::CompilerOptionEntry, 2> options;
+        std::array<slang::CompilerOptionEntry, 3> options;
         options[0].name = slang::CompilerOptionName::Optimization;
         options[0].value = { slang::CompilerOptionValueKind::Int, 3 };
         options[1].name = slang::CompilerOptionName::EmitSpirvDirectly;
         options[1].value = { slang::CompilerOptionValueKind::Int, 1 };
+        options[2].name = slang::CompilerOptionName::MatrixLayoutColumn;
+        options[2].value = { slang::CompilerOptionValueKind::Int, 1 };
 
         sessionDesc.targets = targetDesc.data();
         sessionDesc.targetCount = targetDesc.size();

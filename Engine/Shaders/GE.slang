@@ -3,6 +3,7 @@ static const constexpr uint DxilLightBufferIndex = 1;
 
 // TODO: better name
 class LightData {
+    uint i;
 };
 
 interface IBindlessDescriptor {};
@@ -66,8 +67,8 @@ extension Sampler : IBindlessDescriptor {}
 
 [vk::binding(0, 0)]
 cbuffer __EngineGlobalCameraBuffer__ {
-    column_major float4x4 proj;
-    column_major float4x4 view;
+    float4x4 proj;
+    float4x4 view;
     float3 pos;
 } __EngineGlobalCameraBuffer__;
 
