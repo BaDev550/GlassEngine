@@ -61,6 +61,8 @@ public:
 		fspec.height = ge::Application::Get()->GetWindow().GetHeight();
 		_framebuffer = ge::renderer::Framebuffer::Create(fspec);
 		_renderPass = ge::renderer::RenderPass::Create(_framebuffer, "GUI_RENDER_PASS");
+
+		id = ge::renderer::Renderer3D::GetImGuiTexture(_scene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
 	}
 
 	virtual void OnDetach() override {}
@@ -81,8 +83,8 @@ public:
 		_renderPass->Begin();
 		ImGui::Begin("Test");
 		ImGui::Text("Test");
+		ImGui::Image(id, ImVec2(800, 800));
 		ImGui::End();
-		ImTextureRef();
 		_renderPass->End();
 	}
 private:
@@ -90,6 +92,7 @@ private:
 	ge::mem::Ref<ge::renderer::FreeCamera> _camera;
 	ge::mem::Ref<ge::renderer::Framebuffer> _framebuffer;
 	ge::mem::Ref<ge::renderer::RenderPass> _renderPass;
+	ImTextureID id;
 
 	bool _cursor = false;
 	ge::Entity* entity;

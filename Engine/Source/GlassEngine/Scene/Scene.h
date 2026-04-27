@@ -27,6 +27,7 @@ namespace ge {
 
 		const GEString& GetName() const { return _name; }
 		entt::registry& GetRegistry() { return _registry; }
+		mem::Ref<renderer::SceneRenderer>& GetSceneRenderer() { return _sceneRenderer; }
 		GEUnorderedMap<EntityID, mem::Ref<Entity>>& GetEntities() { return _entities; }
 	private:
 		GEString _name;

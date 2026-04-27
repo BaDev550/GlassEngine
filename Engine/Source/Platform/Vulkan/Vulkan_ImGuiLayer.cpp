@@ -21,7 +21,7 @@ namespace ge {
 		poolSize.push_back({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 });
 		poolSize.push_back({ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,         1000 });
 		poolSize.push_back({ VK_DESCRIPTOR_TYPE_SAMPLER,   1000 });
-
+		
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
 		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		descriptorPoolCreateInfo.poolSizeCount = static_cast<uint32_t>(poolSize.size());
@@ -32,6 +32,11 @@ namespace ge {
 		vkCreateDescriptorPool(context->GetDevice(), &descriptorPoolCreateInfo, VK_ALLOCATOR_CALLBACKS, &_descriptorPool);
 
 		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+
+		auto& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
 		ImGui_ImplGlfw_InitForVulkan(window.GetHandle(), true);
 		ImGui_ImplVulkan_PipelineInfo pipelineInfo{};
 		VkFormat swapchainColorImageFormat = swapchain->GetSwapchainFormat();

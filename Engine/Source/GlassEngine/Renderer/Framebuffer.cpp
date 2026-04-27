@@ -42,6 +42,7 @@ namespace ge::renderer {
 			}
 			else {
 				imageSpec.usageFlags |= ImageUsageFlagsBits::ColorAttachment;
+				imageSpec.usageFlags |= ImageUsageFlagsBits::Readonly;
 				attachment.existingImage = _colorAttachments.emplace_back(Image::Create(imageSpec));
 			}
 		}
