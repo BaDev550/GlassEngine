@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string_view>
 #include "GlassEngine/Memory/Memory.h"
+#include "imgui.h"
 
 #include "GlassEngine/Memory/Ref.h"
 #include "GlassEngine/Renderer/RenderObject.h"
@@ -81,6 +82,8 @@ namespace ge::renderer {
 
 		void LoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize);
 		void LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize);
+
+		virtual ImTextureID GetImGuiTexture(ge::mem::Ref<Sampler>& sampler, ge::mem::Ref<Image>& image, ImageSubresource subresource) = 0;
 
 		static inline RenderStats GetRenderStats() { return _renderStats; }
 		static inline GraphicsAPI GetAPI() { return _graphicsAPI; }

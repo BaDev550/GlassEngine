@@ -15,6 +15,7 @@
 #include "Vulkan_Sampler.h"
 #include "Vulkan_Pipeline.h"
 #include <cstdint>
+#include <imgui_impl_vulkan.h>
 #include <vulkan/vulkan_core.h>
 
 namespace ge::renderer {
@@ -698,5 +699,12 @@ namespace ge::renderer {
 
 		_barriersForImages.emplace(&vk_dst);
 		_barriersForImages.emplace(&vk_src);
+	}
+
+	ImTextureID Vulkan_RenderAPI::GetImGuiTexture(ge::mem::Ref<Sampler>& sampler, ge::mem::Ref<Image>& image, ImageSubresource subresource) {
+		return (ImTextureID)ImGui_ImplVulkan_AddTexture(
+			sampler.Cast<Vulkan_Sampler>()->GetSampler(), 
+			image.Cast<Vulkan_Image>()->CreateGetImageView(subresource), 
+			utility::Vulkan_OptimalImageLayout(image->GetSpecRef().usageFlags));
 	}
 }
