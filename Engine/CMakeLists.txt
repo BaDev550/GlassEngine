@@ -8,7 +8,6 @@ function(copy_file_to_bin TARGET_NAME FILE_PATH)
         message(WARNING "file not exists, file name: ${FILE_PATH}")
         return()
     endif()
-    message(STATUS "runtime output dir: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
     get_filename_component(FILE_NAME "${FILE_PATH}" NAME)
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
@@ -93,5 +92,5 @@ target_link_libraries(Engine
 endif()
 
 if(WIN32)
+    copy_file_to_bin(Engine ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/binary/Compressonator_MT_DLL.dll)
 endif(WIN32)
-copy_file_to_bin(Engine ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/binary/Compressonator_MT_DLL.dll)

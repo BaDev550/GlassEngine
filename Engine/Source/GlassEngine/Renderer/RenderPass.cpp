@@ -10,6 +10,11 @@ namespace ge::renderer {
 	void RenderPass::Begin(uint32_t layer) {
 		Renderer3D::GetRenderAPI()->BeginDebugLabel(_debugName);
 
+		auto& window = Application::Get()->GetWindow();
+		if (_framebuffer->HasSwapchainImage() && window.HasResized()) {
+			_framebuffer->Resize(window.GetSwapchain().GetSpecs().extent.x, window.GetSwapchain().GetSpecs().extent.y);
+		}
+
 		BeginRenderPassSpec beginSpec{};
 		
 		GEVector<Attachment> colorAttachments;

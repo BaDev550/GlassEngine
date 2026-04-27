@@ -1,5 +1,6 @@
 #include "Vulkan_Swapchain.h"
 #include "GlassEngine/Renderer/Renderer.h"
+#include "Platform/Vulkan/Vulkan_RenderContext.h"
 
 namespace ge::renderer {
 	Vulkan_Swapchain::Vulkan_Swapchain(const SwapchainSpec& spec, RenderContext& renderContext)
@@ -29,6 +30,7 @@ namespace ge::renderer {
 
 	void Vulkan_Swapchain::CreateSwapchain(const SwapchainSpec& newSpec) {
 		GE_PROFILE_SCOPE("Create::RHI_Vulkan_Swapchain");
+		VK_RENDER_CONTEXT->Wait();
 
 		auto getDesired = [] (auto&& desiredList, auto&& searchList, auto notFindValue) -> auto {
 				for (const auto& desiredValue : desiredList)
@@ -54,8 +56,25 @@ namespace ge::renderer {
 			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VK_RENDER_CONTEXT->GetPhysicalDevice(), VK_RENDER_CONTEXT->GetSurface(), &surfaceCapabilities);
 
 			_imageCount = 3;
-			_imageCount = std::clamp(_imageCount, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount ? surfaceCapabilities.maxImageCount : UINT32_MAX);
+			_imageCount = std::clamp(_imageCount, 
+				surfaceCapabilities.minImageCount, 
+				surfaceCapabilities.maxImageCount ? surfaceCapabilities.maxImageCount : UINT32_MAX);
+
 			currentTransform = surfaceCapabilities.currentTransform;
+
+			if (surfaceCapabilities.currentExtent.width != 0xFFFFFFFF) {
+				_spec.extent.x = surfaceCapabilities.currentExtent.width;
+				_spec.extent.y = surfaceCapabilities.currentExtent.height;
+			}
+			else {
+				_spec.extent.x = std::clamp(_spec.extent.x, 
+					surfaceCapabilities.minImageExtent.width, 
+					surfaceCapabilities.maxImageExtent.width);
+	
+				_spec.extent.y = std::clamp(_spec.extent.y, 
+					surfaceCapabilities.minImageExtent.height, 
+					surfaceCapabilities.maxImageExtent.height);
+			}
 		}
 
 		{
@@ -104,9 +123,9 @@ namespace ge::renderer {
 
 		VkSwapchainCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+//		createInfo.oldSwapchain = _swapchain;
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		createInfo.oldSwapchain = _swapchain;
 		createInfo.surface = VK_RENDER_CONTEXT->GetSurface();
 		createInfo.imageExtent = { _spec.extent.x, _spec.extent.y };
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -125,6 +144,11 @@ namespace ge::renderer {
 			_images.resize(_imageCount);
 			vkGetSwapchainImagesKHR(VK_RENDER_CONTEXT->GetDevice(), _swapchain, &_imageCount, _images.data());
 			
+			for (auto imageView : _imageViews) {
+				vkDestroyImageView(VK_RENDER_CONTEXT->GetDevice(), imageView, VK_ALLOCATOR_CALLBACKS);
+			}
+			_imageViews.clear();
+
 			for (auto image : _images) {
 				VkImageSubresourceRange subresource{};
 				subresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -147,7 +171,8 @@ namespace ge::renderer {
 			}
 		}
 
-		{
+		// TODO (0x): use timeline semaphore 
+		if (_imageAvailableSemaphores.empty()) {
 			_imageAvailableSemaphores.resize(_imageCount);
 			_renderFinishedSemaphores.resize(_imageCount);
 			_inFlightFences.resize(_imageCount);
@@ -165,6 +190,9 @@ namespace ge::renderer {
 				vkCreateSemaphore(device, &semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_renderFinishedSemaphores[i]);
 				vkCreateFence(device, &fenceInfo, VK_ALLOCATOR_CALLBACKS, &_inFlightFences[i]);
 			}
+		}
+		else {
+			vkResetFences(VK_RENDER_CONTEXT->GetDevice(), _inFlightFences.size(), _inFlightFences.data());
 		}
 	}
 
@@ -208,8 +236,12 @@ namespace ge::renderer {
 		vkWaitForFences(VK_RENDER_CONTEXT->GetDevice(), 1, &_inFlightFences[frameIndex], VK_TRUE, UINT64_MAX);
 
 		VkResult result = vkAcquireNextImageKHR(VK_RENDER_CONTEXT->GetDevice(), _swapchain, UINT64_MAX, _imageAvailableSemaphores[frameIndex], VK_NULL_HANDLE, imageIndex);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR) { return false; }
-		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { return false; }
+		if (result == VK_ERROR_OUT_OF_DATE_KHR) { 
+			return false;
+		}
+		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { 
+			return false;
+		}
 		vkResetFences(VK_RENDER_CONTEXT->GetDevice(), 1, &_inFlightFences[frameIndex]);
 		return true;
 	}

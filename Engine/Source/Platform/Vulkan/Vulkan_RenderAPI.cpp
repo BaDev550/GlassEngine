@@ -123,7 +123,16 @@ namespace ge::renderer {
 		uint32_t frameIndex = Renderer3D::GetFrameIndex();
 		FrameContext& frame = _frames[frameIndex];
 
-		Application::Get()->GetWindow().Swapbuffers();
+		auto& window = Application::Get()->GetWindow();
+		auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
+
+		if (window.HasResized() || !Application::Get()->GetWindow().Swapbuffers()) {
+			SwapchainSpec newSpec = swapchain.GetSpecs();
+			newSpec.extent.x = window.GetWidth();
+			newSpec.extent.y = window.GetHeight();
+			swapchain.ReCreateSwapchain(newSpec);
+		}
+
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
@@ -131,11 +140,9 @@ namespace ge::renderer {
 		vkResetCommandPool(VK_RENDER_CONTEXT->GetDevice(), frame.commandPool, 0);
 		vkBeginCommandBuffer(frame.commandBuffer, &beginInfo);
 
-		VK_RENDER_CONTEXT->GetDescriptorManager().BindDescriptors(frame.commandBuffer);
-
-		auto& window = Application::Get()->GetWindow();
-		const auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
 		const auto image = swapchain.GetImages()[window.GetImageIndex()];
+
+		VK_RENDER_CONTEXT->GetDescriptorManager().BindDescriptors(frame.commandBuffer);
 
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -202,10 +209,6 @@ namespace ge::renderer {
 		VkResult result = swapchain.Submit(&cmd, &imageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.HasResized()) {
 			window.ResetResizeFlag();
-			SwapchainSpec newSpec = swapchain.GetSpecs();
-			newSpec.extent.x = window.GetWidth();
-			newSpec.extent.y = window.GetHeight();
-			swapchain.ReCreateSwapchain(newSpec);
 		}
 		_renderStats.Reset();
 		_frameStarted = false;

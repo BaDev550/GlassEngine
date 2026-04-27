@@ -9,20 +9,25 @@ namespace ge::renderer {
 	void Framebuffer::Invalidate(const FramebufferSpec& spec) {
 		_specs = spec;
 		_colorAttachments.clear();
+
 		for (auto& attachment : _specs.attachments) {
 			if (attachment.isSwapchain) {
+				_hasSwapchainImage = true;
 				continue;
 			}
-			else if (attachment.existingImage) {
-				if (utility::IsDepthFormat(attachment.existingImage->GetSpec().imageFormat) 
-				|| utility::IsDepthStencilFormat(attachment.existingImage->GetSpec().imageFormat)) {
-					_depthStencilAttachment = attachment.existingImage;
-				}
-				else {
-					_colorAttachments.emplace_back(attachment.existingImage);
-				}
-				continue;
-			}
+			// TODO (0x): attachment.existingImage not resizing 
+			// else if (attachment.existingImage) {
+			// 	attachment.format = attachment.existingImage->GetSpecRef().imageFormat;
+
+			// 	if (utility::IsDepthFormat(attachment.existingImage->GetSpec().imageFormat) 
+			// 	|| utility::IsDepthStencilFormat(attachment.existingImage->GetSpec().imageFormat)) {
+			// 		_depthStencilAttachment = attachment.existingImage;
+			// 	}
+			// 	else {
+			// 		_colorAttachments.emplace_back(attachment.existingImage);
+			// 	}
+			// 	continue;
+			// }
 
 			ImageSpec imageSpec{};
 			imageSpec.imageFormat = attachment.format;
@@ -43,8 +48,8 @@ namespace ge::renderer {
 	}
 
 	void Framebuffer::Resize(uint32_t width, uint32_t height) {
-		_specs.height = width;
-		_specs.width = height;
+		_specs.height = height;
+		_specs.width = width;
 		Invalidate(_specs);
 	}
 }
