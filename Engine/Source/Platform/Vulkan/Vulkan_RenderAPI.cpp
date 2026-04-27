@@ -701,7 +701,7 @@ namespace ge::renderer {
 		_barriersForImages.emplace(&vk_src);
 	}
 
-	ImTextureID Vulkan_RenderAPI::GetImGuiTexture(ge::mem::Ref<Sampler>& sampler, ge::mem::Ref<Image>& image, ImageSubresource subresource) {
+	ImTextureID Vulkan_RenderAPI::GetImGuiTexture(ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler) {
 		return (ImTextureID)ImGui_ImplVulkan_AddTexture(
 			sampler.Cast<Vulkan_Sampler>()->GetSampler(), 
 			image.Cast<Vulkan_Image>()->CreateGetImageView(subresource), 

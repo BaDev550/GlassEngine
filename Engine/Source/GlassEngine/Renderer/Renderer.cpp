@@ -78,7 +78,7 @@ namespace ge::renderer {
 
 	ImTextureID Renderer3D::GetImGuiTexture(ge::mem::Ref<Image>& image)
 	{
-		return g_renderAPI->GetImGuiTexture(s_data._defaultSampler, image, ImageSubresource{});
+		return g_renderAPI->GetImGuiTexture(image, ImageSubresource{}, s_data._defaultSampler);
 	}
 
 	uint32_t Renderer3D::GetFrameIndex() { return g_frameIndex; }

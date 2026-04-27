@@ -45,7 +45,7 @@ namespace ge::renderer {
 			glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, glm::uvec3 dstOffset = {0,0,0}
 		) override;
 
-		virtual ImTextureID GetImGuiTexture(ge::mem::Ref<Sampler>& sampler, ge::mem::Ref<Image>& image, ImageSubresource subresource) override;
+		virtual ImTextureID GetImGuiTexture(ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler = {}) override;
 
 		virtual void ILoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) override;
 		virtual void ILoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) override;
