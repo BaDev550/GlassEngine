@@ -46,6 +46,25 @@ namespace ge {
 
     mem::Ref<Asset> MaterialSerializer::DeserializeFromFile(const GEVector<uint8_t>& buffer)
     {
-        return mem::Ref<Asset>();
+		file::BufferReader in(buffer);
+		if (!in.IsStreamGood()) return nullptr;
+
+		char magic[4];
+		in.ReadData(magic, 4);
+		if (strncmp(magic, MATERIAL_MAGIC, 4) != 0) return nullptr;
+
+		mem::Ref<renderer::Material> mat = mem::Ref<renderer::Material>::Create();
+		mem::Ref<renderer::MaterialAsset> matAsset = mem::Ref<renderer::MaterialAsset>::Create(mat);
+
+		AssetHandle albedo, roughness, normal;
+		in.ReadData(reinterpret_cast<char*>(&albedo), sizeof(AssetHandle));
+		in.ReadData(reinterpret_cast<char*>(&roughness), sizeof(AssetHandle));
+		in.ReadData(reinterpret_cast<char*>(&normal), sizeof(AssetHandle));
+
+		matAsset->SetAlbedoTexture(albedo);
+		matAsset->SetRoughnessTexture(roughness);
+		matAsset->SetNormalTexture(normal);
+
+		return matAsset;
     }
 }

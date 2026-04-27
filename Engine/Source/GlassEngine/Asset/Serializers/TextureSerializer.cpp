@@ -119,22 +119,17 @@ namespace ge {
             GE_CORE_ERROR("Invalid magic for texture asset");
             return nullptr;
         }
-        uint32_t width, height;
-        if (!in.Read(width) || !in.Read(height)) {
-            GE_CORE_ERROR("Failed to read dimensions from buffer");
-            return nullptr;
-        }
         renderer::TextureSpec specs;
         if (!in.Read(specs)) {
             GE_CORE_ERROR("Failed to read specs");
             return nullptr;
         }
-        specs.width = width;
-        specs.height = height;
-        specs.format = renderer::ImageFormat::RGBA8;
-		specs.filter = renderer::ImageFilter::Linear;
+        uint32_t dataSize = 0;
+        if (!in.Read(dataSize)) {
+            GE_CORE_ERROR("Failed to read texture data size");
+            return nullptr;
+        }
 
-        size_t dataSize = width * height * STBI_rgb_alpha; // STBI_rgb_alpha TEMP
         const uint8_t* pixelData = in.ReadPtr(dataSize);
         if (!pixelData) {
             GE_CORE_ERROR("No texture data found in buffer or buffer size mismacth with image size");

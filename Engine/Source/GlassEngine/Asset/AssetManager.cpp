@@ -18,7 +18,8 @@ namespace ge {
 			break;
 		}
 		case ge::ApplicationMode::Runtime: {
-			_assetManager = mem::Ref<RuntimeAssetManager>::Create(project->GetAssetPakPath(), project->GetAssetManifestPath());
+			//_assetManager = mem::Ref<RuntimeAssetManager>::Create(project->GetAssetPakPath(), project->GetAssetManifestPath());
+			_assetManager = mem::Ref<RuntimeAssetManager>::Create("assets.pak", "assets_manifest.bin");
 			_runtimeAssetManagerInstance = _assetManager.Cast<RuntimeAssetManager>().Get();
 			break;
 		}

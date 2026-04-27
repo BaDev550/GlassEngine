@@ -251,8 +251,11 @@ namespace ge::renderer {
 		vkCmdBindIndexBuffer(GetCurrentCommandBuffer(), vulkanIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		PushConstant(&transform, sizeof(glm::mat4), 0);
 		for (const Submesh& submesh : currentLOD.submesh) {
-			auto material = materialAssets[submesh.materialIndex]->GetMaterial();
-            PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), sizeof(glm::mat4));
+			auto materialAsset = materialAssets[submesh.materialIndex];
+			if (materialAsset) {
+				auto material = materialAsset->GetMaterial();
+				PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), sizeof(glm::mat4));
+			}
 
 			vkCmdDrawIndexed(GetCurrentCommandBuffer(), submesh.indexCount, 1, submesh.indexOffset, submesh.vertexOffset, 0);
 			_renderStats.drawCalls++;

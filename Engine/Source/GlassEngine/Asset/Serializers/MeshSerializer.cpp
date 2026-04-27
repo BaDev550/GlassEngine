@@ -289,6 +289,19 @@ namespace ge {
 		auto& lods = mesh->GetLODs();
 		lods.resize(lodCount);
 
+		uint32_t materialCount = 0;
+		in.ReadData(reinterpret_cast<char*>(&materialCount), sizeof(uint32_t));
+		GEVector<AssetHandle> materialHandles(materialCount);
+		in.ReadData(reinterpret_cast<char*>(materialHandles.data()), materialCount * sizeof(AssetHandle));
+
+		auto materialTable = mem::Ref<renderer::MaterialTable>::Create();
+		for (uint32_t i = 0; i < materialCount; i++) {
+			AssetHandle handle = materialHandles[i];
+			mem::Ref<renderer::MaterialAsset> materialAsset = AssetManager::GetAsset<renderer::MaterialAsset>(handle);
+			materialTable->AddMaterial(i, materialAsset);
+		}
+		mesh->SetMaterialTable(materialTable);
+
 		for (uint32_t i = 0; i < lodCount; i++) {
 			uint32_t vertexCount, indexCount, submeshCount;
 			in.ReadData(reinterpret_cast<char*>(&vertexCount), sizeof(uint32_t));

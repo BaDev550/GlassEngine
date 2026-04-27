@@ -59,6 +59,7 @@ namespace ge {
 			_pakFileReader.ReadData(reinterpret_cast<char*>(buffer.data()), packedAsset.size);
 			mem::Ref<Asset> asset = _importer->DeserializeFromFile(mtd, buffer);
 			if (asset) {
+				asset->_assetHandle = handle;
 				_loadedAssets[handle] = asset;
 				return asset;
 			}
