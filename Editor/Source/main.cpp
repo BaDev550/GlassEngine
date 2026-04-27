@@ -12,6 +12,7 @@
 #include <GlassEngine/Editor/EditorConsole.h>
 #include <GlassEngine/Editor/EditorECSDebugPanel.h>
 #include <GlassEngine/Editor/EditorRendererDebugPanel.h>
+#include <GlassEngine/Project/ProjectSerializer.h>
 
 #include <imgui.h>
 
@@ -20,6 +21,7 @@ public:
 	EditorLayer() : ge::Layer("LAYER_Editor") {}
 	virtual void OnAttach() override {
 		_scene = ge::mem::Ref<ge::Scene>::Create("Test Scene");
+		_scene->CreateSceneRenderer();
 		_camera = ge::mem::Ref<ge::renderer::FreeCamera>::Create();
 
 		GetPanelManager().RegisterPanel<ge::editor::Console>("E_c");
@@ -53,6 +55,9 @@ public:
 			ge::SceneSerializer serializer(_scene);
 			serializer.Deserialize(args[0]);
 			}, "editor.load_scene <path>");
+		GE_ADD_CONSOLE_COMMAND("editor", "create_project", [this](const GEVector<GEString>& args) {
+			ge::ProjectSerializer::CreateProjectDirectories(args[0], args[1].ToPath());
+			}, "editor.create_project <name> <directory>");
 
 		id = ge::renderer::Renderer3D::GetImGuiTexture(_scene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
 	}

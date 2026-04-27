@@ -17,6 +17,13 @@
 #include "GlassEngine/Asset/AssetManager.h"
 
 namespace ge {
+	enum class EngineIDE {
+		VS22,
+		VSC,
+		VIM,
+		CLion
+	};
+
 	enum class ApplicationMode {
 		Editor,
 		Runtime

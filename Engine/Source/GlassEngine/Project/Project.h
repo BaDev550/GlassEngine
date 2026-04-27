@@ -9,9 +9,12 @@ namespace ge {
 		std::filesystem::path cacheDirectory = "Cache";
 		std::filesystem::path configDirectory = "Config";
 		std::filesystem::path binariesDirectory = "Binaries";
+		std::filesystem::path intermediatesDirectory = "Intermediates";
 
-		std::filesystem::path assetPakPath = "assets.pak";
-		std::filesystem::path assetManifestPath = "assets_manifest.bin";
+		std::filesystem::path scriptModulePath;
+		std::filesystem::path assetRegistryPath = cacheDirectory / "assetRegistry.bin";
+		std::filesystem::path assetPakPath = binariesDirectory / "assets.pak";
+		std::filesystem::path assetManifestPath = binariesDirectory / "assets_manifest.bin";
 	};
 	// GLASS_ENGINE_DIR env
 
@@ -22,6 +25,8 @@ namespace ge {
 		static std::filesystem::path GetCacheDirectory() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetProjectDirectory() / _activeProject->_config.cacheDirectory; }
 		static std::filesystem::path GetConfigDirectory() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetProjectDirectory() / _activeProject->_config.configDirectory; }
 		static std::filesystem::path GetBinariesDirectory() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetProjectDirectory() / _activeProject->_config.binariesDirectory; }
+		static std::filesystem::path GetAssetRegistryPath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetCacheDirectory() / _activeProject->_config.assetRegistryPath; }
+		static std::filesystem::path GetScriptModulePath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetBinariesDirectory() / _activeProject->_config.scriptModulePath; }
 		static std::filesystem::path GetAssetPakPath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetBinariesDirectory() / _activeProject->_config.assetPakPath; }
 		static std::filesystem::path GetAssetManifestPath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetBinariesDirectory() / _activeProject->_config.assetManifestPath; }
 		[[nodiscard]] ProjectConfig& Config() { return _config; }
