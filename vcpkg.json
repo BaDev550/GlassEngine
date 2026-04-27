@@ -1,14 +1,10 @@
 {
   "builtin-baseline": "89dd0f4d241136b843fb55813b2f0fa6448c204d",
   "dependencies": [
-    "glm",
     "assimp",
     "entt",
-    "shader-slang",
-    "vulkan-memory-allocator",
-    {
-      "name": "glfw3"
-    },
+    "glfw3",
+    "glm",
     {
       "name": "imgui",
       "features": [
@@ -18,10 +14,13 @@
     },
     {
       "name": "imgui",
-      "platform": "windows",
       "features": [
         "dx12-binding"
-      ]
-    }
+      ],
+      "platform": "windows"
+    },
+    "shader-slang",
+    "vulkan-memory-allocator",
+    "yaml-cpp"
   ]
 }
