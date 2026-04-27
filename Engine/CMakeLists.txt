@@ -51,6 +51,7 @@ target_link_libraries(Engine
         slang::slang
         yaml-cpp
         GPUOpen::VulkanMemoryAllocator
+        DbgHelp
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/compressonator_MT_DLL.lib
 )
 else()

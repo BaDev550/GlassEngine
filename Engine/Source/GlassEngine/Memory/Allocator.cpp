@@ -10,7 +10,7 @@ namespace ge::mem {
 			GE_PROFILE_SCOPE(("Mem::Alocation size: " + std::to_string(size)));
 #endif
 			s_allocationMetrics.totalAllocated += size;
-			return GE_ALLOC(size);
+			return GE_PLATFORM_ALLOC(size);
 		}
 
 		void* GE_AllocateAligned(size_t size, size_t alignment) {
@@ -18,7 +18,7 @@ namespace ge::mem {
 			GE_PROFILE_SCOPE(("Mem::Aligned Alocation size: " + std::to_string(size) + " alignment: " + std::to_string(alignment)));
 #endif
 			s_allocationMetrics.totalAllocated += size;
-			return GE_ALIGNED_ALLOC(size, alignment);
+			return GE_PLATFORM_ALIGNED_ALLOC(size, alignment);
 		}
 
 		void* GE_ReallocateAligned(void* originalBlock, size_t size, size_t alignment) {
@@ -26,7 +26,7 @@ namespace ge::mem {
 			GE_PROFILE_SCOPE(("Mem::Reallocation Aligned size: " + std::to_string(size) + " alignment: " + std::to_string(alignment)));
 #endif
 			s_allocationMetrics.totalAllocated += size;
-			return GE_ALIGNED_REALLOC(originalBlock, size, alignment);
+			return GE_PLATFORM_ALIGNED_REALLOC(originalBlock, size, alignment);
 		}
 
 		void GE_FreeAligned(void* block, size_t size, size_t aligment) {
@@ -37,7 +37,7 @@ namespace ge::mem {
 				return;
 			}
 			s_allocationMetrics.totalFreed += size;
-			GE_ALIGNED_FREE(block);
+			GE_PLATFORM_ALIGNED_FREE(block);
 		}
 
 		void GE_Free(void* block, size_t size) {
@@ -48,7 +48,7 @@ namespace ge::mem {
 				return;
 			}
 			s_allocationMetrics.totalFreed += size;
-			GE_FREE(block);
+			GE_PLATFORM_FREE(block);
 		}
 	}
 }

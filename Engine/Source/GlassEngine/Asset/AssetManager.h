@@ -6,10 +6,10 @@
 #include <map>
 
 namespace ge {
-	using AssetRegistry = GEUnorderedMap<AssetHandle, AssetMetadata>;
-	using AssetMap = GEMap<AssetHandle, mem::Ref<Asset>>;
-	using AssetManifest = GEUnorderedMap<GEString, AssetHandle>;
-	using PackedAssetMap = GEMap<AssetHandle, PackedAsset>;
+	using AssetRegistry = GEUnorderedMap<AssetHandle, AssetMetadata, mem::AssetAllocTag>;
+	using AssetMap = GEMap<AssetHandle, mem::Ref<Asset>, mem::AssetAllocTag>;
+	using AssetManifest = GEUnorderedMap<GEString, AssetHandle, mem::AssetAllocTag>;
+	using PackedAssetMap = GEMap<AssetHandle, PackedAsset, mem::AssetAllocTag>;
 	class AssetManagerBase : public mem::RefCounted {
 	public:
 		AssetManagerBase() { _importer = mem::CreateScope<AssetImporter>(); }

@@ -59,7 +59,7 @@ namespace ge::renderer {
 			VkCommandPool commandPool;
 			VkCommandBuffer commandBuffer;
 			// for life time
-			GEVector<RenderObject> renderObjects;
+			GEVector<RenderObject, ge::mem::RendererAllocTag> renderObjects;
 		} _frames[Renderer3D::MaxFramesInFlight]; // TEMP ig
 		bool _frameStarted = false;
 

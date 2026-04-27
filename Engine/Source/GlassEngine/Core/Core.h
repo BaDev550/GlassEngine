@@ -25,12 +25,14 @@
 	#define GE_ARGS(...) __VA_OPT__(, ) __VA_ARGS__
 #endif
 
-template<typename T>
-using GEVector = std::vector<T, ge::mem::GE_Allocator<T>>;
-template<typename T, typename U>
-using GEUnorderedMap = std::unordered_map<T, U, std::hash<T>, std::equal_to<T>, ge::mem::GE_Allocator<std::pair<const T, U>>>;
-template<typename T, typename U>
-using GEMap = std::map<T, U, std::less<T>, ge::mem::GE_Allocator<std::pair<const T, U>>>;
+template<typename T, typename Tag = ge::mem::DefaultAllocTag>
+using GEVector = std::vector<T, ge::mem::GE_Allocator<T, Tag>>;
+
+template<typename T, typename U, typename Tag = ge::mem::DefaultAllocTag>
+using GEUnorderedMap = std::unordered_map<T, U, std::hash<T>, std::equal_to<T>, ge::mem::GE_Allocator<std::pair<const T, U>, Tag>>;
+
+template<typename T, typename U, typename Tag = ge::mem::DefaultAllocTag>
+using GEMap = std::map<T, U, std::less<T>, ge::mem::GE_Allocator<std::pair<const T, U>, Tag>>;
 
 template<typename T>
 static T* CastChecked(void* ptr) {

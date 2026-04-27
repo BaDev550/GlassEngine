@@ -3,6 +3,18 @@
 #include "GlassEngine/Memory/Memory.h"
 
 namespace ge::renderer::mem {
+	static std::string_view VkSystemAllocationScopeToString(VkSystemAllocationScope scope) {
+		switch (scope)
+		{
+		case VK_SYSTEM_ALLOCATION_SCOPE_COMMAND: return "Vulkan_Allocator_Command";
+		case VK_SYSTEM_ALLOCATION_SCOPE_OBJECT: return "Vulkan_Allocator_Object";
+		case VK_SYSTEM_ALLOCATION_SCOPE_CACHE: return "Vulkan_Allocator_Cache";
+		case VK_SYSTEM_ALLOCATION_SCOPE_DEVICE: return "Vulkan_Allocator_Device";
+		case VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE: return "Vulkan_Allocator_Instance";
+		default:
+			return "Vulkan_Allocator";
+		}
+	}
 	class Vulkan_AllocatorCallbacks {
 	public:
 		static void InitCallbacks() {
@@ -20,14 +32,14 @@ namespace ge::renderer::mem {
 		}
 	private:
 		static void* VKAPI_CALL Allocator(void* pUserData, size_t size, size_t aligment, VkSystemAllocationScope allocationScope) {
-			
-			return ge::mem::allocFuncs::GE_AllocateAligned(size, aligment);
+			GE_ALIGNED_ALLOC(size, aligment, VkSystemAllocationScopeToString(allocationScope).data());
+			return ptr;
 		}
 		static void* VKAPI_CALL Reallocation(void* pUserData, void* pOriginal, size_t size, size_t aligment, VkSystemAllocationScope allocationScope) {
 			return ge::mem::allocFuncs::GE_ReallocateAligned(pOriginal, size, aligment);
 		}
 		static void  VKAPI_CALL Free(void* pUserData, void* pBlock) {
-			ge::mem::allocFuncs::GE_FreeAligned(pBlock, 0, 0);
+			GE_ALIGNED_FREE(pBlock, 0, 0);
 		}
 		static inline VkAllocationCallbacks _allocationCallbacks;
 		static inline VmaDeviceMemoryCallbacks _deviceMemoryCallbacks;

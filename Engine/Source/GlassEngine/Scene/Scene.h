@@ -29,12 +29,12 @@ namespace ge {
 		const GEString& GetName() const { return _name; }
 		entt::registry& GetRegistry() { return _registry; }
 		mem::Ref<renderer::SceneRenderer>& GetSceneRenderer() { return _sceneRenderer; }
-		GEUnorderedMap<EntityID, mem::Ref<Entity>>& GetEntities() { return _entities; }
+		GEUnorderedMap<EntityID, mem::Ref<Entity>, mem::SceneAllocTag>& GetEntities() { return _entities; }
 	private:
 		GEString _name;
 		entt::registry _registry;
 		mem::Ref<renderer::SceneRenderer> _sceneRenderer;
-		GEUnorderedMap<EntityID, mem::Ref<Entity>> _entities;
+		GEUnorderedMap<EntityID, mem::Ref<Entity>, mem::SceneAllocTag> _entities;
 	};
 }
 #include "EntityFunctions.h"
