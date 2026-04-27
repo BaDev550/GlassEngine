@@ -14,6 +14,7 @@ namespace ge::renderer {
 		ImageFormat format = ImageFormat::RGBA8;
 		bool attachment = false;
 		bool flipV = false;
+		bool compress = false;
 	};
 
 	class Texture : public RenderObject {

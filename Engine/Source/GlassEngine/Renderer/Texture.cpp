@@ -64,7 +64,8 @@ namespace ge::renderer {
 				ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
 
 		auto texture = ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
-		//texture->_data = std::vector<uint8_t>(dataPtr, dataPtr + dataSize);
+		if (!spec.compress)
+			texture->_data = std::vector<uint8_t>(dataPtr, dataPtr + dataSize);
 
 		Renderer3D::GetRenderAPI()->BeginFrame();
 		Renderer3D::GetRenderAPI()->BeginCopyPass();
