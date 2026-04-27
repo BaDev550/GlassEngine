@@ -28,16 +28,16 @@ VertexOutput VertMain(uint vertexID : SV_VertexID)
     int Index = Indices[vertexID];
     float3 vPos3D = Pos[Index] * GridSize;
 
-    vPos3D.x += __EngineGlobalCameraBuffer__.pos.x;
-    vPos3D.z += __EngineGlobalCameraBuffer__.pos.z;
+    vPos3D.x += GetCamaraData().pos.x;
+    vPos3D.z += GetCamaraData().pos.z;
 
     output.GridSize = GridSize;
-    output.CameraPosition = __EngineGlobalCameraBuffer__.pos;
+    output.CameraPosition = GetCamaraData().pos;
     output.WorldPos = vPos3D;
 
     float4 vPos = float4(vPos3D, 1.0f);
     
-    output.position = mul(__EngineGlobalCameraBuffer__.proj, mul(__EngineGlobalCameraBuffer__.view, vPos));
+    output.position = mul(GetCamaraData().proj, mul(GetCamaraData().view, vPos));
     return output;
 }
 

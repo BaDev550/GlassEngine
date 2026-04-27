@@ -2,8 +2,15 @@ static const constexpr uint DxilCameraBufferIndex = 0;
 static const constexpr uint DxilLightBufferIndex = 1;
 
 // TODO: better name
-class LightData {
-    uint i;
+struct CameraData {
+    float4x4 proj;
+    float4x4 view;
+    float3 pos;
+};
+
+// TODO: better name
+struct LightData {
+    float4x4 asd;
 };
 
 interface IBindlessDescriptor {};
@@ -65,24 +72,22 @@ extension ReadonlyImageCube : IBindlessDescriptor {}
 
 extension Sampler : IBindlessDescriptor {}
 
-[vk::binding(0, 0)]
-cbuffer __EngineGlobalCameraBuffer__ {
-    float4x4 proj;
-    float4x4 view;
-    float3 pos;
-} __EngineGlobalCameraBuffer__;
+[vk::binding(1, 0)]
+[require(spirv)]
+ConstantBuffer<LightData> __GE_Global_Light_Buffer__;
 
-// [vk::binding(1, 0)]
-// ConstantBuffer<LightData> __EngineGlobalLightBuffer__;
+[vk::binding(0, 0)]
+[require(spirv)]
+ConstantBuffer<CameraData> __GE_Global_Camera_Buffer__;
 
 [vk::binding(0, 1)]
-__DynamicResource<__DynamicResourceKind.General> __TextureHandles__[];
+__DynamicResource<__DynamicResourceKind.General> __GE_SpirV_Bindless_Readonly_Image_Array__[];
 
 [vk::binding(0, 2)]
-__DynamicResource<__DynamicResourceKind.General> __ImageHandles__[];
+__DynamicResource<__DynamicResourceKind.General> __GE_SpirV_Bindless_Writable_Image_Array__[];
 
 [vk::binding(0, 3)]
-__DynamicResource<__DynamicResourceKind.Sampler> __SamplerHandles__[];
+__DynamicResource<__DynamicResourceKind.Sampler> __GE_SpirV_Bindless_Sampler_Array__[];
 
 T GetBindless<T>(uint handle)
     where T : IOpaqueDescriptor, IBindlessDescriptor {
@@ -90,17 +95,17 @@ T GetBindless<T>(uint handle)
     {
     case spirv:
         if (T.kind == DescriptorKind.Sampler)
-            return __SamplerHandles__[handle].asOpaqueDescriptor<T>();
+            return __GE_SpirV_Bindless_Sampler_Array__[handle].asOpaqueDescriptor<T>();
         else if (T.kind == DescriptorKind.Texture) {
             if (T.This.descriptorAccess == T.This.descriptorAccess::Read) {
-                return __TextureHandles__[handle].asOpaqueDescriptor<T>();
+                return __GE_SpirV_Bindless_Readonly_Image_Array__[handle].asOpaqueDescriptor<T>();
             }
             else {
-                return __ImageHandles__[handle].asOpaqueDescriptor<T>();
+                return __GE_SpirV_Bindless_Writable_Image_Array__[handle].asOpaqueDescriptor<T>();
             }
         }
         // unreachable
-        return __ImageHandles__[handle].asOpaqueDescriptor<T>();
+        return __GE_SpirV_Bindless_Writable_Image_Array__[handle].asOpaqueDescriptor<T>();
 
     case hlsl: {
         if (T.kind == DescriptorKind.Sampler) {
@@ -115,28 +120,28 @@ T GetBindless<T>(uint handle)
     }
 }
 
-// __EngineGlobalCameraBuffer__ GetCamaraData() {
-//     __target_switch
-//     {
-//     case spirv:
-//         return __EngineGlobalCameraBuffer__;
-//     case hlsl: {
-//         return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
-//     }
-//     default: static_assert(false, "unsupported shader target");
-//         return {};
-//     }
-// }
+CameraData GetCamaraData() {
+    __target_switch
+    {
+    case spirv:
+        return __GE_Global_Camera_Buffer__;
+    case hlsl: {
+        return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
+    }
+    default: static_assert(false, "unsupported shader target");
+        return {};
+    }
+}
 
-// LightData GetLightData() {
-//     __target_switch
-//     {
-//     case spirv:
-//         return __EngineGlobalLightBuffer__;
-//     case hlsl: {
-//         return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
-//     }
-//     default: static_assert(false, "unsupported shader target");
-//         return {};
-//     }
-// }
+LightData GetLightData() {
+    __target_switch
+    {
+    case spirv:
+        return __GE_Global_Light_Buffer__;
+    case hlsl: {
+        return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
+    }
+    default: static_assert(false, "unsupported shader target");
+        return {};
+    }
+}
