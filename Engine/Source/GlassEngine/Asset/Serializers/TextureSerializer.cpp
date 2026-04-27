@@ -32,7 +32,7 @@ namespace comp {
         out_image.resize(dst.dwDataSize);
         dst.pData = static_cast<CMP_BYTE*>(out_image.data());
 
-        CMP_CompressOptions options;
+        CMP_CompressOptions options{};
         options.dwSize = sizeof(options);
         options.fquality = 0.0;
         options.dwnumThreads = 10;
@@ -98,7 +98,8 @@ namespace ge {
         in.ReadData(reinterpret_cast<char*>(&textureSpecs), sizeof(renderer::TextureSpec));
         textureSpecs.width = width;
         textureSpecs.height = height;
-        textureSpecs.format = renderer::ImageFormat::RGBA8;
+        // temp
+        textureSpecs.format = renderer::ImageFormat::BC7Unorm;
         textureSpecs.filter = renderer::ImageFilter::Linear;
 
         uint32_t dataSize;

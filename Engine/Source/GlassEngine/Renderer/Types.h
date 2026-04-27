@@ -82,7 +82,22 @@ namespace ge::renderer {
 
 	// TODO (dnm): complate this
 	enum class ImageFormat : uint8_t {
-		RGBA8,
+		RGBA8Unorm,
+		// alias
+		RGBA8 = RGBA8Unorm,
+		RGBA8Srgb,
+		RGBA8Int,
+		RGBA8Uint,
+		RGBA16Float,
+		RGBA16Int,
+		RGBA16Uint,
+		RGBA32Float,
+		RGBA32Int,
+		RGBA32Uint,
+		BC5Unorm,
+		BC5Srgb,
+		BC7Unorm,
+		BC7Srgb,
 		D16,
 		D32,
 		D32S8,
@@ -279,14 +294,28 @@ namespace ge::renderer {
 
 		[[nodiscard]] constexpr uint32_t GetPixelSize(ImageFormat imageFormat) noexcept {
 			switch (imageFormat) {
-			case ImageFormat::RGBA8: return 4;
-			case ImageFormat::D16: return 2;
-			case ImageFormat::D32: return 4;
-			case ImageFormat::D32S8: return 8;
-			case ImageFormat::D24S8: return 4;
+			case ImageFormat::RGBA8Unorm:  return 4;
+			case ImageFormat::RGBA8Srgb:   return 4;
+			case ImageFormat::RGBA8Int:    return 4;
+			case ImageFormat::RGBA8Uint:   return 4;
+			case ImageFormat::RGBA16Float: return 8;
+			case ImageFormat::RGBA16Int:   return 8;
+			case ImageFormat::RGBA16Uint:  return 8;
+			case ImageFormat::RGBA32Float: return 16;
+			case ImageFormat::RGBA32Int:   return 16;
+			case ImageFormat::RGBA32Uint:  return 16;
+			case ImageFormat::BC5Unorm:    return 1;
+			case ImageFormat::BC5Srgb:     return 1;
+			case ImageFormat::BC7Unorm:    return 1;
+			case ImageFormat::BC7Srgb:     return 1;
+			case ImageFormat::D16:         return 2;
+			case ImageFormat::D32:         return 4;
+			case ImageFormat::D32S8:       return 8;
+			case ImageFormat::D24S8:       return 4;
 			}
+			return 0;
 		}
-
+		
 		[[nodiscard]] constexpr uint32_t GetVertexSize(VertexFormat vertexFormat) noexcept {
 			switch (vertexFormat) {
 			case VertexFormat::RGBA32Float:  return 16;

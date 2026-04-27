@@ -1,20 +1,21 @@
 function(copy_file_to_bin TARGET_NAME FILE_PATH)
     if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+        # temp
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Editor")
     endif()
 
     if(NOT EXISTS "${FILE_PATH}")
         message(WARNING "file not exists, file name: ${FILE_PATH}")
         return()
     endif()
+    message(STATUS "runtime output dir: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
     get_filename_component(FILE_NAME "${FILE_PATH}" NAME)
     add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${FILE_PATH}"
-            # Visual Studio Debug/Release klasörünü otomatik çözer
             "$<TARGET_FILE_DIR:${TARGET_NAME}>/${FILE_NAME}"
-        COMMENT "Kopyalanıyor: ${FILE_NAME}"
+        COMMENT "copy: ${FILE_NAME}"
     )
 endfunction()
 
@@ -92,5 +93,5 @@ target_link_libraries(Engine
 endif()
 
 if(WIN32)
-    copy_file_to_bin(Engine ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/binary/Compressonator_MT_DLL.dll)
 endif(WIN32)
+copy_file_to_bin(Engine ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/binary/Compressonator_MT_DLL.dll)

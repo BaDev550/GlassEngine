@@ -22,7 +22,8 @@ namespace ge {
 		renderer::Renderer3D::Init();
 
 		_window->SetCursor(true);
-		_window->SetIcon("Resources/icon-512.png");
+		// TODO (0x): dont work with gpu compression
+		// _window->SetIcon("Resources/icon-512.png");
 
 		_imGuiLayer = ImGuiLayer::Create();
 		Input::Init();
