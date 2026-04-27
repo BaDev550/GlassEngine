@@ -13,6 +13,7 @@ namespace ge::renderer {
 		ImageFilter filter = ImageFilter::Linear;
 		ImageFormat format = ImageFormat::RGBA8;
 		bool attachment = false;
+		bool flipV = false;
 	};
 
 	class Texture : public RenderObject {

@@ -14,6 +14,7 @@ namespace ge {
 			_handle = glfwCreateWindow(_specs.width, _specs.height, _specs.title.c_str(), NULL, NULL);
 			glfwMakeContextCurrent(_handle);
 			glfwSetWindowUserPointer(_handle, &_specs);
+			glfwSetFramebufferSizeCallback(_handle, FramebufferResizeCallback);
 			GE_CORE_INFO("Window created!");
 		}
 
@@ -66,6 +67,16 @@ namespace ge {
 		return glfwWindowShouldClose(_handle);
 	}
 
+	bool Window::HasResized() const
+	{
+		return _specs.resized;
+	}
+
+	void Window::ResetResizeFlag()
+	{
+		_specs.resized = false;
+	}
+
 	void Window::SetIcon(const GEString& iconPath)
 	{
 		ImportAssetData assetData{};
@@ -75,5 +86,13 @@ namespace ge {
 		assetData.textureSpecs = &textureSpecs;
 		auto iconAsset = AssetManager::GetOrImportAsset<renderer::Texture2D>(iconPath.ToPath(), "", assetData);
  		SetIcon(iconAsset->GetData(), iconAsset->GetWidth(), iconAsset->GetHeight());
+	}
+
+	void Window::FramebufferResizeCallback(GLFWwindow* window, int width, int height)
+	{
+		WindowSpecification* spec = reinterpret_cast<WindowSpecification*>(glfwGetWindowUserPointer(window));
+		spec->resized = true;
+		spec->width = width;
+		spec->height = height;
 	}
 }

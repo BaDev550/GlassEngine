@@ -154,6 +154,7 @@ namespace ge {
 						ImportAssetData importData;
 						renderer::TextureSpec textureSpec{};
 						textureSpec.attachment = false;
+						textureSpec.flipV = true;
 						textureSpec.filter = renderer::ImageFilter::Linear;
 						textureSpec.format = renderer::ImageFormat::RGBA8;
 						importData.textureSpecs = &textureSpec;
@@ -170,6 +171,7 @@ namespace ge {
 						ImportAssetData importData;
 						renderer::TextureSpec textureSpec{};
 						textureSpec.attachment = false;
+						textureSpec.flipV = true;
 						textureSpec.filter = renderer::ImageFilter::Linear;
 						textureSpec.format = renderer::ImageFormat::RGBA8;
 						importData.textureSpecs = &textureSpec;

@@ -124,7 +124,7 @@ namespace ge::renderer {
 			vkGetSwapchainImagesKHR(VK_RENDER_CONTEXT->GetDevice(), _swapchain, &_imageCount, nullptr);
 			_images.resize(_imageCount);
 			vkGetSwapchainImagesKHR(VK_RENDER_CONTEXT->GetDevice(), _swapchain, &_imageCount, _images.data());
-
+			
 			for (auto image : _images) {
 				VkImageSubresourceRange subresource{};
 				subresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;

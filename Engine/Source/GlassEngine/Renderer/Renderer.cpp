@@ -13,6 +13,7 @@ namespace ge::renderer {
 	} static s_data;
 	static mem::Ref<RenderAPI> g_renderAPI = nullptr;
 	static uint32_t g_frameIndex = 0;
+	static RenderConfig g_config;
 
 	void Renderer3D::Init() {
 		GE_PROFILE_SCOPE("Renderer3D::Init");
@@ -20,15 +21,8 @@ namespace ge::renderer {
 		g_renderAPI = RenderAPI::Create();
 		s_data._shaderLibrary = mem::CreateScope<ShaderLibrary>();
 
-		GE_ADD_CONSOLE_COMMAND("r", "wireframe", [](const GEVector<GEString>& args) {
-			bool enable = (args[0] == "1" || args[0] == "true");
-			GE_GRAPHICS_INFO("Wireframe: {}", enable);
-		}, "wireframe <enabled>");
-
-		GE_ADD_CONSOLE_COMMAND("r", "vsync", [](const GEVector<GEString>& args) {
-			bool enable = (args[0] == "1" || args[0] == "true");
-			GE_GRAPHICS_INFO("Vsync: {}", enable);
-		}, "vsync <enabled>");
+		GE_ADD_CONSOLE_COMMAND("r", "wireframe", [](const GEVector<GEString>& args) { g_config.wireframe = (args[0] == "1" || args[0] == "true");}, "wireframe <enabled>");
+		GE_ADD_CONSOLE_COMMAND("r", "vsync", [](const GEVector<GEString>& args) {g_config.vsync = (args[0] == "1" || args[0] == "true");}, "vsync <enabled>");
 
 		GE_ADD_CONSOLE_COMMAND("r", "reload_shaders", [](const GEVector<GEString>& args) { GetShaderLibrary().ReloadAll(); });
 		GE_ADD_CONSOLE_COMMAND("r", "reload_shader", [](const GEVector<GEString>& args) { GetShaderLibrary().ReloadShader(GEString(args[0])); }, "reload_shader <name>");
@@ -80,6 +74,7 @@ namespace ge::renderer {
 	}
 
 	uint32_t Renderer3D::GetFrameIndex() { return g_frameIndex; }
+	RenderConfig Renderer3D::GetRenderConfig() { return g_config; }
 	RenderStats Renderer3D::GetRenderStats() { return g_renderAPI->GetRenderStats(); }
 	ShaderLibrary& Renderer3D::GetShaderLibrary() { return *s_data._shaderLibrary; }
 	ge::mem::Ref<Texture2D>& Renderer3D::GetWhiteTexture() { return s_data._defaultWhiteTexture; }

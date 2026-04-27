@@ -9,7 +9,7 @@ namespace ge {
     // Source texture
     AssetType SourceTextureSerializer::ImportFromSource(const ImportAssetData& asset, const std::filesystem::path& source, const std::filesystem::path& targetPath) {
         int width, height, channels;
-        stbi_set_flip_vertically_on_load(true);
+        stbi_set_flip_vertically_on_load(asset.textureSpecs->flipV);
         stbi_uc* pixels = stbi_load(source.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
         if (!pixels) {

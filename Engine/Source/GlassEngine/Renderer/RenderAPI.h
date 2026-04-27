@@ -21,6 +21,8 @@
 namespace ge::renderer {
 	struct RenderStats {
 		uint32_t drawCalls;
+
+		void Reset() { drawCalls = 0; }
 	};
 
 	enum class GraphicsAPI {

@@ -4,9 +4,8 @@
 
 namespace ge::renderer {
 	struct RenderConfig { // TODO (0x): make this more complete this is just for testing
-		bool Bloom = false;
-		bool DepthOfField = false;
-		bool MotionBlur = false;
+		bool vsync = false;
+		bool wireframe = false;
 	};
 
 	class ShaderLibrary;
@@ -26,6 +25,7 @@ namespace ge::renderer {
 		static void DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex = 0, ge::mem::Ref<MaterialTable> materialTable = nullptr, const glm::mat4& transform = glm::mat4(1.0f));
 
 		static uint32_t GetFrameIndex();
+		static RenderConfig GetRenderConfig();
 		static RenderStats GetRenderStats();
 		static ShaderLibrary& GetShaderLibrary();
 		static ge::mem::Ref<Texture2D>& GetWhiteTexture();

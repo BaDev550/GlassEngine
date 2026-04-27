@@ -200,10 +200,14 @@ namespace ge::renderer {
 
 		vkEndCommandBuffer(cmd);
 		VkResult result = swapchain.Submit(&cmd, &imageIndex);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-			//swapchain->ReCreateSwapchain();
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.HasResized()) {
+			window.ResetResizeFlag();
+			SwapchainSpec newSpec = swapchain.GetSpecs();
+			newSpec.extent.x = window.GetWidth();
+			newSpec.extent.y = window.GetHeight();
+			swapchain.ReCreateSwapchain(newSpec);
 		}
-		_renderStats.drawCalls = 0;
+		_renderStats.Reset();
 		_frameStarted = false;
 	}
 
@@ -216,6 +220,7 @@ namespace ge::renderer {
 		vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
 		vkCmdBindVertexBuffers(GetCurrentCommandBuffer(), 0, 1, &vulkanVertexBuffer, offsets);
 		vkCmdDraw(GetCurrentCommandBuffer(), vertexCount, instanceCount, firstVertex, firstInstance);
+		_renderStats.drawCalls++;
 	}
 
 	void Vulkan_RenderAPI::DrawIndexed(ge::mem::Ref<Pipeline>& pipeline, uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex, uint32_t firstInstance, int32_t vertexOffset)
@@ -229,6 +234,7 @@ namespace ge::renderer {
 		vkCmdBindVertexBuffers(GetCurrentCommandBuffer(), 0, 1, &vulkanVertexBuffer, offsets);
 		vkCmdBindIndexBuffer(GetCurrentCommandBuffer(), vulkanIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(GetCurrentCommandBuffer(), indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+		_renderStats.drawCalls++;
 	}
 
 	void Vulkan_RenderAPI::DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex, ge::mem::Ref<MaterialTable> materialTable, const glm::mat4& transform)
@@ -236,13 +242,20 @@ namespace ge::renderer {
 		const auto& currentLOD = mesh->GetLODs()[lodIndex];
 		auto& materialAssets = materialTable ? materialTable->GetMaterials() : mesh->GetMaterialTable()->GetMaterials();
 		auto vulkanPipeline = pipeline.Cast<Vulkan_Pipeline>()->GetPipeline();
+		auto vulkanVertexBuffer = mesh->GetVertexBuffer().Cast<Vulkan_Buffer>()->GetVkBuffer();
+		auto vulkanIndexBuffer = mesh->GetIndexBuffer().Cast<Vulkan_Buffer>()->GetVkBuffer();
 
+		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
+		vkCmdBindVertexBuffers(GetCurrentCommandBuffer(), 0, 1, &vulkanVertexBuffer, offsets);
+		vkCmdBindIndexBuffer(GetCurrentCommandBuffer(), vulkanIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		PushConstant(&transform, sizeof(glm::mat4), 0);
 		for (const Submesh& submesh : currentLOD.submesh) {
 			auto material = materialAssets[submesh.materialIndex]->GetMaterial();
             PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), sizeof(glm::mat4));
-			DrawIndexed(pipeline, submesh.indexCount, 1, mesh->GetVertexBuffer(), mesh->GetIndexBuffer(), submesh.indexOffset, 0, submesh.vertexOffset);
+
+			vkCmdDrawIndexed(GetCurrentCommandBuffer(), submesh.indexCount, 1, submesh.indexOffset, submesh.vertexOffset, 0);
+			_renderStats.drawCalls++;
 		}
 	}
 
@@ -262,11 +275,10 @@ namespace ge::renderer {
 	void Vulkan_RenderAPI::BeginRenderPass(const BeginRenderPassSpec& spec) {
 		// Barrier();
 
-		VkCommandBuffer cmd = Renderer3D::GetRenderAPI().Cast<Vulkan_RenderAPI>()->GetCurrentCommandBuffer();
+		VkCommandBuffer cmd = GetCurrentCommandBuffer();
 		
 		const auto& window = Application::Get()->GetWindow();
 		const uint32_t imageIndex = window.GetImageIndex();
-
 
 		GEVector<VkRenderingAttachmentInfo> colorAttachments;
 		colorAttachments.reserve(spec.colorAttachments.size());

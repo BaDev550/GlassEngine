@@ -43,7 +43,7 @@ VertexOutput VertMain(uint vertexID : SV_VertexID)
 
 static const float GridCellSize = 0.15f;
 static const float GridMinPixelsBetweenCells = 2.0f;
-static const float4 GridColorThin = float4(0.0f, 0.0f, 0.0f, 1.0f);
+static const float4 GridColorThin = float4(0.15f, 0.15f, 0.15f, 1.0f);
 static const float4 GridColorThick = float4(0.5f, 0.5f, 0.5f, 1.0f);
 
 float log10(float x) {

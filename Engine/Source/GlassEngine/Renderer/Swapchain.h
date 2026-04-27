@@ -22,8 +22,10 @@ namespace ge::renderer {
 		virtual bool Swapbuffers(uint32_t* imageIndex = nullptr) = 0;
 		void ReCreateSwapchain(const SwapchainSpec& spec) {
 			// TODO (dnm): check spec is valid
+			_spec = spec;
 			CreateSwapchain(spec);
 		}
+		[[nodiscard]] const SwapchainSpec GetSpecs() { return _spec; }
 		[[nodiscard]] const glm::uvec2& GetExtent() const { return _spec.extent; }
 	protected:
 		virtual void CreateSwapchain(const SwapchainSpec& newSpec) = 0;

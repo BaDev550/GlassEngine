@@ -11,6 +11,7 @@
 #include <GlassEngine/Scene/SceneSerializer.h>
 #include <GlassEngine/Editor/EditorConsole.h>
 #include <GlassEngine/Editor/EditorECSDebugPanel.h>
+#include <GlassEngine/Editor/EditorRendererDebugPanel.h>
 
 #include <imgui.h>
 
@@ -23,9 +24,11 @@ public:
 
 		GetPanelManager().RegisterPanel<ge::editor::Console>("E_c");
 		GetPanelManager().RegisterPanel<ge::editor::EditorECSDebugPanel>("E_ecs", _scene.Get());
+		GetPanelManager().RegisterPanel<ge::editor::EditorRendererDebugPanel>("E_r");
 
 		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_c");
 		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_ecs");
+		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_r");
 #if 1
 		auto mario = ge::AssetManager::GetOrImportAsset<ge::renderer::StaticMesh>("Resources/DamagedHelmet/DamagedHelmet.gltf");
 		for (int i = 0; i < mario->GetLODs().size(); i++) {

@@ -10,6 +10,7 @@ namespace ge {
 		GEString title;
 		uint32_t width;
 		uint32_t height;
+		bool resized = false;
 	};
 
 	class Window {
@@ -29,11 +30,14 @@ namespace ge {
 		void SetIcon(const GEString& iconPath);
 		bool Swapbuffers();
 		bool ShoudClose() const;
+		bool HasResized() const;
+		void ResetResizeFlag();
 
 		renderer::RenderContext& GetRenderContext() { return *_renderContext; }
 		renderer::Swapchain& GetSwapchain() { return *_swapchain; }
 		const renderer::Swapchain& GetSwapchain() const { return *_swapchain; }
 	private:
+		static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
 		WindowSpecification _specs;
 		GLFWwindow* _handle;
 		uint32_t _imageIndex = 0;
