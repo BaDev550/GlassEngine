@@ -75,6 +75,11 @@ namespace ge::renderer {
 		g_renderAPI->DrawStaticMesh(pipeline, mesh, lodIndex, materialTable, transform);
 	}
 
+	ImTextureID Renderer3D::GetImGuiTexture(ge::mem::Ref<Image>& image)
+	{
+		return ImTextureID();
+	}
+
 	uint32_t Renderer3D::GetFrameIndex() { return g_frameIndex; }
 	RenderConfig Renderer3D::GetRenderConfig() { return g_config; }
 	RenderStats Renderer3D::GetRenderStats() { return g_renderAPI->GetRenderStats(); }

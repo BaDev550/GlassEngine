@@ -11,6 +11,7 @@ namespace ge::renderer {
 		SceneRenderer(Scene* scene);
 		~SceneRenderer();
 
+		ge::mem::Ref<Framebuffer>& GetOffscreenFramebuffer() { return _framebuffer; }
 		void DrawScene(const ge::mem::Ref<Camera>& camera);
 	private:
 		Scene* _scene;

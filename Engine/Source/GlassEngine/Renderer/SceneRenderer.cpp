@@ -9,7 +9,7 @@
 namespace ge::renderer {
 	SceneRenderer::SceneRenderer(Scene* scene) : _scene(scene) {
 		FramebufferSpec fspec{};
-		fspec.attachments = { FramebufferAttachment{true}, FramebufferAttachment{ImageFormat::D32S8} };
+		fspec.attachments = { FramebufferAttachment{ImageFormat::RGBA8Srgb}, FramebufferAttachment{ImageFormat::D32S8} };
 		fspec.attachments[1].clearValue = {1.f, 0};
 		fspec.width = Application::Get()->GetWindow().GetWidth();
 		fspec.height = Application::Get()->GetWindow().GetHeight();

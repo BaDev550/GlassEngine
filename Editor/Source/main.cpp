@@ -53,6 +53,14 @@ public:
 			ge::SceneSerializer serializer(_scene);
 			serializer.Deserialize(args[0]);
 			}, "editor.load_scene <path>");
+
+		ge::renderer::FramebufferSpec fspec{};
+		fspec.attachments = { ge::renderer::FramebufferAttachment{true}, ge::renderer::FramebufferAttachment{ge::renderer::ImageFormat::D32S8} };
+		fspec.attachments[1].clearValue = { 1.f, 0 };
+		fspec.width = ge::Application::Get()->GetWindow().GetWidth();
+		fspec.height = ge::Application::Get()->GetWindow().GetHeight();
+		_framebuffer = ge::renderer::Framebuffer::Create(fspec);
+		_renderPass = ge::renderer::RenderPass::Create(_framebuffer, "GUI_RENDER_PASS");
 	}
 
 	virtual void OnDetach() override {}
@@ -69,10 +77,19 @@ public:
 		}
 	}
 
-	virtual void OnImGuiRender() override {}
+	virtual void OnImGuiRender() override {
+		_renderPass->Begin();
+		ImGui::Begin("Test");
+		ImGui::Text("Test");
+		ImGui::End();
+		ImTextureRef();
+		_renderPass->End();
+	}
 private:
 	ge::mem::Ref<ge::Scene> _scene;
 	ge::mem::Ref<ge::renderer::FreeCamera> _camera;
+	ge::mem::Ref<ge::renderer::Framebuffer> _framebuffer;
+	ge::mem::Ref<ge::renderer::RenderPass> _renderPass;
 
 	bool _cursor = false;
 	ge::Entity* entity;
