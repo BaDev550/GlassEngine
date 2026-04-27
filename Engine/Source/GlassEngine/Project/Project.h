@@ -13,6 +13,7 @@ namespace ge {
 		std::filesystem::path assetPakPath = "assets.pak";
 		std::filesystem::path assetManifestPath = "assets_manifest.bin";
 	};
+	// GLASS_ENGINE_DIR env
 
 	class Project : public mem::RefCounted {
 	public:

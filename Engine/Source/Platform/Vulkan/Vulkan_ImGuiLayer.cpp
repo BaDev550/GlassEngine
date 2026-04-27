@@ -3,6 +3,7 @@
 #include "Vulkan_ImGuiLayer.h"
 #include "Vulkan_Swapchain.h"
 #include "Vulkan_RenderAPI.h"
+#include "Vulkan_RenderContext.h"
 
 #include <imgui_impl_vulkan.h>
 #include <imgui_impl_glfw.h>
@@ -40,22 +41,23 @@ namespace ge {
 		ImGui_ImplGlfw_InitForVulkan(window.GetHandle(), true);
 		ImGui_ImplVulkan_PipelineInfo pipelineInfo{};
 		VkFormat swapchainColorImageFormat = swapchain->GetSwapchainFormat();
-		//VkFormat swapchainDepthImageFormat = (VkFormat)window.GetSwapchain().GetSwapchainDepthFormat();
 		pipelineInfo.RenderPass = nullptr;
 		pipelineInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		pipelineInfo.PipelineRenderingCreateInfo.sType = { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
 		pipelineInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
 		pipelineInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &swapchainColorImageFormat;
 		pipelineInfo.PipelineRenderingCreateInfo.depthAttachmentFormat = VK_FORMAT_D32_SFLOAT;
-
+		
 		ImGui_ImplVulkan_InitInfo initInfo{};
 		initInfo.Instance = context->GetInstance();
 		initInfo.PhysicalDevice = context->GetPhysicalDevice();
 		initInfo.Device = context->GetDevice();
 		initInfo.Queue = context->GetGraphicsQueue();
 		initInfo.DescriptorPool = _descriptorPool;
-		initInfo.MinImageCount = 3;
-		initInfo.ImageCount = 3;
+		initInfo.MinImageCount = swapchain->GetImages().size();
+		initInfo.Allocator = VK_ALLOCATOR_CALLBACKS;
+		initInfo.PipelineCache = context->GetPipelineCache();
+		initInfo.ImageCount = swapchain->GetImages().size();
 		initInfo.UseDynamicRendering = true;
 		initInfo.PipelineInfoMain = pipelineInfo;
 		ImGui_ImplVulkan_Init(&initInfo);
@@ -102,7 +104,7 @@ namespace ge {
 		colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 		colorAttachment.imageView = swapchain->GetImageViews()[Application::Get()->GetWindow().GetImageIndex()];
 		colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
 		VkRenderingInfo renderingInfo{};
@@ -112,8 +114,10 @@ namespace ge {
 		renderingInfo.colorAttachmentCount = 1;
 		renderingInfo.pColorAttachments = &colorAttachment;
 
+		renderer::Renderer3D::GetRenderAPI()->BeginDebugLabel("IMGUI_PASS");
 		vkCmdBeginRendering(cmd, &renderingInfo);
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 		vkCmdEndRendering(cmd);
+		renderer::Renderer3D::GetRenderAPI()->EndDebugLabel();
 	}
 }

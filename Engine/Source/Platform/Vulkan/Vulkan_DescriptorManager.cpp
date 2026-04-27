@@ -57,7 +57,7 @@ namespace ge::renderer {
 			nameInfo.pObjectName = "Global Pipeline Layout";
 
 			// TODO (dnm): fix vkSetDebugUtilsObjectNameEXT(): Returned error VK_ERROR_OUT_OF_HOST_MEMORY. error
-			// vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+			vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
 		}
 	}
 
