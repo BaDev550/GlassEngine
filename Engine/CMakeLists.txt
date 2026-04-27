@@ -1,3 +1,23 @@
+function(copy_file_to_bin TARGET_NAME FILE_PATH)
+    if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    endif()
+
+    if(NOT EXISTS "${FILE_PATH}")
+        message(WARNING "file not exists, file name: ${FILE_PATH}")
+        return()
+    endif()
+
+    get_filename_component(FILE_NAME "${FILE_PATH}" NAME)
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${FILE_PATH}"
+            # Visual Studio Debug/Release klasörünü otomatik çözer
+            "$<TARGET_FILE_DIR:${TARGET_NAME}>/${FILE_NAME}"
+        COMMENT "Kopyalanıyor: ${FILE_NAME}"
+    )
+endfunction()
+
 add_library(Engine STATIC)
 set_target_properties(Engine PROPERTIES
 	CXX_STANDARD 20
@@ -6,7 +26,6 @@ set_target_properties(Engine PROPERTIES
 
 find_package(Vulkan)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
-# set(slang_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/slang/cmake")
 find_package(slang CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
@@ -50,6 +69,7 @@ target_link_libraries(Engine
         meshoptimizer
         slang::slang
         GPUOpen::VulkanMemoryAllocator
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/compressonator_MT_DLL.lib
 )
 else()
 target_link_libraries(Engine
@@ -70,3 +90,7 @@ target_link_libraries(Engine
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core_SSE.a
 )
 endif()
+
+if(WIN32)
+    copy_file_to_bin(Engine ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/binary/Compressonator_MT_DLL.dll)
+endif(WIN32)
