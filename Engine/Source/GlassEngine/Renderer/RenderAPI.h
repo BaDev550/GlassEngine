@@ -61,7 +61,7 @@ namespace ge::renderer {
 		RenderAPI() = default;
 		virtual ~RenderAPI() = default;
 
-		virtual void BeginFrame() = 0;
+		virtual bool BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 
 		virtual void Draw(ge::mem::Ref<Pipeline>& pipeline, uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex = 0, uint32_t firstInstance = 0) = 0;

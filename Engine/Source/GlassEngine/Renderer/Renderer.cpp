@@ -58,8 +58,8 @@ namespace ge::renderer {
 		g_renderAPI = nullptr;
 	}
 
-	void Renderer3D::BeginFrame() {
-		g_renderAPI->BeginFrame();
+	bool Renderer3D::BeginFrame() {
+		return g_renderAPI->BeginFrame();
 	}
 	void Renderer3D::EndFrame() {
 		g_renderAPI->EndFrame();

@@ -1,6 +1,8 @@
 #include "Vulkan_Swapchain.h"
 #include "GlassEngine/Renderer/Renderer.h"
+#include "GlassEngine/Utilities/Counter.h"
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
+#include <vulkan/vulkan_core.h>
 
 namespace ge::renderer {
 	Vulkan_Swapchain::Vulkan_Swapchain(const SwapchainSpec& spec, RenderContext& renderContext)
@@ -11,17 +13,21 @@ namespace ge::renderer {
 
 	Vulkan_Swapchain::~Vulkan_Swapchain()
 	{
-		auto device = VK_RENDER_CONTEXT->GetDevice();
+		const auto device = VK_RENDER_CONTEXT->GetDevice();
 
 		vkDeviceWaitIdle(device);
 
-		for (size_t i = 0; i < _imageCount; i++) {
+		for (const auto semaphore : _renderFinishedSemaphores) {
+			vkDestroySemaphore(device, semaphore, 
+				VK_ALLOCATOR_CALLBACKS);
+		}
+
+		for (const auto i : Counter(Renderer3D::MaxFramesInFlight)) {
 			vkDestroySemaphore(device, _imageAvailableSemaphores[i], VK_ALLOCATOR_CALLBACKS);
-			vkDestroySemaphore(device, _renderFinishedSemaphores[i], VK_ALLOCATOR_CALLBACKS);
 			vkDestroyFence(device, _inFlightFences[i], VK_ALLOCATOR_CALLBACKS);
 		}
 
-		for (auto imageView : _imageViews) {
+		for (const auto imageView : _imageViews) {
 			vkDestroyImageView(device, imageView, VK_ALLOCATOR_CALLBACKS);
 		}
 
@@ -31,6 +37,7 @@ namespace ge::renderer {
 	void Vulkan_Swapchain::CreateSwapchain(const SwapchainSpec& newSpec) {
 		GE_PROFILE_SCOPE("Create::RHI_Vulkan_Swapchain");
 		VK_RENDER_CONTEXT->Wait();
+		const auto device = VK_RENDER_CONTEXT->GetDevice();
 
 		auto getDesired = [] (auto&& desiredList, auto&& searchList, auto notFindValue) -> auto {
 				for (const auto& desiredValue : desiredList)
@@ -123,7 +130,7 @@ namespace ge::renderer {
 
 		VkSwapchainCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-//		createInfo.oldSwapchain = _swapchain;
+		createInfo.oldSwapchain = _swapchain;
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		createInfo.surface = VK_RENDER_CONTEXT->GetSurface();
@@ -137,15 +144,15 @@ namespace ge::renderer {
 		createInfo.clipped = VK_TRUE;
 		createInfo.preTransform = currentTransform;
 
-		vkCreateSwapchainKHR(VK_RENDER_CONTEXT->GetDevice(), &createInfo, VK_ALLOCATOR_CALLBACKS, &_swapchain);
+		vkCreateSwapchainKHR(device, &createInfo, VK_ALLOCATOR_CALLBACKS, &_swapchain);
 
 		{
-			vkGetSwapchainImagesKHR(VK_RENDER_CONTEXT->GetDevice(), _swapchain, &_imageCount, nullptr);
+			vkGetSwapchainImagesKHR(device, _swapchain, &_imageCount, nullptr);
 			_images.resize(_imageCount);
-			vkGetSwapchainImagesKHR(VK_RENDER_CONTEXT->GetDevice(), _swapchain, &_imageCount, _images.data());
+			vkGetSwapchainImagesKHR(device, _swapchain, &_imageCount, _images.data());
 			
 			for (auto imageView : _imageViews) {
-				vkDestroyImageView(VK_RENDER_CONTEXT->GetDevice(), imageView, VK_ALLOCATOR_CALLBACKS);
+				vkDestroyImageView(device, imageView, VK_ALLOCATOR_CALLBACKS);
 			}
 			_imageViews.clear();
 
@@ -166,16 +173,13 @@ namespace ge::renderer {
 				imageViewCreateInfo.subresourceRange = subresource;
 
 				VkImageView imageView;
-				vkCreateImageView(VK_RENDER_CONTEXT->GetDevice(), &imageViewCreateInfo, VK_ALLOCATOR_CALLBACKS, &imageView);
+				vkCreateImageView(device, &imageViewCreateInfo, VK_ALLOCATOR_CALLBACKS, &imageView);
 				_imageViews.push_back(imageView);
 			}
 		}
 
-		// TODO (0x): use timeline semaphore 
-		if (_imageAvailableSemaphores.empty()) {
-			_imageAvailableSemaphores.resize(_imageCount);
+		if (_renderFinishedSemaphores.empty()) {
 			_renderFinishedSemaphores.resize(_imageCount);
-			_inFlightFences.resize(_imageCount);
 
 			VkSemaphoreCreateInfo semaphoreInfo{};
 			semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -184,15 +188,35 @@ namespace ge::renderer {
 			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-			auto device = VK_RENDER_CONTEXT->GetDevice();
-			for (size_t i = 0; i < _imageCount; i++) {
-				vkCreateSemaphore(device, &semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_imageAvailableSemaphores[i]);
-				vkCreateSemaphore(device, &semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_renderFinishedSemaphores[i]);
-				vkCreateFence(device, &fenceInfo, VK_ALLOCATOR_CALLBACKS, &_inFlightFences[i]);
+			for (auto& semaphore : _renderFinishedSemaphores) {
+				vkCreateSemaphore(device, &semaphoreInfo, 
+					VK_ALLOCATOR_CALLBACKS, &semaphore);
+			}
+
+			for (const auto i : Counter(Renderer3D::MaxFramesInFlight)) {
+				vkCreateSemaphore(device, 
+					&semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_imageAvailableSemaphores[i]);
+				vkCreateFence(device, 
+					&fenceInfo, VK_ALLOCATOR_CALLBACKS, &_inFlightFences[i]);	
 			}
 		}
 		else {
-			vkResetFences(VK_RENDER_CONTEXT->GetDevice(), _inFlightFences.size(), _inFlightFences.data());
+			reSized = true;
+			// VkSemaphoreCreateInfo semaphoreInfo{};
+			// semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+			// VkFenceCreateInfo fenceInfo{};
+			// fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			// fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+			// for (auto& semaphore : _renderFinishedSemaphores) {
+				// vkDestroySemaphore(device, semaphore, VK_ALLOCATOR_CALLBACKS);
+				// vkDestroySemaphore(device, _renderFinishedSemaphores[i], VK_ALLOCATOR_CALLBACKS);
+				// vkCreateSemaphore(device, &semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &semaphore);
+				// vkCreateSemaphore(device, &semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_renderFinishedSemaphores[i]);
+				// vkCreateFence(device, &fenceInfo, VK_ALLOCATOR_CALLBACKS, &_inFlightFences[i]);
+			// }
+			// vkResetFences(VK_RENDER_CONTEXT->GetDevice(), _inFlightFences.size(), _inFlightFences.data());
 		}
 	}
 
@@ -206,9 +230,12 @@ namespace ge::renderer {
 		VkSemaphore waitSemaphores[] = { _imageAvailableSemaphores[frameIndex] };
 		VkSemaphore signalSemaphores[] = { _renderFinishedSemaphores[*imageIndex] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
+		// if (!reSized) {
+			submitInfo.waitSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = waitSemaphores;
+			submitInfo.pWaitDstStageMask = waitStages;
+			reSized = false;
+		// }
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = cmd;
 		submitInfo.signalSemaphoreCount = 1;

@@ -26,6 +26,7 @@ namespace ge {
 	void Console::Destroy() {
 		Get().ClearLog();
 		Get()._commandLists.clear();
+		Get()._consoleMessages.clear();
 	}
 
 	GEVector<GEString> Console::GetCommandMatches(const GEString& partialInput) {

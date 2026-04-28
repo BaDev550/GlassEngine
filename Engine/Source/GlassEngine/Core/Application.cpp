@@ -1,3 +1,4 @@
+#include "GlassEngine/Utilities/MemoryProfiler.h"
 #include "gepch.h"
 #include "Application.h"
 #include "GlassEngine/Renderer/Renderer.h"
@@ -44,7 +45,8 @@ namespace ge {
 		Logger::Destroy();
 		Console::Destroy();
 		profile::Profiler::Destroy();
-	}
+		MemoryProfiler::Destroy();
+ 	}
 
 	void Application::Run() {
 		Timer timer;
@@ -56,7 +58,11 @@ namespace ge {
 			_window->PollEvents();
 			Input::Update();
 
-			ge::renderer::Renderer3D::BeginFrame();
+			if (!ge::renderer::Renderer3D::BeginFrame()) {
+				// ge::renderer::Renderer3D::EndFrame();
+				continue;
+			}
+
 			for (auto& layer : _layerStack) {
 				layer->OnUpdate(_deltaTime);
 

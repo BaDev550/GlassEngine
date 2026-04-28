@@ -13,7 +13,7 @@ namespace ge::renderer {
 	public:
 		Vulkan_RenderAPI();
 		~Vulkan_RenderAPI();
-		virtual void BeginFrame() override;
+		virtual bool BeginFrame() override;
 		virtual void EndFrame() override;
 
 		virtual void Draw(ge::mem::Ref<Pipeline>& pipeline, uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex = 0, uint32_t firstInstance = 0) override;

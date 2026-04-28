@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GlassEngine/Renderer/Renderer.h"
 #include "GlassEngine/Renderer/Swapchain.h"
 #include "Vulkan_RenderContext.h"
 
@@ -23,12 +24,15 @@ namespace ge::renderer {
 		void CreateSwapchain(const SwapchainSpec& newSpec) override;
 
 		VkSwapchainKHR _swapchain = VK_NULL_HANDLE;
-		GEVector<VkSemaphore> _imageAvailableSemaphores;
+
 		GEVector<VkSemaphore> _renderFinishedSemaphores;
-		GEVector<VkFence> _inFlightFences;
+		std::array<VkSemaphore, Renderer3D::MaxFramesInFlight> _imageAvailableSemaphores;
+		std::array<VkFence, Renderer3D::MaxFramesInFlight> _inFlightFences;
+
 		GEVector<VkImageView> _imageViews;
 		GEVector<VkImage> _images;
 		VkFormat _format;
 		VkPresentModeKHR _presentMode;
+		bool reSized{};
 	};
 }

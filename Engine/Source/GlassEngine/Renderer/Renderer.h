@@ -16,7 +16,7 @@ namespace ge::renderer {
 		static void Init();
 		static void Destroy();
 		
-		static void BeginFrame();
+		static bool BeginFrame();
 		static void EndFrame();
 		static void BeginDefaultPass();
 		static void EndDefaultPass();

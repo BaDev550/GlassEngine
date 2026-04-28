@@ -117,7 +117,7 @@ namespace ge::renderer {
 		VK_RENDER_CONTEXT->GetDescriptorManager().PushConstant(GetCurrentCommandBuffer(), ptr, size, offset);
 	}
 
-	void Vulkan_RenderAPI::BeginFrame()
+	bool Vulkan_RenderAPI::BeginFrame()
 	{
 		GE_ASSERT(!_frameStarted, "Cannot call beginFrame while processing a frame");
 		_frameStarted = true;
@@ -127,12 +127,17 @@ namespace ge::renderer {
 		auto& window = Application::Get()->GetWindow();
 		auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
 
-		if (window.HasResized() || !Application::Get()->GetWindow().Swapbuffers()) {
+		if (window.HasResized()) {
 			SwapchainSpec newSpec = swapchain.GetSpecs();
 			newSpec.extent.x = window.GetWidth();
 			newSpec.extent.y = window.GetHeight();
 			swapchain.ReCreateSwapchain(newSpec);
+			_frameStarted = false;
+			window.ResetResizeFlag();
+			return false;
 		}
+
+		Application::Get()->GetWindow().Swapbuffers();
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -169,6 +174,7 @@ namespace ge::renderer {
 			0, nullptr,
 			1, &barrier
 		);
+		return true;
 	}
 
 	void Vulkan_RenderAPI::EndFrame()

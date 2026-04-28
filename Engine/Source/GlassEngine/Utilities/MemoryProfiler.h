@@ -24,6 +24,11 @@ namespace ge {
 			return instance;
 		}
 
+		static void Destroy() {
+			Get()._activeAllocations.clear();
+			Get()._categoryUsage.clear();
+		}
+
 		void RecordAlloc(void* ptr, size_t size, const char* category) {
 			AllocRecord record;
 			record.size = size;
@@ -51,6 +56,7 @@ namespace ge {
 		const std::unordered_map<void*, AllocRecord>& GetActiveAllocations() const { return _activeAllocations; }
 		const std::unordered_map<std::string, size_t>& GetCategoryUsage() const { return _categoryUsage; }
 	private:
+
 		std::unordered_map<void*, AllocRecord> _activeAllocations;
 		std::unordered_map<std::string, size_t> _categoryUsage;
 		size_t _totalAllocated = 0;
