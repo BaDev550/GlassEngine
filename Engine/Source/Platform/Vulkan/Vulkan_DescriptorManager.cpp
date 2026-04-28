@@ -56,7 +56,6 @@ namespace ge::renderer {
 			nameInfo.objectType = VK_OBJECT_TYPE_PIPELINE_LAYOUT;
 			nameInfo.pObjectName = "Global Pipeline Layout";
 
-			// TODO (dnm): fix vkSetDebugUtilsObjectNameEXT(): Returned error VK_ERROR_OUT_OF_HOST_MEMORY. error
 			vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
 		}
 	}
@@ -83,8 +82,7 @@ namespace ge::renderer {
 			nameInfo.objectType = VK_OBJECT_TYPE_DESCRIPTOR_POOL;
 			nameInfo.pObjectName = "Global Descriptor Pool";
 
-			// TODO (dnm): fix vkSetDebugUtilsObjectNameEXT(): Returned error VK_ERROR_OUT_OF_HOST_MEMORY. error 
-			// vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+			vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
 		}
 
 		{
@@ -108,8 +106,7 @@ namespace ge::renderer {
 			nameInfo.objectType = VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT;
 			nameInfo.pObjectName = "Global Descriptor Set Layout";
 
-			// TODO (dnm): fix vkSetDebugUtilsObjectNameEXT(): Returned error VK_ERROR_OUT_OF_HOST_MEMORY. error 
-			// vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+			vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
 		}
 
 		{
@@ -127,8 +124,7 @@ namespace ge::renderer {
 			nameInfo.objectType = VK_OBJECT_TYPE_DESCRIPTOR_SET;
 			nameInfo.pObjectName = "Global Descriptor Set";
 
-			// TODO (dnm): fix vkSetDebugUtilsObjectNameEXT(): Returned error VK_ERROR_OUT_OF_HOST_MEMORY. error 
-			// vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+			vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
 		}
 	}
 
@@ -157,8 +153,7 @@ namespace ge::renderer {
 			nameInfo.objectType = VK_OBJECT_TYPE_DESCRIPTOR_POOL;
 			nameInfo.pObjectName = name.c_str();
 
-			// TODO (dnm): fix vkSetDebugUtilsObjectNameEXT(): Returned error VK_ERROR_OUT_OF_HOST_MEMORY. error 
-			// vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+			vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
 		}
 
 		// create dst set layout
@@ -199,8 +194,7 @@ namespace ge::renderer {
 			nameInfo.objectType = VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT;
 			nameInfo.pObjectName = name.c_str();
 
-			// TODO (dnm): fix vkSetDebugUtilsObjectNameEXT(): Returned error VK_ERROR_OUT_OF_HOST_MEMORY. error 
-			// vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+			vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
 		}
 
 		// alloc dst set
@@ -228,8 +222,7 @@ namespace ge::renderer {
 			nameInfo.objectType = VK_OBJECT_TYPE_DESCRIPTOR_SET;
 			nameInfo.pObjectName = name.c_str();
 
-			// TODO (dnm): fix vkSetDebugUtilsObjectNameEXT(): Returned error VK_ERROR_OUT_OF_HOST_MEMORY. error 
-			// vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
+			vkSetDebugUtilsObjectNameEXT(VK_RENDER_CONTEXT->GetDevice(), &nameInfo);
 		}
 	}
 

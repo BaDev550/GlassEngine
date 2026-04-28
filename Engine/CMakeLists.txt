@@ -49,7 +49,7 @@ target_link_libraries(Engine
         assimp::assimp
         meshoptimizer
         slang::slang
-        yaml-cpp
+        yaml-cpp::yaml-cpp
         GPUOpen::VulkanMemoryAllocator
         DbgHelp
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/compressonator_MT_DLL.lib
@@ -65,7 +65,7 @@ target_link_libraries(Engine
         assimp::assimp
         meshoptimizer
         slang::slang
-        yaml-cpp
+        yaml-cpp::yaml-cpp
         GPUOpen::VulkanMemoryAllocator
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Compressonator.a
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core.a

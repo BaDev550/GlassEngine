@@ -38,7 +38,7 @@ namespace ge {
 #ifdef _WIN32
 		command = "cd /D \"" + cacheAbsDir.string() + "\" && " + "cmake ..";
 #else
-		command = "cd \"" + projectAbs.generic_string() + "\" && \"" + cmakePath.generic_string() + "\"";
+		command = "cd \"" + cacheAbsDir.generic_string() + "\" && \"" + cmakePath.generic_string() + "\"";
 #endif
 		std::filesystem::create_directories(projectDir);
 		std::filesystem::create_directories(cacheDir);

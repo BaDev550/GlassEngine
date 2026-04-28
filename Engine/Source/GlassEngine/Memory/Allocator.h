@@ -23,7 +23,7 @@ namespace ge::mem {
 #define GE_ALLOC(size, category) void* ptr = ::ge::mem::allocFuncs::GE_Allocate(size); ::ge::MemoryProfiler::Get().RecordAlloc(ptr, size, category);
 #define GE_ALIGNED_ALLOC(size, alignment, category) void* ptr = ::ge::mem::allocFuncs::GE_AllocateAligned(size, alignment); ::ge::MemoryProfiler::Get().RecordAlloc(ptr, size, category);
 #define GE_ALIGNED_FREE(ptr, size, alignment) ::ge::mem::allocFuncs::GE_FreeAligned(ptr, size, alignment); ::ge::MemoryProfiler::Get().RecordFree(ptr);
-#define GE_FREE(ptr, size, alignment) ::ge::mem::allocFuncs::GE_Free(ptr, size); ::ge::MemoryProfiler::Get().RecordFree(ptr);
+#define GE_FREE(ptr, size) ::ge::mem::allocFuncs::GE_Free(ptr, size); ::ge::MemoryProfiler::Get().RecordFree(ptr);
 
 	template<typename T, typename Tag = DefaultAllocTag>
 	class GE_Allocator {
