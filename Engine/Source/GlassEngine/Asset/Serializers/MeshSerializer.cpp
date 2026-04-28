@@ -157,7 +157,7 @@ namespace ge {
 						textureSpec.flipV = true;
 						textureSpec.compress = true;
 						textureSpec.filter = renderer::ImageFilter::Linear;
-						textureSpec.format = renderer::ImageFormat::BC7Srgb;
+						textureSpec.format = renderer::ImageFormat::BC3Srgb;
 						importData.textureSpecs = &textureSpec;
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
 						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);
@@ -175,7 +175,7 @@ namespace ge {
 						textureSpec.flipV = true;
 						textureSpec.compress = true;
 						textureSpec.filter = renderer::ImageFilter::Linear;
-						textureSpec.format = renderer::ImageFormat::BC5Unorm;
+						textureSpec.format = renderer::ImageFormat::BC3Unorm;
 						importData.textureSpecs = &textureSpec;
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
 						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);

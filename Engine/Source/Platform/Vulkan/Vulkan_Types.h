@@ -66,6 +66,8 @@ namespace ge::renderer::utility {
 		case ImageFormat::RGBA32Float: return VK_FORMAT_R32G32B32A32_SFLOAT;
 		case ImageFormat::RGBA32Int:   return VK_FORMAT_R32G32B32A32_SINT;
 		case ImageFormat::RGBA32Uint:  return VK_FORMAT_R32G32B32A32_UINT;
+		case ImageFormat::BC3Unorm:    return VK_FORMAT_BC3_UNORM_BLOCK;
+		case ImageFormat::BC3Srgb:     return VK_FORMAT_BC3_SRGB_BLOCK;
 		case ImageFormat::BC5Unorm:    return VK_FORMAT_BC5_UNORM_BLOCK;
 		case ImageFormat::BC5Srgb:     return VK_FORMAT_BC5_SNORM_BLOCK;
 		case ImageFormat::BC7Unorm:    return VK_FORMAT_BC7_UNORM_BLOCK;

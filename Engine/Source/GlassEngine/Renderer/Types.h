@@ -94,6 +94,8 @@ namespace ge::renderer {
 		RGBA32Float,
 		RGBA32Int,
 		RGBA32Uint,
+		BC3Unorm,
+		BC3Srgb,
 		BC5Unorm,
 		BC5Srgb,
 		BC7Unorm,
@@ -304,6 +306,8 @@ namespace ge::renderer {
 			case ImageFormat::RGBA32Float: return 16;
 			case ImageFormat::RGBA32Int:   return 16;
 			case ImageFormat::RGBA32Uint:  return 16;
+			case ImageFormat::BC3Unorm:    return 1;
+			case ImageFormat::BC3Srgb:     return 1;
 			case ImageFormat::BC5Unorm:    return 1;
 			case ImageFormat::BC5Srgb:     return 1;
 			case ImageFormat::BC7Unorm:    return 1;

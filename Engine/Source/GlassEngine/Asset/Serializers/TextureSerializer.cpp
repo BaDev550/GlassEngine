@@ -24,7 +24,7 @@ namespace comp {
 
         CMP_Texture dst{};
         dst.dwSize = sizeof(CMP_Texture);
-        dst.format = CMP_FORMAT_BC7;
+        dst.format = CMP_FORMAT_BC3;
         dst.dwWidth = x;
         dst.dwHeight = y;
         dst.dwPitch = 0;
@@ -36,7 +36,7 @@ namespace comp {
         options.dwSize = sizeof(options);
         options.fquality = 0.0;
         options.dwnumThreads = 10;
-
+        
         CMP_ConvertTexture(&src, &dst, &options, CompressionCallback);
     }
 }
@@ -62,7 +62,6 @@ namespace ge {
             outData.resize(width * height * STBI_rgb_alpha);
             std::memcpy(outData.data(), pixels, width * height * STBI_rgb_alpha);
         }
-        stbi_image_free(pixels);
 
         file::Writer out(targetPath);
         if (!out.IsStreamGood()) {
@@ -78,7 +77,7 @@ namespace ge {
         out.WriteData(reinterpret_cast<const char*>(&dataSize), sizeof(uint32_t));
         out.WriteData(reinterpret_cast<const char*>(outData.data()), outData.size());
 
-        outData.clear();
+        stbi_image_free(pixels);
         return AssetType::Texture;
     }
 
