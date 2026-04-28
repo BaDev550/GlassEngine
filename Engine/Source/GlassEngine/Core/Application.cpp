@@ -58,21 +58,29 @@ namespace ge {
 			_window->PollEvents();
 			Input::Update();
 
-			if (!ge::renderer::Renderer3D::BeginFrame()) {
-				// ge::renderer::Renderer3D::EndFrame();
+			if (!renderer::Renderer3D::BeginFrame()) {
 				continue;
 			}
 
-			for (auto& layer : _layerStack) {
-				layer->OnUpdate(_deltaTime);
-
-				_imGuiLayer->Begin();
-				for (auto& [name, panel] : layer->GetPanelManager()) { panel->Draw(); }
-				layer->OnImGuiRender();
-				_imGuiLayer->End();
+			{
+				for (auto& layer : _layerStack)
+					layer->OnUpdate(_deltaTime);
 			}
-			ge::renderer::Renderer3D::EndFrame();
+			renderer::Renderer3D::Submit([this]() { DrawImGui(); });
+			renderer::Renderer3D::Submit([=]() { _imGuiLayer->End(); });
+
+			renderer::Renderer3D::WaitAndRender();
+			renderer::Renderer3D::EndFrame();
 		}
 		_window->GetRenderContext().Wait();
+	}
+
+	void Application::DrawImGui()
+	{
+		_imGuiLayer->Begin();
+		for (auto& layer : _layerStack) {
+			for (auto& [name, panel] : layer->GetPanelManager()) { panel->Draw(); }
+			layer->OnImGuiRender();
+		}
 	}
 }

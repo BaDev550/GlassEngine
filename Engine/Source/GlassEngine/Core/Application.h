@@ -51,6 +51,7 @@ namespace ge {
 		ThreadManager& GetThreadManager() { return *_threadManager; }
 		ApplicationSpecification GetSpecs() const { return _specs; }
 	protected:
+		void DrawImGui();
 		void PushLayer(Layer* layer) { _layerStack.PushLayer(layer); }
 		void PushOverlay(Layer* overlay) { _layerStack.PushOverlay(overlay); }
 	private:

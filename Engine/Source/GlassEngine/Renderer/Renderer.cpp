@@ -9,12 +9,12 @@ namespace ge::renderer {
 		mem::Ref<Sampler> _defaultSampler = nullptr;
 		mem::Ref<Texture2D> _defaultWhiteTexture = nullptr;
 		mem::Ref<Texture2D> _defaultBlackTexture = nullptr;
-		mem::Ref<Texture2D> _defaultNormal = nullptr;
 	} static s_data;
 
 	static mem::Ref<RenderAPI> g_renderAPI = nullptr;
 	static uint32_t g_frameIndex = 0;
 	static RenderConfig g_config;
+	static RenderCommandQueue g_renderCommandQueue;
 
 	void Renderer3D::Init() {
 		GE_PROFILE_SCOPE("Renderer3D::Init");
@@ -75,12 +75,15 @@ namespace ge::renderer {
 	void Renderer3D::DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex, ge::mem::Ref<MaterialTable> materialTable, const glm::mat4& transform) {
 		g_renderAPI->DrawStaticMesh(pipeline, mesh, lodIndex, materialTable, transform);
 	}
+	void Renderer3D::WaitAndRender() {
+		g_renderCommandQueue.Execute();
+	}
 
-	ImTextureID Renderer3D::GetImGuiTexture(ge::mem::Ref<Image>& image)
-	{
+	ImTextureID Renderer3D::GetImGuiTexture(ge::mem::Ref<Image>& image) {
 		return g_renderAPI->GetImGuiTexture(image, ImageSubresource{}, s_data._defaultSampler);
 	}
 
+	void Renderer3D::Submit(std::function<void()> func) { g_renderCommandQueue.Submit(func); }
 	uint32_t Renderer3D::GetFrameIndex() { return g_frameIndex; }
 	RenderConfig Renderer3D::GetRenderConfig() { return g_config; }
 	RenderStats Renderer3D::GetRenderStats() { return g_renderAPI->GetRenderStats(); }

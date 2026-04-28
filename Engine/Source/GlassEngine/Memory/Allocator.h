@@ -12,6 +12,7 @@ namespace ge::mem {
 	struct SceneAllocTag { static constexpr const char* Name = "GE_Allocator_Scene"; };
 	struct RendererAllocTag { static constexpr const char* Name = "GE_Allocator_Renderer"; };
 	struct AssetAllocTag { static constexpr const char* Name = "GE_Allocator_AssetManager"; };
+	struct ThreadAllocTag { static constexpr const char* Name = "GE_Allocator_ThreadManager"; };
 
 	namespace allocFuncs {
 		void* GE_Allocate(size_t size);

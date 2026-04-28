@@ -35,7 +35,7 @@ namespace comp {
         CMP_CompressOptions options{};
         options.dwSize = sizeof(options);
         options.fquality = 0.0;
-        options.dwnumThreads = 10;
+        options.dwnumThreads = 8;
         
         CMP_ConvertTexture(&src, &dst, &options, CompressionCallback);
     }
