@@ -24,6 +24,7 @@ namespace ge {
 	};
 
 	struct EngineSpecification {
+		GEString name = "Glass Engine";
 		EngineIDE IDE = EngineIDE::VS22;
 		EngineMode mode = EngineMode::Editor;
 		Application* application = nullptr;

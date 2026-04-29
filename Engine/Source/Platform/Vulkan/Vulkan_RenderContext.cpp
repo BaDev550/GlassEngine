@@ -91,7 +91,7 @@ namespace ge::renderer {
 		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = Engine::Get().GetApplicationSpecs().title.c_str();
-		appInfo.pEngineName = "GlassEngine"; // TODO: implement
+		appInfo.pEngineName = Engine::Get().GetSpecs().name.c_str();
 		appInfo.apiVersion = VK_API_VERSION_1_4;
 
 		GEVector<const char*> instanceExtensions = GetRequiredInstanceExtensions();

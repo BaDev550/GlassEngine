@@ -23,7 +23,7 @@ namespace ge {
 		std::filesystem::path targetMeshDirectory = targetPath.parent_path();
 		uint32_t importFlags = BASE_ASSIMP_FLAGS;
 
-		if (asset.sourceMeshSpecs->flipUVs)
+		if (spec.flipUVs)
 			importFlags |= aiProcess_FlipUVs;
 
 		Assimp::Importer importer;
@@ -142,7 +142,7 @@ namespace ge {
 
 			uint32_t materialCount = scene->mNumMaterials;
 			GEVector<AssetHandle> materialHandles(materialCount, GE_INVALID_ASSET_HANDLE);
-			if (scene->HasMaterials() && asset.sourceMeshSpecs->loadMaterials) {
+			if (scene->HasMaterials() && spec.loadMaterials) {
 				auto whiteTexture = renderer::Renderer3D::GetWhiteTexture();
 				for (uint32_t i = 0; i < materialCount; i++) {
 					aiMaterial* aiMat = scene->mMaterials[i];
