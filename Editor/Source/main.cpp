@@ -1,5 +1,6 @@
 #include <iostream>
 #include <imgui.h>
+#include <GlassEngine/Core/EntryPoint.h>
 
 #include "EditorLayer.h"
 

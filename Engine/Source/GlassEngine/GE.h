@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GlassEngine/Core/EntryPoint.h>
 #include <GlassEngine/Core/Application.h>
 #include <GlassEngine/Core/Engine.h>
 #include <GlassEngine/Core/Core.h>

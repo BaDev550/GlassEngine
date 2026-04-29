@@ -10,14 +10,16 @@ namespace ge {
 			GE_ADD_CONSOLE_COMMAND(_debugName, "showPanel", [this](const GEVector<GEString>& args) { GetPanelManager().ShowPanel(args[0]); }, "showPanel <panelName>");
 			GE_ADD_CONSOLE_COMMAND(_debugName, "hidePanel", [this](const GEVector<GEString>& args) { GetPanelManager().DisablePanel(args[0]); }, "hidePanel <panelName>");
 			GE_ADD_CONSOLE_COMMAND(_debugName, "printAllRegisteredPanels", [this](const GEVector<GEString>& args) { GetPanelManager().PrintAllPanels(); });
+			RegisterConsoleCommands();
 		}
 
 		virtual ~Layer() = default;
-		virtual void OnAttach() {}
+		virtual void OnAttach() { RegisterLayerPanels(); }
 		virtual void OnDetach() {}
 		virtual void OnUpdate(float deltaTime) {}
-		virtual void OnEvent() {}
 		virtual void OnImGuiRender() {}
+		virtual void RegisterConsoleCommands() {}
+		virtual void RegisterLayerPanels() {}
 		inline const char* GetDebugName() const { return _debugName.c_str(); }
 		inline editor::PanelManager& GetPanelManager() { return _panelManager; }
 	private:
