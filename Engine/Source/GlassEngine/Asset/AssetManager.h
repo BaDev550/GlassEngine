@@ -70,7 +70,7 @@ namespace ge {
 		file::Reader _pakFileReader;
 	};
 
-	inline std::string GetPathWithoutExtension(const std::filesystem::path& path) {
+	inline GEString GetPathWithoutExtension(const std::filesystem::path& path) {
 		return (path.parent_path() / path.stem()).generic_string();
 	}
 

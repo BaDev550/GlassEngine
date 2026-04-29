@@ -20,9 +20,14 @@ namespace ge {
 		GE_CORE_INFO("Importing mesh from source: {}", source.string());
 		GE_PROFILE_SCOPE(std::format("MeshSourceSerializer::ImportFromSource - Assimp Import path: {}", source.string()));
 		std::filesystem::path meshDirectory = source.parent_path();
+		std::filesystem::path targetMeshDirectory = targetPath.parent_path();
+		uint32_t importFlags = BASE_ASSIMP_FLAGS;
+
+		if (asset.sourceMeshSpecs->flipUVs)
+			importFlags |= aiProcess_FlipUVs;
 
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(source.string(), ASSIMP_FLAGS);
+		const aiScene* scene = importer.ReadFile(source.string(), importFlags);
 		if (!scene) {
 			GE_CORE_ERROR(" -Failed to load model!");
 			return GE_INVALID_ASSET_TYPE;
@@ -137,7 +142,7 @@ namespace ge {
 
 			uint32_t materialCount = scene->mNumMaterials;
 			GEVector<AssetHandle> materialHandles(materialCount, GE_INVALID_ASSET_HANDLE);
-			if (scene->HasMaterials()) {
+			if (scene->HasMaterials() && asset.sourceMeshSpecs->loadMaterials) {
 				auto whiteTexture = renderer::Renderer3D::GetWhiteTexture();
 				for (uint32_t i = 0; i < materialCount; i++) {
 					aiMaterial* aiMat = scene->mMaterials[i];
@@ -160,7 +165,8 @@ namespace ge {
 						textureSpec.format = renderer::ImageFormat::BC3Srgb;
 						importData.textureSpecs = &textureSpec;
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
-						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);
+						auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.stem());
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, targetTexturePath, importData);
 						matAsset->SetAlbedoTexture(texture->_assetHandle);
 					}
 					else {
@@ -178,7 +184,8 @@ namespace ge {
 						textureSpec.format = renderer::ImageFormat::BC3Unorm;
 						importData.textureSpecs = &textureSpec;
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
-						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);
+						auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.stem());
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, targetTexturePath, importData);
 						matAsset->SetNormalTexture(texture->_assetHandle);
 					}
 					else {
@@ -187,8 +194,12 @@ namespace ge {
 					materialHandles[i] = AssetManager::Editor_CreateAsset(matTargetPath, matAsset);
 				}
 			}
+			else {
+				// NO material or not selected to import
+			}
 
 			// Write into .gasset
+			auto targetModelPath = (targetPath.empty() ? targetPath : targetPath / source.stem());
 			file::Writer out(targetPath);
 			if (!out.IsStreamGood()) {
 				GE_CORE_ERROR("Failed to open/write to path: {}", targetPath.string());

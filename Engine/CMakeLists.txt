@@ -13,6 +13,7 @@ find_package(EnTT CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
+find_package(nfd CONFIG REQUIRED)
 
 # meshoptimizer
 FetchContent_Declare(
@@ -42,6 +43,7 @@ if(WIN32)
 target_link_libraries(Engine
 	PUBLIC
 		glfw
+        nfd::nfd
         glm::glm-header-only
         EnTT::EnTT
         imgui::imgui
@@ -58,6 +60,7 @@ else()
 target_link_libraries(Engine
 	PUBLIC
 		glfw
+        nfd::nfd
         glm::glm-header-only
         EnTT::EnTT
 		Vulkan::Vulkan

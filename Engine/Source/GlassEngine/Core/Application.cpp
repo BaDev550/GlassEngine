@@ -6,6 +6,7 @@
 #include "GlassEngine/Utilities/Timer.h"
 #include <stdexcept>
 #include <iostream>
+#include <nfd.hpp>
 
 namespace ge {
 	Application* Application::_instance = nullptr;
@@ -17,16 +18,16 @@ namespace ge {
 		profile::Profiler::Init();
 		Console::Init();
 		Logger::Init();
-		AssetManager::Init(nullptr);
 		_threadManager = mem::CreateScope<ThreadManager>(1);
 		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
 		renderer::Renderer3D::Init();
 
 		_window->SetCursor(true);
-		_window->SetIcon("Resources/icon-512.png");
+		//_window->SetIcon("Resources/icon-512.png");
 
 		_imGuiLayer = ImGuiLayer::Create();
 		Input::Init();
+		NFD::Init();
 
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "close", [this](const GEVector<GEString>& args) { _forceClose = true; });
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "writeProfile", [](const GEVector<GEString>& args) { profile::utils::WriteEventsToFile(profile::Profiler::Get().GetEvents(), args[0].ToPath());}, "writeProfile <filePath>");
@@ -37,9 +38,10 @@ namespace ge {
 		GE_GLOBAL_SINK->Dump("Log_" + Time::GetCurrentLocalTime() + ".txt");
 #endif
 		_layerStack.Clear();
-		AssetManager::Destroy();
 		delete _imGuiLayer;
 		_imGuiLayer = nullptr;
+		NFD::Quit();
+		AssetManager::Destroy();
 		renderer::Renderer3D::Destroy();
 		_window = nullptr;
 		Logger::Destroy();

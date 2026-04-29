@@ -29,8 +29,15 @@ namespace ge {
 		Runtime
 	};
 
+	struct ApplicationCommandLineArgs {
+		int count = 0;
+		char** args = nullptr;
+		const char* operator[](int index) const { return args[index]; }
+	};
+
 	struct ApplicationSpecification {
 		GEString title = "Glass Engine";
+		ApplicationCommandLineArgs commandLineArgs;
 		ApplicationMode mode = ApplicationMode::Editor;
 		uint32_t width = 1280;
 		uint32_t height = 720;
@@ -68,5 +75,5 @@ namespace ge {
 		float _deltaTime = 0.0f;
 	};
 
-	Application* CreateApplication(const ApplicationSpecification& createInfo);
+	Application* CreateApplication(const ApplicationCommandLineArgs& createInfo);
 }

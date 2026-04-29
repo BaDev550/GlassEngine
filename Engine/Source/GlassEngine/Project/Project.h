@@ -30,7 +30,7 @@ namespace ge {
 		static std::filesystem::path GetAssetPakPath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetBinariesDirectory() / _activeProject->_config.assetPakPath; }
 		static std::filesystem::path GetAssetManifestPath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetBinariesDirectory() / _activeProject->_config.assetManifestPath; }
 		[[nodiscard]] ProjectConfig& Config() { return _config; }
-		static mem::Ref<Project> New();
+		static mem::Ref<Project> New(const GEString& name, const std::filesystem::path& dir);
 		static mem::Ref<Project> Load(const std::filesystem::path& path);
 		static mem::Ref<Project> GetActive() { return _activeProject; }
 		static bool SaveActive();

@@ -8,9 +8,9 @@
     {
       "name": "imgui",
       "features": [
+        "docking-experimental",
         "glfw-binding",
-        "vulkan-binding",
-        "docking-experimental"
+        "vulkan-binding"
       ]
     },
     {
@@ -22,6 +22,7 @@
     },
     "shader-slang",
     "vulkan-memory-allocator",
-    "yaml-cpp"
+    "yaml-cpp",
+    "nativefiledialog-extended"
   ]
 }

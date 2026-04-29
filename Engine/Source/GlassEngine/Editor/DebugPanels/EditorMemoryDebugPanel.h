@@ -1,5 +1,5 @@
 #pragma once
-#include "EditorPanel.h"
+#include "GlassEngine/Editor/EditorPanel.h"
 
 namespace ge::editor {
 	class EditorMemoryDebugPanel : public EditorPanel {

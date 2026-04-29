@@ -4,15 +4,17 @@
 #include <GlassEngine/Layers/Layer.h>
 #include <GlassEngine/Memory/Ref.h>
 #include <GlassEngine/Core/Core.h>
+#include <GlassEngine/Core/String.h>
 #include <GlassEngine/Renderer/Renderer.h>
 #include <GlassEngine/Renderer/Model.h>
 #include <GlassEngine/Renderer/FreeCamera.h>
 #include <GlassEngine/Scene/Scene.h>
 #include <GlassEngine/Scene/SceneSerializer.h>
 #include <GlassEngine/Editor/EditorConsole.h>
-#include <GlassEngine/Editor/EditorECSDebugPanel.h>
-#include <GlassEngine/Editor/EditorRendererDebugPanel.h>
-#include <GlassEngine/Editor/EditorMemoryDebugPanel.h>
+#include <GlassEngine/Editor/Debug/EditorECSDebugPanel.h>
+#include <GlassEngine/Editor/Debug/EditorRendererDebugPanel.h>
+#include <GlassEngine/Editor/Debug/EditorMemoryDebugPanel.h>
+#include <GlassEngine/Editor/ModelImportPanel.h>
 #include <GlassEngine/Project/ProjectSerializer.h>
 
 #include <imgui.h>
@@ -21,32 +23,18 @@ class EditorLayer : public ge::Layer {
 public:
 	EditorLayer() : ge::Layer("LAYER_Editor") {}
 	virtual void OnAttach() override {
-		_scene = ge::mem::Ref<ge::Scene>::Create("Test Scene");
-		_scene->CreateSceneRenderer();
 		_camera = ge::mem::Ref<ge::renderer::FreeCamera>::Create();
+		OpenProject("projects/sandbox/sandbox.geproj");
 
 		GetPanelManager().RegisterPanel<ge::editor::Console>("E_c");
 		GetPanelManager().RegisterPanel<ge::editor::EditorECSDebugPanel>("E_ecs", _scene.Get());
 		GetPanelManager().RegisterPanel<ge::editor::EditorRendererDebugPanel>("E_r");
 		GetPanelManager().RegisterPanel<ge::editor::EditorMemoryDebugPanel>("E_m");
+		GetPanelManager().RegisterPanel<ge::editor::ModelImportPanel>("E_mI");
 
 		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_c");
 		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_ecs");
 		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_r");
-#if 1
-		auto mario = ge::AssetManager::GetOrImportAsset<ge::renderer::StaticMesh>("Resources/DamagedHelmet/DamagedHelmet.gltf");
-		for (int i = 0; i < mario->GetLODs().size(); i++) {
-			auto& lod = mario->GetLODs()[i];
-			GE_APPLICATION_INFO("LOD: {}", i);
-			GE_APPLICATION_INFO(" -vertexC: {}", lod.vertices.size());
-			GE_APPLICATION_INFO(" -indicesC: {}", lod.indices.size());
-			GE_APPLICATION_INFO(" -submeshC: {}", lod.submesh.size());
-		}
-
-		entity = _scene->CreateEntity("Mario");
-		auto& smc = entity->AddComponent<ge::StaticMeshComponent>();
-		smc.meshHandle = mario->_assetHandle;
-#endif
 
 		GE_ADD_CONSOLE_COMMAND("editor", "save_scene", [this](const GEVector<GEString>& args) {
 			ge::SceneSerializer serializer(_scene);
@@ -58,8 +46,14 @@ public:
 			serializer.Deserialize(args[0]);
 			}, "editor.load_scene <path>");
 		GE_ADD_CONSOLE_COMMAND("editor", "create_project", [this](const GEVector<GEString>& args) {
-			ge::ProjectSerializer::CreateProjectDirectories(args[0], args[1].ToPath());
+			NewProject(args[0], args[1].ToPath());
 			}, "editor.create_project <name> <directory>");
+		GE_ADD_CONSOLE_COMMAND("editor", "open_project", [this](const GEVector<GEString>& args) {
+			OpenProject(args[0].ToPath());
+			}, "editor.open_project <directory>");
+		GE_ADD_CONSOLE_COMMAND("editor", "save_project", [this](const GEVector<GEString>& args) {
+			SaveProject();
+			});
 
 		id = ge::renderer::Renderer3D::GetImGuiTexture(_scene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
 	}
@@ -81,7 +75,22 @@ public:
 	virtual void OnImGuiRender() override {
 		ImGui::Begin("Viewport");
 		ImGui::Image(id, ImVec2(300, 300));
+
+		if (ImGui::MenuItem("Import Model...")) {
+			GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel E_mI");
+		}
 		ImGui::End();
+	}
+private:
+	void NewProject(const GEString& name, const std::filesystem::path& dir) { ge::Project::New(name, dir); }
+	void OpenProject(const std::filesystem::path& path) {
+		if (ge::Project::Load(path)) {
+			_scene = ge::mem::Ref<ge::Scene>::Create("New Scene");
+			_scene->CreateSceneRenderer();
+		};
+	}
+	void SaveProject() {
+		ge::Project::SaveActive();
 	}
 private:
 	ge::mem::Ref<ge::Scene> _scene;
@@ -101,7 +110,13 @@ public:
 };
 
 namespace ge {
-	Application* CreateApplication(const ApplicationSpecification& createInfo) {
-		return new EditorApp(createInfo);
+	Application* CreateApplication(const ApplicationCommandLineArgs& args) {
+		ApplicationSpecification appSpecs{};
+		appSpecs.title = GEString("Glass Editor");
+		appSpecs.mode = ApplicationMode::Editor;
+		appSpecs.width = 1280;
+		appSpecs.height = 720;
+		appSpecs.commandLineArgs = args;
+		return new EditorApp(appSpecs);
 	}
 }
