@@ -11,8 +11,8 @@ namespace ge::renderer {
 		FramebufferSpec fspec{};
 		fspec.attachments = { FramebufferAttachment{ImageFormat::RGBA8Srgb}, FramebufferAttachment{ImageFormat::D32S8} };
 		fspec.attachments[1].clearValue = {1.f, 0};
-		fspec.width = Application::Get()->GetWindow().GetWidth();
-		fspec.height = Application::Get()->GetWindow().GetHeight();
+		fspec.width = Engine::Get().GetApplicationWindow().GetWidth();
+		fspec.height = Engine::Get().GetApplicationWindow().GetHeight();
 		_framebuffer = Framebuffer::Create(fspec);
 		_renderPass = RenderPass::Create(_framebuffer, "SCENE_RENDER_PASS");
 
@@ -43,7 +43,7 @@ namespace ge::renderer {
 			spec.usageFlags = BufferUsageFlagsBits::Uniform;
 			_cameraBuffer = Buffer::Create(spec);
 			std::memcpy(_cameraBuffer->GetMappedPtr(), &_cameraData, sizeof(CameraData));
-			Application::Get()->GetWindow().GetRenderContext().SetUniformBuffer(_cameraBuffer, 0);
+			Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(_cameraBuffer, 0);
 		}
 
 		_endlessGrid = mem::Ref<EndlessGrid>::Create(_framebuffer);

@@ -10,3 +10,4 @@
 #include "GlassEngine/Memory/Memory.h"
 #include "GlassEngine/Renderer/RenderAPI.h"
 #include "GlassEngine/Core/Application.h"
+#include "GlassEngine/Core/Engine.h"

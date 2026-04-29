@@ -6,80 +6,24 @@
 #include "GlassEngine/Utilities/Timer.h"
 #include <stdexcept>
 #include <iostream>
-#include <nfd.hpp>
 
 namespace ge {
-	Application* Application::_instance = nullptr;
 	Application::Application(const ApplicationSpecification& specs) : _specs(specs) {
-		if (_instance)
-			throw std::runtime_error("Application already exists!");
-		_instance = this;
-
-		profile::Profiler::Init();
-		Console::Init();
-		Logger::Init();
 		_threadManager = mem::CreateScope<ThreadManager>(1);
-		_window = mem::CreateScope<Window>(WindowSpecification({ _specs.title, _specs.width, _specs.height }));
-		renderer::Renderer3D::Init();
-
-		_window->SetCursor(true);
-		//_window->SetIcon("Resources/icon-512.png");
-
-		_imGuiLayer = ImGuiLayer::Create();
-		Input::Init();
-		NFD::Init();
-
-		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "close", [this](const GEVector<GEString>& args) { _forceClose = true; });
-		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "writeProfile", [](const GEVector<GEString>& args) { profile::utils::WriteEventsToFile(profile::Profiler::Get().GetEvents(), args[0].ToPath());}, "writeProfile <filePath>");
 	}
 
-	Application::~Application() {
-#ifdef GE_APPLICATION_DUMP_LOG_ON_CLOSE
-		GE_GLOBAL_SINK->Dump("Log_" + Time::GetCurrentLocalTime() + ".txt");
-#endif
-		_layerStack.Clear();
-		delete _imGuiLayer;
-		_imGuiLayer = nullptr;
-		NFD::Quit();
-		AssetManager::Destroy();
-		renderer::Renderer3D::Destroy();
-		_window = nullptr;
-		Logger::Destroy();
-		Console::Destroy();
-		profile::Profiler::Destroy();
-		MemoryProfiler::Destroy();
- 	}
+	Application::~Application() { _layerStack.Clear(); }
+	bool Application::Running() const { return !_forceClose; }
 
-	void Application::Run() {
-		Timer timer;
-		while (!_window->ShoudClose() && !_forceClose) {
-			float time = timer.Elapsed();
-			_deltaTime = time - _lastTime;
-			_lastTime = time;
-
-			_window->PollEvents();
-			Input::Update();
-
-			if (!renderer::Renderer3D::BeginFrame()) {
-				continue;
-			}
-
-			{
-				for (auto& layer : _layerStack)
-					layer->OnUpdate(_deltaTime);
-			}
-			renderer::Renderer3D::Submit([this]() { DrawImGui(); });
-			renderer::Renderer3D::Submit([=]() { _imGuiLayer->End(); });
-
-			renderer::Renderer3D::WaitAndRender();
-			renderer::Renderer3D::EndFrame();
+	void Application::Update(float deltaTime) {
+		{
+			for (auto& layer : _layerStack)
+				layer->OnUpdate(deltaTime);
 		}
-		_window->GetRenderContext().Wait();
 	}
 
 	void Application::DrawImGui()
 	{
-		_imGuiLayer->Begin();
 		for (auto& layer : _layerStack) {
 			for (auto& [name, panel] : layer->GetPanelManager()) { panel->Draw(); }
 			layer->OnImGuiRender();

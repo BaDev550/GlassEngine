@@ -147,30 +147,31 @@ namespace ge {
 			ButtonMiddle = Button2
 		};
 	}
-	class Input {
+	class InputManager {
 	public:
-		static void Init();
-		static void Update();
+		InputManager(GLFWwindow* window);
+		void Update();
 
-		static bool IsKeyPressed(KeyCode key);
-		static bool IsKeyJustPressed(KeyCode key);
-		static bool IsKeyJustReleased(KeyCode key);
+		bool IsKeyPressed(KeyCode key);
+		bool IsKeyJustPressed(KeyCode key);
+		bool IsKeyJustReleased(KeyCode key);
 
-		static bool IsMouseButtonPressed(MouseCode button);
-		static bool IsMouseButtonJustPressed(MouseCode button);
-		static bool IsMouseButtonJustReleased(MouseCode button);
+		bool IsMouseButtonPressed(MouseCode button);
+		bool IsMouseButtonJustPressed(MouseCode button);
+		bool IsMouseButtonJustReleased(MouseCode button);
 
-		static glm::vec2 GetMousePosition();
-		static glm::vec2 GetMouseDelta();
-		static float GetMouseX();
-		static float GetMouseY();
+		glm::vec2 GetMousePosition();
+		glm::vec2 GetMouseDelta();
+		float GetMouseX();
+		float GetMouseY();
 	private:
-		static bool _KeyStates[GLFW_KEY_LAST];
-		static bool _PrevKeyStates[GLFW_KEY_LAST];
-		static bool _MouseButtonStates[GLFW_MOUSE_BUTTON_LAST];
-		static bool _PrevMouseButtonStates[GLFW_MOUSE_BUTTON_LAST];
-		static glm::vec2 _MousePos;
-		static glm::vec2 _LastMousePos;
-		static glm::vec2 _MouseDelta;
+		GLFWwindow* _window;
+		bool _KeyStates[GLFW_KEY_LAST];
+		bool _PrevKeyStates[GLFW_KEY_LAST];
+		bool _MouseButtonStates[GLFW_MOUSE_BUTTON_LAST];
+		bool _PrevMouseButtonStates[GLFW_MOUSE_BUTTON_LAST];
+		glm::vec2 _MousePos;
+		glm::vec2 _LastMousePos;
+		glm::vec2 _MouseDelta;
 	};
 }

@@ -223,7 +223,7 @@ namespace ge::renderer {
 	VkResult Vulkan_Swapchain::Submit(VkCommandBuffer* cmd, uint32_t* imageIndex)
 	{
 		uint32_t frameIndex = Renderer3D::GetFrameIndex();
-		auto renderContext = CastChecked<Vulkan_RenderContext>(&Application::Get()->GetWindow().GetRenderContext());
+		auto renderContext = CastChecked<Vulkan_RenderContext>(&Engine::Get().GetApplicationWindow().GetRenderContext());
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

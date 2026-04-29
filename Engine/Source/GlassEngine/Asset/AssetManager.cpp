@@ -1,7 +1,7 @@
 #include "gepch.h"
 #include "AssetManager.h"
 #include "GlassEngine/Project/Project.h"
-#include "GlassEngine/Core/Application.h"
+#include "GlassEngine/Core/Engine.h"
 
 namespace ge {
 	mem::Ref<AssetManagerBase> AssetManager::_assetManager = nullptr;
@@ -9,17 +9,17 @@ namespace ge {
 	RuntimeAssetManager* AssetManager::_runtimeAssetManagerInstance = nullptr;
 
 	void AssetManager::Init(Project* project) {
-		ApplicationMode mode = Application::Get()->GetSpecs().mode;
+		EngineMode mode = Engine::Get().GetSpecs().mode;
 		switch (mode)
 		{
-		case ge::ApplicationMode::Editor: {
+		case EngineMode::Editor: {
 			_assetManager = mem::Ref<EditorAssetManager>::Create();
 			_editorAssetManagerInstance = _assetManager.Cast<EditorAssetManager>().Get();
+			_editorAssetManagerInstance->SetAssetRegistryPath(project->GetAssetRegistryPath());
 			break;
 		}
-		case ge::ApplicationMode::Runtime: {
-			//_assetManager = mem::Ref<RuntimeAssetManager>::Create(project->GetAssetPakPath(), project->GetAssetManifestPath());
-			_assetManager = mem::Ref<RuntimeAssetManager>::Create("assets.pak", "assets_manifest.bin");
+		case EngineMode::Runtime: {
+			_assetManager = mem::Ref<RuntimeAssetManager>::Create(project->GetAssetPakPath(), project->GetAssetManifestPath());
 			_runtimeAssetManagerInstance = _assetManager.Cast<RuntimeAssetManager>().Get();
 			break;
 		}

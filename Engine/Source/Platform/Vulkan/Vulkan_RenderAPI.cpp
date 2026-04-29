@@ -124,7 +124,7 @@ namespace ge::renderer {
 		uint32_t frameIndex = Renderer3D::GetFrameIndex();
 		FrameContext& frame = _frames[frameIndex];
 
-		auto& window = Application::Get()->GetWindow();
+		auto& window = Engine::Get().GetApplicationWindow();
 		auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
 
 		if (window.HasResized()) {
@@ -137,7 +137,7 @@ namespace ge::renderer {
 			return false;
 		}
 
-		Application::Get()->GetWindow().Swapbuffers();
+		Engine::Get().GetApplicationWindow().Swapbuffers();
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -181,7 +181,7 @@ namespace ge::renderer {
 	{
 		GE_ASSERT(_frameStarted, "Cannot call endFrame while not processing a frame");
 		VkCommandBuffer cmd = GetCurrentCommandBuffer();
-		auto& window = Application::Get()->GetWindow();
+		auto& window = Engine::Get().GetApplicationWindow();
 		auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
 		uint32_t frameIndex = Renderer3D::GetFrameIndex();
 		uint32_t imageIndex = window.GetImageIndex();
@@ -290,7 +290,7 @@ namespace ge::renderer {
 
 		VkCommandBuffer cmd = GetCurrentCommandBuffer();
 		
-		const auto& window = Application::Get()->GetWindow();
+		const auto& window = Engine::Get().GetApplicationWindow();
 		const uint32_t imageIndex = window.GetImageIndex();
 
 		GEVector<VkRenderingAttachmentInfo> colorAttachments;

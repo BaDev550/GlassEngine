@@ -12,7 +12,7 @@
 namespace ge {
 	Vulkan_ImGuiLayer::Vulkan_ImGuiLayer()
 	{
-		auto& window = Application::Get()->GetWindow();
+		auto& window = Engine::Get().GetApplicationWindow();
 		auto context = CastChecked<renderer::Vulkan_RenderContext>(&window.GetRenderContext());
 		auto swapchain = CastChecked<renderer::Vulkan_Swapchain>(&window.GetSwapchain());
 
@@ -66,7 +66,7 @@ namespace ge {
 
 	Vulkan_ImGuiLayer::~Vulkan_ImGuiLayer()
 	{
-		auto& window = Application::Get()->GetWindow();
+		auto& window = Engine::Get().GetApplicationWindow();
 		auto context = CastChecked<renderer::Vulkan_RenderContext>(&window.GetRenderContext());
 		ImGui_ImplGlfw_Shutdown();
 		ImGui_ImplVulkan_Shutdown();
@@ -91,7 +91,7 @@ namespace ge {
 	void Vulkan_ImGuiLayer::End()
 	{
 		ImGui::Render();
-		auto& window = Application::Get()->GetWindow();
+		auto& window = Engine::Get().GetApplicationWindow();
 		auto& context = window.GetRenderContext();
 		auto swapchain = CastChecked<renderer::Vulkan_Swapchain>(&window.GetSwapchain());
 		auto renderAPI = renderer::Renderer3D::GetRenderAPI().Cast<renderer::Vulkan_RenderAPI>();
@@ -102,7 +102,7 @@ namespace ge {
 
 		VkRenderingAttachmentInfo colorAttachment{};
 		colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-		colorAttachment.imageView = swapchain->GetImageViews()[Application::Get()->GetWindow().GetImageIndex()];
+		colorAttachment.imageView = swapchain->GetImageViews()[Engine::Get().GetApplicationWindow().GetImageIndex()];
 		colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

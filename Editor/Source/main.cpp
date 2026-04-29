@@ -11,11 +11,12 @@
 #include <GlassEngine/Scene/Scene.h>
 #include <GlassEngine/Scene/SceneSerializer.h>
 #include <GlassEngine/Editor/EditorConsole.h>
-#include <GlassEngine/Editor/Debug/EditorECSDebugPanel.h>
-#include <GlassEngine/Editor/Debug/EditorRendererDebugPanel.h>
-#include <GlassEngine/Editor/Debug/EditorMemoryDebugPanel.h>
+#include <GlassEngine/Editor/DebugPanels/EditorECSDebugPanel.h>
+#include <GlassEngine/Editor/DebugPanels/EditorRendererDebugPanel.h>
+#include <GlassEngine/Editor/DebugPanels/EditorMemoryDebugPanel.h>
 #include <GlassEngine/Editor/ModelImportPanel.h>
 #include <GlassEngine/Project/ProjectSerializer.h>
+#include <GlassEngine/Core/Engine.h>
 
 #include <imgui.h>
 
@@ -64,11 +65,11 @@ public:
 
 		_scene->OnEditorUpdate(deltaTime, _camera);
 
-		if (ge::Input::IsKeyJustPressed(ge::key::Tab)) {
+		if (ge::Engine::Get().GetInputManager().IsKeyJustPressed(ge::key::Tab)) {
 			_cursor = !_cursor;
 			_camera->SetProccessingMouse(!_cursor);
 			_camera->SetFirstMouse();
-			ge::Application::Get()->GetWindow().SetCursor(_cursor);
+			ge::Engine::Get().GetApplicationWindow().SetCursor(_cursor);
 		}
 	}
 
@@ -105,6 +106,9 @@ class EditorApp : public ge::Application {
 public:
 	EditorApp(const ge::ApplicationSpecification& createInfo) : ge::Application(createInfo) {
 		GE_APPLICATION_INFO("EditorApp created!");
+	}
+
+	virtual void Init() override {
 		PushLayer(new EditorLayer());
 	}
 };
@@ -113,7 +117,6 @@ namespace ge {
 	Application* CreateApplication(const ApplicationCommandLineArgs& args) {
 		ApplicationSpecification appSpecs{};
 		appSpecs.title = GEString("Glass Editor");
-		appSpecs.mode = ApplicationMode::Editor;
 		appSpecs.width = 1280;
 		appSpecs.height = 720;
 		appSpecs.commandLineArgs = args;

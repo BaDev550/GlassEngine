@@ -42,7 +42,7 @@ namespace ge {
 				return LoadAssetFromFile(handle);
 		}
 		else if (!sourcePath.empty()) {
-			//sourcePath.replace_extension(GE_ASSET_EXTENSION);
+			//sourcePath.replace_extension(GE_ASSET_EXTENSION); TODO(0x): rewirte this
 			auto mtd = GetMetadata(sourcePath);
 			if (mtd.IsValid()) {
 				if (mtd.IsLoaded())
@@ -74,13 +74,7 @@ namespace ge {
 	}
 
 	void EditorAssetManager::ImportAssetAsync(const ImportAssetData& asset, std::function<void(AssetHandle)> loadedFunc, std::filesystem::path sourcePath, std::filesystem::path targetPath) {
-		Application::Get()->GetThreadManager().Enqueue([this, asset, sourcePath, targetPath, loadedFunc]() {
-			AssetHandle result = ImportAsset(asset, sourcePath, targetPath);
-			if (loadedFunc) {
-				loadedFunc(result);
-				GE_CORE_INFO("Asset Loaded: {}", sourcePath.string());
-			}
-			});
+		// TODO (0x): rewrite this
 	}
 
 	AssetHandle EditorAssetManager::ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath)

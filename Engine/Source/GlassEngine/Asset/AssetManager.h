@@ -33,6 +33,7 @@ namespace ge {
 		[[nodiscard]] mem::Ref<Asset> LoadAssetFromFile(AssetHandle handle);
 		[[nodiscard]] AssetHandle CreateAsset(const std::filesystem::path& targetPath, mem::Ref<Asset> asset);
 
+		void SetAssetRegistryPath(const std::filesystem::path& path) { _assetRegistryPath = path; }
 		void ImportAssetAsync(const ImportAssetData& asset, std::function<void(AssetHandle)> loadedFunc, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
 		void CompileIntoPakFile(const std::filesystem::path& outPath);
 		void CompileIntoManifest(const std::filesystem::path& outPath);
@@ -48,7 +49,7 @@ namespace ge {
 
 		void SaveAssetRegistry();
 		void LoadAssetRegistry();
-		const std::filesystem::path _assetRegistryPath = "assetregistry.ge";
+		std::filesystem::path _assetRegistryPath = "assetregistry.ge";
 	};
 
 	class RuntimeAssetManager : public AssetManagerBase {

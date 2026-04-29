@@ -11,27 +11,27 @@ namespace ge::renderer {
 			glm::vec3 position = _position;
 
 			float speed = 5.0f;
-			if (Input::IsKeyPressed(key::LeftShift))
+			if (Engine::Get().GetInputManager().IsKeyPressed(key::LeftShift))
 				speed *= 2.5f;
 
-			if (Input::IsKeyPressed(key::W))
+			if (Engine::Get().GetInputManager().IsKeyPressed(key::W))
 				position += forward * speed * dt;
-			if (Input::IsKeyPressed(key::S))
+			if (Engine::Get().GetInputManager().IsKeyPressed(key::S))
 				position -= forward * speed * dt;
-			if (Input::IsKeyPressed(key::A))
+			if (Engine::Get().GetInputManager().IsKeyPressed(key::A))
 				position -= right * speed * dt;
-			if (Input::IsKeyPressed(key::D))
+			if (Engine::Get().GetInputManager().IsKeyPressed(key::D))
 				position += right * speed * dt;
-			if (Input::IsKeyPressed(key::E))
+			if (Engine::Get().GetInputManager().IsKeyPressed(key::E))
 				position.y += speed * dt;
-			if (Input::IsKeyPressed(key::Q))
+			if (Engine::Get().GetInputManager().IsKeyPressed(key::Q))
 				position.y -= speed * dt;
 
 			_position = position;
 
 			double xpos, ypos;
-			xpos = -Input::GetMousePosition().x;
-			ypos = Input::GetMousePosition().y;
+			xpos = -Engine::Get().GetInputManager().GetMousePosition().x;
+			ypos = Engine::Get().GetInputManager().GetMousePosition().y;
 
 			if (_firstMouse) {
 				_lastX = xpos;

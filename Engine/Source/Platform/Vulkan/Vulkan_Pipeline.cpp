@@ -132,7 +132,7 @@ namespace ge::renderer {
 		VkFormat depthFormat = VK_FORMAT_UNDEFINED;
 		VkFormat stencilFormat = VK_FORMAT_UNDEFINED;
 		
-		const auto* swapchain = CastChecked<Vulkan_Swapchain>(&Application::Get()->GetWindow().GetSwapchain());
+		const auto* swapchain = CastChecked<Vulkan_Swapchain>(&Engine::Get().GetApplicationWindow().GetSwapchain());
 		for (const auto& attachment : _specs.targetFramebuffer->GetAttachments()) {
 			if (attachment.isSwapchain) {
 				colorFormat.push_back(swapchain->GetSwapchainFormat());
