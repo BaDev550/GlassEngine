@@ -80,6 +80,7 @@ namespace ge::editor {
                     bool isNoneSelected = !component.meshHandle;
                     if (ImGui::Selectable("None", isNoneSelected)) {
                         component.meshHandle = 0;
+                        component.materialTable = nullptr;
                     }
                     if (isNoneSelected) {
                         ImGui::SetItemDefaultFocus();
@@ -89,7 +90,10 @@ namespace ge::editor {
                         bool isSelected = (component.meshHandle == handles[i]);
 
                         if (ImGui::Selectable(names[i].c_str(), isSelected)) {
-                            component.meshHandle = handles[i];
+                            if (component.meshHandle != handles[i]) {
+                                component.meshHandle = handles[i];
+                                component.materialTable = nullptr; 
+                            }
                         }
 
                         if (isSelected) {
@@ -108,6 +112,69 @@ namespace ge::editor {
                     ImGui::Checkbox("Calculate LOD", &component.calculateLOD);
                     if (ImGui::DragInt("Current LOD", &lodIndex, 1.0f, 0, 3)) {
                         component.lodLevel = lodIndex;
+                    }
+
+                    auto staticMesh = AssetManager::GetAsset<renderer::StaticMesh>(component.meshHandle);
+                    if (staticMesh && ImGui::TreeNode("Materials")) {
+
+                        auto defaultMaterialTable = staticMesh->GetMaterialTable();
+                        auto& activeMaterials = component.materialTable ? component.materialTable->GetMaterials() : defaultMaterialTable->GetMaterials();
+
+                        if (component.materialTable) {
+                            if (ImGui::Button("Clear Overrides")) {
+                                component.materialTable = nullptr;
+                            }
+                        }
+
+                        auto matAssets = AssetManager::Editor_GetLoadedAssetsWithType(AssetType::Material);
+                        std::vector<AssetHandle> matHandles;
+                        std::vector<std::string> matNames;
+                        for (const auto& [id, asset] : matAssets) {
+                            matHandles.push_back(id);
+                            matNames.push_back(AssetManager::GetMetadata(id).path.stem().string());
+                        }
+
+                        for (size_t i = 0; i < activeMaterials.size(); i++) {
+                            auto currentMat = activeMaterials[i];
+
+                            std::string currentMatName = "None";
+                            if (currentMat) {
+                                AssetHandle handle = currentMat->_assetHandle;
+                                auto it = std::find(matHandles.begin(), matHandles.end(), handle);
+                                if (it != matHandles.end()) {
+                                    currentMatName = matNames[std::distance(matHandles.begin(), it)];
+                                }
+                                else {
+                                    currentMatName = "Material " + std::to_string(i);
+                                }
+                            }
+
+                            ImGui::PushID(static_cast<int>(i));
+                            std::string slotLabel = std::format("Slot {}", i);
+
+                            if (ImGui::BeginCombo(slotLabel.c_str(), currentMatName.c_str())) {
+                                for (size_t j = 0; j < matHandles.size(); j++) {
+                                    bool isSelected = (currentMatName == matNames[j]);
+                                    if (ImGui::Selectable(matNames[j].c_str(), isSelected)) {
+
+                                        if (!component.materialTable) {
+                                            component.materialTable = mem::Ref<renderer::MaterialTable>::Create();
+                                            for (size_t m = 0; m < defaultMaterialTable->GetMaterials().size(); m++) {
+                                                component.materialTable->AddMaterial(static_cast<uint32_t>(m), defaultMaterialTable->GetMaterials()[m]);
+                                            }
+                                        }
+
+                                        auto newMat = AssetManager::GetAsset<renderer::MaterialAsset>(matHandles[j]);
+                                        component.materialTable->AddMaterial(static_cast<uint32_t>(i), newMat);
+                                    }
+
+                                    if (isSelected) ImGui::SetItemDefaultFocus();
+                                }
+                                ImGui::EndCombo();
+                            }
+                            ImGui::PopID();
+                        }
+                        ImGui::TreePop();
                     }
                 }
 			});

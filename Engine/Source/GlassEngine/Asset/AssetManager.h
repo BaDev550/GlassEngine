@@ -21,13 +21,20 @@ namespace ge {
 		[[nodiscard]] virtual AssetMap GetLoadedAssets() const = 0;
 		[[nodiscard]] virtual AssetMetadata GetMetadata(AssetHandle handle) = 0;
 		[[nodiscard]] virtual AssetMetadata GetMetadata(const std::filesystem::path& path) = 0;
+		std::filesystem::path TryToGetGassetFile(std::filesystem::path sourcePath) {
+			std::filesystem::path originalPath = sourcePath;
+			std::filesystem::path gassetPath = sourcePath.replace_extension(GE_ASSET_EXTENSION);
+			if (std::filesystem::exists(gassetPath))
+				return gassetPath;
+			return originalPath;
+		}
 	protected:
 		mem::Scope<AssetImporter> _importer;
 	};
 
 	class EditorAssetManager : public AssetManagerBase {
 	public:
-		EditorAssetManager();
+		EditorAssetManager(const std::filesystem::path& assetRegistry);
 		[[nodiscard]] virtual mem::Ref<Asset> GetOrImportAsset(std::filesystem::path sourcePath, ImportAssetData asset = ImportAssetData(), std::filesystem::path targetPath = "", AssetHandle handle = GE_INVALID_ASSET_HANDLE) override;
 		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) override;
 		[[nodiscard]] virtual AssetMap GetLoadedAssets() const override { return _loadedAssets; }

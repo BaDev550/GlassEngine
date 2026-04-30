@@ -26,7 +26,7 @@ namespace ge::renderer {
 		void SetAlbedoTexture(const AssetHandle& textureHandle);
 		void SetRoughnessTexture(const AssetHandle& textureHandle);
 		void SetNormalTexture(const AssetHandle& textureHandle);
-		ge::mem::Ref<Material> GetMaterial() const { return _material; }
+		ge::mem::Ref<Material>& GetMaterial();
 		static AssetType GetStaticAssetType() { return AssetType::Material; }
 		virtual AssetType GetAssetType() const override { return GetStaticAssetType(); }
 	private:
@@ -47,7 +47,7 @@ namespace ge::renderer {
 		}
 
 		GEUnorderedMap<uint32_t, ge::mem::Ref<MaterialAsset>>& GetMaterials() { return _materials; }
-		ge::mem::Ref<Material> GetMaterial(uint32_t materialIndex) const {
+		ge::mem::Ref<Material> GetMaterial(uint32_t materialIndex) {
 			auto it = _materials.find(materialIndex);
 			if (it != _materials.end()) {
 				return it->second->GetMaterial();

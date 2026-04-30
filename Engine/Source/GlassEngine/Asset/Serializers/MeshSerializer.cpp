@@ -25,6 +25,8 @@ namespace ge {
 
 		if (spec.flipUVs)
 			importFlags |= aiProcess_FlipUVs;
+		if (source.extension() != ".gltf")
+			importFlags |= aiProcess_PreTransformVertices;
 
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(source.string(), importFlags);
@@ -59,7 +61,7 @@ namespace ge {
 				for (uint32_t f = 0; f < aimesh->mNumFaces; f++) {
 					aiFace face = aimesh->mFaces[f];
 					for (uint32_t j = 0; j < face.mNumIndices; j++) {
-						lod0.indices.push_back(face.mIndices[j]);
+						lod0.indices.push_back(face.mIndices[j] + vertexOffset);
 					}
 				}
 				vertexOffset += aimesh->mNumVertices;
@@ -69,8 +71,12 @@ namespace ge {
 			// Optimze the vertices and indiceses so it reduces the filesize and draw time
 			{
 				GE_PROFILE_SCOPE("MeshSourceSerializer::ImportFromSource::Optimizing");
-				meshopt_optimizeVertexCache(lod0.indices.data(), lod0.indices.data(), lod0.indices.size(), lod0.vertices.size());
-				meshopt_optimizeOverdraw(lod0.indices.data(), lod0.indices.data(), lod0.indices.size(), &lod0.vertices[0].position.x, lod0.vertices.size(), sizeof(renderer::Vertex), 1.05f);
+				for (const auto& submesh : lod0.submesh) {
+					uint32_t* submeshIndices = &lod0.indices[submesh.indexOffset];
+					meshopt_optimizeVertexCache(submeshIndices, submeshIndices, submesh.indexCount, lod0.vertices.size());
+					meshopt_optimizeOverdraw(submeshIndices, submeshIndices, submesh.indexCount, &lod0.vertices[0].position.x, lod0.vertices.size(), sizeof(renderer::Vertex), 1.05f);
+				}
+
 				meshopt_optimizeVertexFetch(lod0.vertices.data(), lod0.indices.data(), lod0.indices.size(), lod0.vertices.data(), lod0.vertices.size(), sizeof(renderer::Vertex));
 			}
 
@@ -135,7 +141,11 @@ namespace ge {
 					}
 					if (!simplified) break;
 
-					meshopt_optimizeVertexCache(newLod.indices.data(), newLod.indices.data(), newLod.indices.size(), newLod.vertices.size());
+					for (const auto& newSubmesh : newLod.submesh) {
+						uint32_t* submeshIndices = &newLod.indices[newSubmesh.indexOffset];
+						meshopt_optimizeVertexCache(submeshIndices, submeshIndices, newSubmesh.indexCount, newLod.vertices.size());
+					}
+
 					allLods.push_back(newLod);
 				}
 			}
@@ -154,7 +164,10 @@ namespace ge {
 					mem::Ref<renderer::Material> mat = mem::Ref<renderer::Material>::Create();
 					mem::Ref<renderer::MaterialAsset> matAsset = mem::Ref<renderer::MaterialAsset>::Create(mat);
 
-					bool hasAlbedo = aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexturePath) == AI_SUCCESS;
+					bool hasAlbedo = aiMat->GetTexture(AI_MATKEY_BASE_COLOR_TEXTURE, &aiTexturePath) == AI_SUCCESS;
+					if (!hasAlbedo)
+						hasAlbedo = aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexturePath) == AI_SUCCESS;
+
 					if (hasAlbedo) {
 						ImportAssetData importData;
 						renderer::TextureSpec textureSpec{};
@@ -184,7 +197,7 @@ namespace ge {
 						textureSpec.format = renderer::ImageFormat::BC3Unorm;
 						importData.textureSpecs = &textureSpec;
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
-						auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.stem());
+						auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.filename());
 						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, targetTexturePath, importData);
 						matAsset->SetNormalTexture(texture->_assetHandle);
 					}

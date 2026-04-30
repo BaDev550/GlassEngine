@@ -4,7 +4,7 @@
 
 namespace ge {
 	constexpr uint32_t BASE_ASSIMP_FLAGS = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType;
-
+	
 	class MeshAssetSerializer : public AssetSerializer {
 	public:
 		virtual ~MeshAssetSerializer() = default;

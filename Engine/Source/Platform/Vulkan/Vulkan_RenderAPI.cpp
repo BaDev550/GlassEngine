@@ -267,7 +267,7 @@ namespace ge::renderer {
 				PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), sizeof(glm::mat4));
 			}
 
-			vkCmdDrawIndexed(GetCurrentCommandBuffer(), submesh.indexCount, 1, submesh.indexOffset, submesh.vertexOffset, 0);
+			vkCmdDrawIndexed(GetCurrentCommandBuffer(), submesh.indexCount, 1, submesh.indexOffset, 0, 0);
 			_renderStats.drawCalls++;
 		}
 	}

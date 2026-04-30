@@ -4,7 +4,7 @@
 #include "GlassEngine/Asset/AssetExtensions.h"
 
 namespace ge {
-	EditorAssetManager::EditorAssetManager()
+	EditorAssetManager::EditorAssetManager(const std::filesystem::path& assetRegistry) : _assetRegistryPath(assetRegistry)
 	{
 		LoadAssetRegistry();
 
@@ -42,8 +42,8 @@ namespace ge {
 				return LoadAssetFromFile(handle);
 		}
 		else if (!sourcePath.empty()) {
-			//sourcePath.replace_extension(GE_ASSET_EXTENSION); TODO(0x): rewirte this
-			auto mtd = GetMetadata(sourcePath);
+			auto assetPath = TryToGetGassetFile(sourcePath);
+			auto mtd = GetMetadata(assetPath);
 			if (mtd.IsValid()) {
 				if (mtd.IsLoaded())
 					return _loadedAssets.at(mtd.handle);
@@ -51,7 +51,7 @@ namespace ge {
 					return LoadAssetFromFile(mtd.handle);
 			}
 			else {
-				AssetHandle newHandle = ImportAsset(asset, sourcePath, targetPath);
+				AssetHandle newHandle = ImportAsset(asset, assetPath, targetPath);
 				if (newHandle != GE_INVALID_ASSET_HANDLE)
 					return LoadAssetFromFile(newHandle);
 			}

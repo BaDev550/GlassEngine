@@ -13,9 +13,8 @@ namespace ge {
 		switch (mode)
 		{
 		case EngineMode::Editor: {
-			_assetManager = mem::Ref<EditorAssetManager>::Create();
+			_assetManager = mem::Ref<EditorAssetManager>::Create(project->GetAssetRegistryPath());
 			_editorAssetManagerInstance = _assetManager.Cast<EditorAssetManager>().Get();
-			_editorAssetManagerInstance->SetAssetRegistryPath(project->GetAssetRegistryPath());
 			break;
 		}
 		case EngineMode::Runtime: {

@@ -5,7 +5,11 @@ namespace ge::editor {
 	{
 		Layer::OnAttach();
 
-		OpenProject("projects/sandbox/sandbox.geproj");
+		// TEMP
+		auto projectPath = GE_ENGINE_DIR.parent_path() / "sandbox/sandbox.geproj";
+
+		OpenProject(projectPath);
+		RegisterConsoleCommands();
 
 		_camera = mem::Ref<renderer::FreeCamera>::Create();
 		_viewportTextureId = renderer::Renderer3D::GetImGuiTexture(_activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
@@ -15,7 +19,8 @@ namespace ge::editor {
 		_sceneHierarchyPanel->SetContext(_activeScene);
 
 		{
-			auto marioModel = AssetManager::GetOrImportAsset<renderer::StaticMesh>("projects/sandbox/Assets/Model/DamagedHelmet.gltf");
+			auto marioModel = AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Model/DamagedHelmet.gltf");
+			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/mario_2/mario_2.obj");
 			entity = _activeScene->CreateEntity("Mario");
 			auto& smc = entity->AddComponent<StaticMeshComponent>();
 			smc.meshHandle = marioModel->_assetHandle;
