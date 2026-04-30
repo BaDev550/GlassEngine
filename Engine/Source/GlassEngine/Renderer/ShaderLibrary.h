@@ -10,7 +10,7 @@ namespace ge::renderer {
 			GE_PROFILE_SCOPE(("RHI_Shader::Compile " + shaderName).c_str());
 
 			ShaderData _shaderData;
-			CompileShader("Shaders/", shaderName, _shaderData);
+			CompileShader((GE_ENGINE_DIR / "Shaders/"), shaderName, _shaderData);
 			_loadedShaders[shaderName] = Shader::Create(shaderName, std::move(_shaderData));
 			return _loadedShaders[shaderName];
 		}

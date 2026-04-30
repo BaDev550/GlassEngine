@@ -156,6 +156,17 @@ namespace ge {
 		return handle;
 	}
 
+	AssetMap EditorAssetManager::GetLoadedAssetsWithType(AssetType type)
+	{
+		AssetMap result;
+		for (auto& [id, asset] : _loadedAssets) {
+			AssetMetadata mtd = GetMetadata(id);
+			if (mtd.type == type)
+				result[id] = asset;
+		}
+		return result;
+	}
+
 	void EditorAssetManager::CompileIntoPakFile(const std::filesystem::path& outPath)
 	{
 		GE_PROFILE_SCOPE("EditorAssetManager::CompileIntoPakFile");

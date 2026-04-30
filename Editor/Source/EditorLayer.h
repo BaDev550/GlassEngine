@@ -27,6 +27,9 @@ namespace ge::editor {
 		virtual void RegisterConsoleCommands() override;
 		virtual void RegisterLayerPanels() override;
 	private:
+		void BeginDockspace();
+		void EndDockspace();
+
 		mem::Ref<Scene> _activeScene;
 		mem::Ref<Scene> _editorScene;
 		std::filesystem::path _activeScenePath;
@@ -35,7 +38,10 @@ namespace ge::editor {
 
 		ImTextureID _viewportTextureId;
 
+		bool _consoleEnabled = false;
 		bool _cursor = false;
 		Entity* entity;
+		editor::ContentBrowserPanel* _contentBrowserPanel;
+		editor::SceneHierarchyPanel* _sceneHierarchyPanel;
 	};
 }

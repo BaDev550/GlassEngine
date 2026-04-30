@@ -67,6 +67,26 @@ namespace ge {
 		return nullptr;
 	}
 
+	AssetMetadata RuntimeAssetManager::GetMetadata(AssetHandle handle)
+	{
+		if (!AssetInRegistry(handle))
+			return AssetMetadata();
+
+		AssetMetadata mtd;
+		mtd.handle = _assetRegistry[handle].handle;
+		return mtd;
+	}
+
+	AssetMetadata RuntimeAssetManager::GetMetadata(const std::filesystem::path& path)
+	{
+		if (!_assetManifest.contains(path.string()))
+			return AssetMetadata();
+
+		AssetMetadata mtd;
+		mtd.handle = _assetManifest[path.string()];
+		return mtd;
+	}
+
 	void RuntimeAssetManager::LoadManifest(const std::filesystem::path& manifestPath)
 	{
 		_manifestFileReader.OpenStream(manifestPath);

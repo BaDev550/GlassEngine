@@ -65,15 +65,17 @@ namespace ge::renderer {
 		view.each([&](const TransformComponent& tc, StaticMeshComponent& smc) {
 			if (smc.isVisible) {
 				auto staticMesh = AssetManager::GetAsset<StaticMesh>(smc.meshHandle);
-				uint32_t lodIndex = 0;
-				if (smc.calculateLOD) {
-					lodIndex = staticMesh->GetLODManager().GetLODindex(staticMesh->GetLODs(), camera, tc.position);
-					smc.lodLevel = lodIndex;
+				if (staticMesh) {
+					uint32_t lodIndex = 0;
+					if (smc.calculateLOD) {
+						lodIndex = staticMesh->GetLODManager().GetLODindex(staticMesh->GetLODs(), camera, tc.position);
+						smc.lodLevel = lodIndex;
+					}
+					else {
+						lodIndex = smc.lodLevel;
+					}
+					Renderer3D::DrawStaticMesh(_pipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
 				}
-				else {
-					lodIndex = smc.lodLevel;
-				}
-				Renderer3D::DrawStaticMesh(_pipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
 			}
 			});
 

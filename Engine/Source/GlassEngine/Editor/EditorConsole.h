@@ -7,11 +7,11 @@
 #include <imgui.h>
 
 namespace ge::editor {
-	class Console : public EditorPanel {
+	class EditorConsole : public EditorPanel {
 	public:
 		virtual void Draw() override {
 			ImGui::SetNextWindowSize(ImVec2(600, 350), ImGuiCond_FirstUseEver);
-			ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
+			ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking);
 
 			const float footerHeightToReserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
 			ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footerHeightToReserve), false, ImGuiWindowFlags_HorizontalScrollbar);
@@ -90,7 +90,7 @@ namespace ge::editor {
 		}
 
 		static int TextEditCallbackStub(ImGuiInputTextCallbackData* data) {
-			editor::Console* console = (editor::Console*)data->UserData;
+			editor::EditorConsole* console = (editor::EditorConsole*)data->UserData;
 			return console->TextEditCallback(data);
 		}
 

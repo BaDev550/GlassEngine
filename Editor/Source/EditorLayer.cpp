@@ -4,16 +4,18 @@ namespace ge::editor {
 	void EditorLayer::OnAttach()
 	{
 		Layer::OnAttach();
-		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel console");
-		GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel render");
 
 		OpenProject("projects/sandbox/sandbox.geproj");
 
 		_camera = mem::Ref<renderer::FreeCamera>::Create();
 		_viewportTextureId = renderer::Renderer3D::GetImGuiTexture(_activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
+		_contentBrowserPanel = CastChecked<editor::ContentBrowserPanel>(GetPanelManager().ShowPanel("contentBrowser"));
+		_contentBrowserPanel->Init();
+		_sceneHierarchyPanel = CastChecked<editor::SceneHierarchyPanel>(GetPanelManager().ShowPanel("sceneHierarchy"));
+		_sceneHierarchyPanel->SetContext(_activeScene);
 
 		{
-			auto marioModel = AssetManager::GetOrImportAsset<renderer::StaticMesh>("Resources/DamagedHelmet/DamagedHelmet.gltf");
+			auto marioModel = AssetManager::GetOrImportAsset<renderer::StaticMesh>("projects/sandbox/Assets/Model/DamagedHelmet.gltf");
 			entity = _activeScene->CreateEntity("Mario");
 			auto& smc = entity->AddComponent<StaticMeshComponent>();
 			smc.meshHandle = marioModel->_assetHandle;
@@ -26,20 +28,30 @@ namespace ge::editor {
 
 		_activeScene->OnEditorUpdate(deltaTime, _camera);
 
-		if (ge::Engine::Get().GetInputManager().IsKeyJustPressed(key::Tab)) {
+		if (Engine::Get().GetInputManager().IsKeyJustPressed(key::Tab)) {
 			_cursor = !_cursor;
 			_camera->SetProccessingMouse(!_cursor);
 			_camera->SetFirstMouse();
 			ge::Engine::Get().GetApplicationWindow().SetCursor(_cursor);
 		}
+
+		if (Engine::Get().GetInputManager().IsKeyPressed(key::LeftAlt) && Engine::Get().GetInputManager().IsKeyJustPressed(key::C)) {
+			_consoleEnabled = !_consoleEnabled;
+			if (_consoleEnabled) GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel console");
+			else GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.hidePanel console");
+		}
 	}
 
 	void EditorLayer::OnImGuiRender()
 	{
+		BeginDockspace();
+		Layer::OnImGuiRender();
+
 		ImGui::Begin("Viewport");
 		ImVec2 viewportSize = ImGui::GetWindowSize();
 		ImGui::Image(_viewportTextureId, viewportSize);
 		ImGui::End();
+		EndDockspace();
 	}
 
 	void EditorLayer::NewScene()
@@ -54,6 +66,7 @@ namespace ge::editor {
 			_activeScenePath = path;
 			_activeScene->Clear();
 			_activeScene = std::move(tempScene);
+			_sceneHierarchyPanel->SetContext(_activeScene);
 		}
 	}
 
@@ -84,10 +97,42 @@ namespace ge::editor {
 	}
 
 	void EditorLayer::RegisterLayerPanels() {
-		GetPanelManager().RegisterPanel<editor::Console>("console");
-		GetPanelManager().RegisterPanel<editor::EditorECSDebugPanel>("ecs", _editorScene);
+		GetPanelManager().RegisterPanel<editor::EditorConsole>("console");
 		GetPanelManager().RegisterPanel<editor::EditorRendererDebugPanel>("render");
 		GetPanelManager().RegisterPanel<editor::EditorMemoryDebugPanel>("mem");
 		GetPanelManager().RegisterPanel<editor::ModelImportPanel>("modelImporter");
+		GetPanelManager().RegisterPanel<editor::ContentBrowserPanel>("contentBrowser");
+		GetPanelManager().RegisterPanel<editor::SceneHierarchyPanel>("sceneHierarchy");
+	}
+
+	void EditorLayer::BeginDockspace()
+	{
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("Glass Engine Editor Dockspace", nullptr, window_flags);
+		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
+
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+			ImGuiID dockspace_id = ImGui::GetID("GlassEngineDockspace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		}
+	}
+
+	void EditorLayer::EndDockspace() {
+		ImGui::End();
 	}
 }

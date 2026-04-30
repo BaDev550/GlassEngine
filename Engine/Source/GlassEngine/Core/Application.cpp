@@ -25,7 +25,6 @@ namespace ge {
 	void Application::DrawImGui()
 	{
 		for (auto& layer : _layerStack) {
-			for (auto& [name, panel] : layer->GetPanelManager()) { panel->Draw(); }
 			layer->OnImGuiRender();
 		}
 	}

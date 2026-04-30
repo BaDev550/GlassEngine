@@ -21,8 +21,9 @@ namespace ge {
 		_inputManager = mem::CreateScope<InputManager>(_window->GetHandle());
 		_imGuiLayer = ImGuiLayer::Create();
 
-		_window->SetCursor(true);
 		renderer::Renderer3D::Init(); //def move this into engine
+		_window->SetCursor(true);
+		_window->SetIcon((GE_ENGINE_DIR.parent_path() / "Brand/icon-512.png").string());
 		_specs.application->Init();
 		NFD::Init();
 
@@ -61,12 +62,12 @@ namespace ge {
 #ifdef GE_ENGINE_DUMP_LOG_ON_CLOSE
 		GE_GLOBAL_SINK->Dump("Log_" + Time::GetCurrentLocalTime() + ".txt");
 #endif
-		_specs.application->Close();
 		_inputManager = nullptr;
-		delete _specs.application;
-		_specs.application = nullptr;
 		delete _imGuiLayer;
 		_imGuiLayer = nullptr;
+		_specs.application->Close();
+		delete _specs.application;
+		_specs.application = nullptr;
 		NFD::Quit();
 		AssetManager::Destroy();
 		renderer::Renderer3D::Destroy();

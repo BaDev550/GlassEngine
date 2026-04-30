@@ -81,6 +81,25 @@ namespace ge {
         return AssetType::Texture;
     }
 
+    mem::Ref<Asset> SourceTextureSerializer::ImportTextureFromFile(const ImportAssetData& asset, const std::filesystem::path& source)
+    {
+        int width, height, channels;
+        renderer::TextureSpec specs{};
+        if (asset.textureSpecs)
+            specs = *asset.textureSpecs;
+        stbi_set_flip_vertically_on_load(specs.flipV);
+
+        uint8_t* pixels = stbi_load(source.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
+        if (!pixels) {
+            GE_CORE_ERROR("Failed to load source image: {}", source.string());
+            return nullptr;
+        }
+        specs.width = width;
+        specs.height = height;
+        mem::Ref<renderer::Texture2D> texture = renderer::Texture2D::Create(specs, pixels);
+        return texture;
+    }
+
     // Texture serializer
     mem::Ref<Asset> TextureSerializer::DeserializeFromFile(const AssetMetadata& mtd) {
         GE_PROFILE_SCOPE(("TextureSerializer::DeserializeFromFile " + mtd.path.string()).c_str());

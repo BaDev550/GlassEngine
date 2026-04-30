@@ -5,6 +5,7 @@ namespace ge {
 	class SourceTextureSerializer : public SourceSerializer {
 	public:
 		virtual AssetType ImportFromSource(const ImportAssetData& asset, const std::filesystem::path& source, const std::filesystem::path& targetPath) override;
+		static mem::Ref<Asset> ImportTextureFromFile(const ImportAssetData& asset, const std::filesystem::path& source);
 	};
 
 	class TextureSerializer : public AssetSerializer {

@@ -9,6 +9,7 @@
 #define GE_CONSOLE_ENGINE_CATAGORY "engine"
 #define GE_MEMORY_ALLOCATOR_DEBUG_ALLOCATION_FREE 0
 #define GE_MEMORY_ALLOCATOR_DEBUG_WRITE_INTO_PROFILER 0
+#define GE_ENGINE_DIR GEString(std::getenv("GLASS_ENGINE_DIR")).ToPath()
 
 #ifdef _WIN32
     #define GE_DEBUGBREAK() __debugbreak()

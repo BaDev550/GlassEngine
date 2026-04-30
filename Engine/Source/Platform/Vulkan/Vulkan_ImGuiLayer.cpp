@@ -37,6 +37,7 @@ namespace ge {
 
 		auto& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		ImGui_ImplGlfw_InitForVulkan(window.GetHandle(), true);
 		ImGui_ImplVulkan_PipelineInfo pipelineInfo{};
@@ -119,5 +120,11 @@ namespace ge {
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 		vkCmdEndRendering(cmd);
 		renderer::Renderer3D::GetRenderAPI()->EndDebugLabel();
+
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+		}
 	}
 }

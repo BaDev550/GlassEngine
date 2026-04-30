@@ -2,7 +2,7 @@
 #include <string>
 #include <filesystem>
 #include "GlassEngine/Asset/Asset.h"
-#include "EditorPanel.h"
+#include "GlassEngine/Editor/EditorPanel.h"
 #include <nfd.hpp>
 
 namespace ge::editor {

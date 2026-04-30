@@ -79,12 +79,7 @@ namespace ge {
 
 	void Window::SetIcon(const GEString& iconPath)
 	{
-		ImportAssetData assetData{};
-		ge::renderer::TextureSpec textureSpecs{};
-		textureSpecs.filter = ge::renderer::ImageFilter::Linear;
-		textureSpecs.format = ge::renderer::ImageFormat::RGBA8;
-		assetData.textureSpecs = &textureSpecs;
-		auto iconAsset = AssetManager::GetOrImportAsset<renderer::Texture2D>(iconPath.ToPath(), "", assetData);
+		auto iconAsset = ge::SourceTextureSerializer::ImportTextureFromFile(ImportAssetData(), iconPath.ToPath()).Cast<renderer::Texture2D>();
  		SetIcon(iconAsset->GetData(), iconAsset->GetWidth(), iconAsset->GetHeight());
 	}
 

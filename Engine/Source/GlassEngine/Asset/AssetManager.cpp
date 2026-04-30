@@ -32,9 +32,14 @@ namespace ge {
 		_runtimeAssetManagerInstance = nullptr;
 	}
 
+	[[nodiscard]] AssetMetadata AssetManager::GetMetadata(AssetHandle handle) { return _assetManager->GetMetadata(handle); }
+	[[nodiscard]] AssetMetadata AssetManager::GetMetadata(const std::filesystem::path& path) { return _assetManager->GetMetadata(path); }
+
 	void AssetManager::Editor_CompileIntoPakFile(const std::filesystem::path& outPath) { _editorAssetManagerInstance->CompileIntoPakFile(outPath); }
 	void AssetManager::Editor_CompileIntoManifest(const std::filesystem::path& outPath) { _editorAssetManagerInstance->CompileIntoManifest(outPath); }
 	void AssetManager::Editor_CookAssets(const std::filesystem::path& outPath) { _editorAssetManagerInstance->CookAssets(outPath); }
+	AssetMap AssetManager::Editor_GetLoadedAssetsWithType(AssetType type) { return _editorAssetManagerInstance->GetLoadedAssetsWithType(type); }
+
 	[[nodiscard]] AssetHandle AssetManager::Editor_ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath) {
 		return _editorAssetManagerInstance->ImportAsset(asset, sourcePath, targetPath);
 	}

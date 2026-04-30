@@ -19,6 +19,8 @@ namespace ge {
 		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) = 0;
 		[[nodiscard]] virtual mem::Ref<Asset> GetOrImportAsset(std::filesystem::path sourcePath, ImportAssetData asset = ImportAssetData(), std::filesystem::path targetPath = "", AssetHandle handle = GE_INVALID_ASSET_HANDLE) = 0;
 		[[nodiscard]] virtual AssetMap GetLoadedAssets() const = 0;
+		[[nodiscard]] virtual AssetMetadata GetMetadata(AssetHandle handle) = 0;
+		[[nodiscard]] virtual AssetMetadata GetMetadata(const std::filesystem::path& path) = 0;
 	protected:
 		mem::Scope<AssetImporter> _importer;
 	};
@@ -29,9 +31,12 @@ namespace ge {
 		[[nodiscard]] virtual mem::Ref<Asset> GetOrImportAsset(std::filesystem::path sourcePath, ImportAssetData asset = ImportAssetData(), std::filesystem::path targetPath = "", AssetHandle handle = GE_INVALID_ASSET_HANDLE) override;
 		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) override;
 		[[nodiscard]] virtual AssetMap GetLoadedAssets() const override { return _loadedAssets; }
+		[[nodiscard]] virtual AssetMetadata GetMetadata(AssetHandle handle) override;
+		[[nodiscard]] virtual AssetMetadata GetMetadata(const std::filesystem::path& path) override;
 		[[nodiscard]] AssetHandle ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
 		[[nodiscard]] mem::Ref<Asset> LoadAssetFromFile(AssetHandle handle);
 		[[nodiscard]] AssetHandle CreateAsset(const std::filesystem::path& targetPath, mem::Ref<Asset> asset);
+		[[nodiscard]] AssetMap GetLoadedAssetsWithType(AssetType type);
 
 		void SetAssetRegistryPath(const std::filesystem::path& path) { _assetRegistryPath = path; }
 		void ImportAssetAsync(const ImportAssetData& asset, std::function<void(AssetHandle)> loadedFunc, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
@@ -41,8 +46,6 @@ namespace ge {
 	private:
 		bool AssetInRegistry(AssetHandle handle);
 		bool AssetLoaded(AssetHandle handle);
-		AssetMetadata GetMetadata(AssetHandle handle);
-		AssetMetadata GetMetadata(const std::filesystem::path& path);
 
 		AssetRegistry _assetRegistry;
 		AssetMap _loadedAssets;
@@ -58,6 +61,8 @@ namespace ge {
 		[[nodiscard]] virtual mem::Ref<Asset> GetOrImportAsset(std::filesystem::path sourcePath, ImportAssetData asset = ImportAssetData(), std::filesystem::path targetPath = "", AssetHandle handle = GE_INVALID_ASSET_HANDLE) override;
 		[[nodiscard]] virtual mem::Ref<Asset> GetAsset(AssetHandle handle) override;
 		[[nodiscard]] virtual AssetMap GetLoadedAssets() const override { return _loadedAssets; }
+		[[nodiscard]] virtual AssetMetadata GetMetadata(AssetHandle handle) override;
+		[[nodiscard]] virtual AssetMetadata GetMetadata(const std::filesystem::path& path) override;
 
 		void LoadManifest(const std::filesystem::path& manifestPath);
 		void LoadAssetsFromPak(const std::filesystem::path& assetPakPath);
@@ -81,6 +86,9 @@ namespace ge {
 		static void Init(Project* project);
 		static void Destroy();
 
+		static [[nodiscard]] AssetMetadata GetMetadata(AssetHandle handle);
+		static [[nodiscard]] AssetMetadata GetMetadata(const std::filesystem::path& path);
+
 		template<typename T>
 		static mem::Ref<T> GetAsset(AssetHandle handle) {
 			return _assetManager->GetAsset(handle).Cast<T>();
@@ -93,6 +101,7 @@ namespace ge {
 		static void Editor_CompileIntoPakFile(const std::filesystem::path& outPath);
 		static void Editor_CompileIntoManifest(const std::filesystem::path& outPath);
 		static void Editor_CookAssets(const std::filesystem::path& outPath);
+		[[nodiscard]] static AssetMap Editor_GetLoadedAssetsWithType(AssetType type);
 		[[nodiscard]] static AssetHandle Editor_ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
 		[[nodiscard]] static AssetHandle Editor_CreateAsset(const std::filesystem::path& targetPath, mem::Ref<Asset> asset);
 	private:
