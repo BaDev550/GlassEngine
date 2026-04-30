@@ -200,24 +200,6 @@ namespace ge::renderer {
 					&fenceInfo, VK_ALLOCATOR_CALLBACKS, &_inFlightFences[i]);	
 			}
 		}
-		else {
-			reSized = true;
-			// VkSemaphoreCreateInfo semaphoreInfo{};
-			// semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-			// VkFenceCreateInfo fenceInfo{};
-			// fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			// fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-			// for (auto& semaphore : _renderFinishedSemaphores) {
-				// vkDestroySemaphore(device, semaphore, VK_ALLOCATOR_CALLBACKS);
-				// vkDestroySemaphore(device, _renderFinishedSemaphores[i], VK_ALLOCATOR_CALLBACKS);
-				// vkCreateSemaphore(device, &semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &semaphore);
-				// vkCreateSemaphore(device, &semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_renderFinishedSemaphores[i]);
-				// vkCreateFence(device, &fenceInfo, VK_ALLOCATOR_CALLBACKS, &_inFlightFences[i]);
-			// }
-			// vkResetFences(VK_RENDER_CONTEXT->GetDevice(), _inFlightFences.size(), _inFlightFences.data());
-		}
 	}
 
 	VkResult Vulkan_Swapchain::Submit(VkCommandBuffer* cmd, uint32_t* imageIndex)
@@ -230,12 +212,9 @@ namespace ge::renderer {
 		VkSemaphore waitSemaphores[] = { _imageAvailableSemaphores[frameIndex] };
 		VkSemaphore signalSemaphores[] = { _renderFinishedSemaphores[*imageIndex] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		// if (!reSized) {
-			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = waitSemaphores;
-			submitInfo.pWaitDstStageMask = waitStages;
-			reSized = false;
-		// }
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = cmd;
 		submitInfo.signalSemaphoreCount = 1;

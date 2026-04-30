@@ -33,6 +33,5 @@ namespace ge::renderer {
 		GEVector<VkImage> _images;
 		VkFormat _format;
 		VkPresentModeKHR _presentMode;
-		bool reSized{};
 	};
 }

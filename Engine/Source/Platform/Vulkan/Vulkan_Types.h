@@ -12,8 +12,8 @@
 namespace ge::renderer::utility {
 	[[nodiscard]] constexpr VkBufferUsageFlags Vulkan_GetBufferUsageFlags(BufferUsageFlags bufferUsageFlags) noexcept {
 		VkBufferUsageFlags out{};
-		if (bufferUsageFlags.Has(BufferUsageFlagsBits::Readonly)) out |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Writable)) out |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		if (bufferUsageFlags.Has(BufferUsageFlagsBits::Readonly)) out |= (VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT);
+		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Writable)) out |= (VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT);
 		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::TransferDst)) out |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::TransferSrc)) out |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		else if (bufferUsageFlags.Has(BufferUsageFlagsBits::Uniform)) out |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
