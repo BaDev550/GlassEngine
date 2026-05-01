@@ -21,10 +21,12 @@ namespace ge {
 		[[nodiscard]] virtual AssetMap GetLoadedAssets() const = 0;
 		[[nodiscard]] virtual AssetMetadata GetMetadata(AssetHandle handle) = 0;
 		[[nodiscard]] virtual AssetMetadata GetMetadata(const std::filesystem::path& path) = 0;
+		virtual bool AssetInRegistry(AssetHandle handle) = 0;
 		std::filesystem::path TryToGetGassetFile(std::filesystem::path sourcePath) {
 			std::filesystem::path originalPath = sourcePath;
 			std::filesystem::path gassetPath = sourcePath.replace_extension(GE_ASSET_EXTENSION);
-			if (std::filesystem::exists(gassetPath))
+			auto mtd = GetMetadata(gassetPath);
+			if (std::filesystem::exists(gassetPath) && AssetInRegistry(mtd.handle))
 				return gassetPath;
 			return originalPath;
 		}
@@ -44,6 +46,7 @@ namespace ge {
 		[[nodiscard]] mem::Ref<Asset> LoadAssetFromFile(AssetHandle handle);
 		[[nodiscard]] AssetHandle CreateAsset(const std::filesystem::path& targetPath, mem::Ref<Asset> asset);
 		[[nodiscard]] AssetMap GetLoadedAssetsWithType(AssetType type);
+		virtual bool AssetInRegistry(AssetHandle handle) override;
 
 		void SetAssetRegistryPath(const std::filesystem::path& path) { _assetRegistryPath = path; }
 		void ImportAssetAsync(const ImportAssetData& asset, std::function<void(AssetHandle)> loadedFunc, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
@@ -51,7 +54,6 @@ namespace ge {
 		void CompileIntoManifest(const std::filesystem::path& outPath);
 		void CookAssets(const std::filesystem::path& outPath);
 	private:
-		bool AssetInRegistry(AssetHandle handle);
 		bool AssetLoaded(AssetHandle handle);
 
 		AssetRegistry _assetRegistry;
@@ -70,12 +72,12 @@ namespace ge {
 		[[nodiscard]] virtual AssetMap GetLoadedAssets() const override { return _loadedAssets; }
 		[[nodiscard]] virtual AssetMetadata GetMetadata(AssetHandle handle) override;
 		[[nodiscard]] virtual AssetMetadata GetMetadata(const std::filesystem::path& path) override;
+		virtual bool AssetInRegistry(AssetHandle handle) override;
 
 		void LoadManifest(const std::filesystem::path& manifestPath);
 		void LoadAssetsFromPak(const std::filesystem::path& assetPakPath);
 	private:
 		bool AssetLoaded(AssetHandle handle);
-		bool AssetInRegistry(AssetHandle handle);
 		PackedAssetMap _assetRegistry;
 		AssetMap _loadedAssets;
 		AssetManifest _assetManifest;
