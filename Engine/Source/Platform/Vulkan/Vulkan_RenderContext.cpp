@@ -587,6 +587,7 @@ namespace ge::renderer {
 
 	GEVector<const char*> Vulkan_RenderContext::GetRequiredDeviceExtensions() {
 		return {
+			VK_EXT_DYNAMIC_RENDERING_UNUSED_ATTACHMENTS_EXTENSION_NAME,
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
 	}

@@ -22,7 +22,6 @@
     },
     "shader-slang",
     "vulkan-memory-allocator",
-    "yaml-cpp",
-    "nativefiledialog-extended"
+    "yaml-cpp"
   ]
 }

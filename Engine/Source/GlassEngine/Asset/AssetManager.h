@@ -93,8 +93,8 @@ namespace ge {
 		static void Init(Project* project);
 		static void Destroy();
 
-		static [[nodiscard]] AssetMetadata GetMetadata(AssetHandle handle);
-		static [[nodiscard]] AssetMetadata GetMetadata(const std::filesystem::path& path);
+		[[nodiscard]] static AssetMetadata GetMetadata(AssetHandle handle);
+		[[nodiscard]] static AssetMetadata GetMetadata(const std::filesystem::path& path);
 
 		template<typename T>
 		static mem::Ref<T> GetAsset(AssetHandle handle) {

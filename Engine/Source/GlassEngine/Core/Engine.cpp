@@ -21,6 +21,8 @@ namespace ge {
 		_inputManager = mem::CreateScope<InputManager>(_window->GetHandle());
 		_imGuiLayer = ImGuiLayer::Create();
 
+		auto i = GE_ENGINE_DIR.parent_path();
+
 		renderer::Renderer3D::Init(); //def move this into engine
 		_window->SetCursor(true);
 		_window->SetIcon((GE_ENGINE_DIR.parent_path() / "Brand/icon-512.png").string());
