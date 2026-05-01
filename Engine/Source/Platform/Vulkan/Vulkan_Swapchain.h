@@ -21,7 +21,7 @@ namespace ge::renderer {
 		[[nodiscard]] auto GetImageViews() const noexcept { return std::span(_imageViews); }
 		[[nodiscard]] auto GetImages() const noexcept { return std::span(_images); }
 	private:
-		void CreateSwapchain(const SwapchainSpec& newSpec) override;
+		virtual void CreateSwapchain(const SwapchainSpec& newSpec) override;
 
 		VkSwapchainKHR _swapchain = VK_NULL_HANDLE;
 

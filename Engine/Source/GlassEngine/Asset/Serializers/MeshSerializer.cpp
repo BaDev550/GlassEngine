@@ -178,9 +178,9 @@ namespace ge {
 						textureSpec.format = renderer::ImageFormat::BC3Srgb;
 						importData.textureSpecs = &textureSpec;
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
-						auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.stem());
-						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, targetTexturePath, importData);
-						matAsset->SetAlbedoTexture(texture->_assetHandle);
+						//auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.replace_extension(GE_ASSET_EXTENSION).filename());
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);
+						matAsset->SetAlbedoTexture(texture ? texture->_assetHandle : whiteTexture->_assetHandle);
 					}
 					else {
 						matAsset->SetAlbedoTexture(whiteTexture->_assetHandle);
@@ -197,13 +197,16 @@ namespace ge {
 						textureSpec.format = renderer::ImageFormat::BC3Unorm;
 						importData.textureSpecs = &textureSpec;
 						auto texturePath = meshDirectory / aiTexturePath.C_Str();
-						auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.filename());
-						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, targetTexturePath, importData);
-						matAsset->SetNormalTexture(texture->_assetHandle);
+						//auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.replace_extension(GE_ASSET_EXTENSION).filename());
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);
+						matAsset->SetNormalTexture(texture ? texture->_assetHandle : whiteTexture->_assetHandle);
 					}
 					else {
-						matAsset->SetAlbedoTexture(whiteTexture->_assetHandle);
+						matAsset->SetNormalTexture(whiteTexture->_assetHandle);
 					}
+
+					if (matTargetPath.stem() == targetPath.stem())
+						matTargetPath = matTargetPath.parent_path() / (matTargetPath.stem().string() + "_MAT" + matTargetPath.extension().string());
 					materialHandles[i] = AssetManager::Editor_CreateAsset(matTargetPath, matAsset);
 				}
 			}

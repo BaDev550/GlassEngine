@@ -4,7 +4,6 @@
 namespace ge {
 	struct ProjectConfig {
 		GEString name;
-		std::filesystem::path defaultScenePath = "default.scene";
 		std::filesystem::path assetDirectory = "Assets";
 		std::filesystem::path cacheDirectory = "Cache";
 		std::filesystem::path configDirectory = "Config";
@@ -12,6 +11,7 @@ namespace ge {
 		std::filesystem::path intermediatesDirectory = "Intermediates";
 
 		std::filesystem::path scriptModulePath;
+		std::filesystem::path defaultScenePath = assetDirectory / "default.scene";
 		std::filesystem::path assetRegistryPath = (cacheDirectory / "assetRegistry.bin");
 		std::filesystem::path assetPakPath = (binariesDirectory / "assets.pak");
 		std::filesystem::path assetManifestPath = (binariesDirectory / "assets_manifest.bin");
@@ -29,6 +29,7 @@ namespace ge {
 		static std::filesystem::path GetScriptModulePath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetProjectDirectory() / _activeProject->_config.scriptModulePath; }
 		static std::filesystem::path GetAssetPakPath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetProjectDirectory() / _activeProject->_config.assetPakPath; }
 		static std::filesystem::path GetAssetManifestPath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetProjectDirectory() / _activeProject->_config.assetManifestPath; }
+		static std::filesystem::path GetDefaultScenePath() noexcept { GE_ASSERT(_activeProject, "No active project!"); return GetProjectDirectory() / _activeProject->_config.defaultScenePath; }
 		[[nodiscard]] ProjectConfig& Config() { return _config; }
 		static mem::Ref<Project> New(const GEString& name, const std::filesystem::path& dir);
 		static mem::Ref<Project> Load(const std::filesystem::path& path);

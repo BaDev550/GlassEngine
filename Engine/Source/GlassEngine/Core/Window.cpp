@@ -31,6 +31,8 @@ namespace ge {
 	}
 
 	Window::~Window() {
+		_swapchain = nullptr;
+		_renderContext = nullptr;
 		glfwDestroyWindow(_handle);
 		glfwTerminate();
 	}

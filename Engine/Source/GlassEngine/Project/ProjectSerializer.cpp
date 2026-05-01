@@ -30,8 +30,7 @@ namespace ge {
 		std::filesystem::path cmakePath = projectDir / "CMakeLists.txt";
 		std::filesystem::path cacheAbsDir = std::filesystem::absolute(intermediatesDir);
 
-		std::string startupScene = "defaultScene";
-		mem::Ref<Scene> scene = mem::Ref<Scene>::Create(startupScene);
+		mem::Ref<Scene> scene = mem::Ref<Scene>::Create(config.defaultScenePath.stem().string());
 		SceneSerializer scene_serializer(scene);
 
 		std::string command;
@@ -51,7 +50,7 @@ namespace ge {
 		if (CreateCMakeFile(cmakePath, config)) {
 			SerializeWithConfig(projectFile, config);
 
-			scene_serializer.Serialize((projectDir / config.assetDirectory / (startupScene + ".scene")).string());
+			scene_serializer.Serialize((projectDir / config.defaultScenePath).string());
 
 			std::ofstream defaultCS((projectDir / config.assetDirectory) / "Test.cs");
 			std::ofstream renderConfig(configDir / "render.config");

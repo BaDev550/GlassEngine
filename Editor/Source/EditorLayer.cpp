@@ -19,11 +19,11 @@ namespace ge::editor {
 		_sceneHierarchyPanel->SetContext(_activeScene);
 
 		{
-			auto marioModel = AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Model/DamagedHelmet.gltf");
+			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Model/DamagedHelmet.gltf");
 			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/mario_2/mario_2.obj");
-			entity = _activeScene->CreateEntity("Mario");
-			auto& smc = entity->AddComponent<StaticMeshComponent>();
-			smc.meshHandle = marioModel->_assetHandle;
+			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/SheenChair/SheenChair.gltf");
+			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/SciFiHelmet/SciFiHelmet.gltf");
+			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Sponza/Sponza.gltf");
 		}
 	}
 
@@ -67,10 +67,11 @@ namespace ge::editor {
 	void EditorLayer::LoadScene(const std::filesystem::path& path) {
 		mem::Ref<Scene> tempScene = mem::Ref<Scene>::Create(path.stem().string());
 		SceneSerializer serializer(tempScene);
+
 		if (serializer.Deserialize(path.string())) {
-			_activeScenePath = path;
 			_activeScene->Clear();
 			_activeScene = std::move(tempScene);
+			_activeScene->CreateSceneRenderer();
 			_sceneHierarchyPanel->SetContext(_activeScene);
 		}
 	}
@@ -83,8 +84,12 @@ namespace ge::editor {
 	void EditorLayer::NewProject(const GEString& name, const std::filesystem::path& dir) { Project::New(name, dir); }
 	void EditorLayer::OpenProject(const std::filesystem::path& path) {
 		if (Project::Load(path)) {
-			_activeScene = mem::Ref<Scene>::Create("New Scene");
-			_editorScene = _activeScene;
+			auto defaultScenePath = Project::GetActive()->GetDefaultScenePath();
+			_activeScene = mem::Ref<Scene>::Create(defaultScenePath.stem().string());
+
+			SceneSerializer serializer(_activeScene);
+			serializer.Deserialize(defaultScenePath.string());
+			_activeScenePath = defaultScenePath;
 			_activeScene->CreateSceneRenderer();
 		};
 	}
