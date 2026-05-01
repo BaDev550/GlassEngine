@@ -139,6 +139,9 @@ namespace ge::renderer {
 
 		Engine::Get().GetApplicationWindow().Swapbuffers();
 
+		frame.renderObjects.clear();
+		staging_buffers.clear();
+
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
@@ -231,6 +234,9 @@ namespace ge::renderer {
 		vkCmdBindVertexBuffers(GetCurrentCommandBuffer(), 0, 1, &vulkanVertexBuffer, offsets);
 		vkCmdDraw(GetCurrentCommandBuffer(), vertexCount, instanceCount, firstVertex, firstInstance);
 		_renderStats.drawCalls++;
+
+		TrackObject(pipeline);
+		TrackObject(vertexBuffer);
 	}
 
 	void Vulkan_RenderAPI::DrawIndexed(ge::mem::Ref<Pipeline>& pipeline, uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex, uint32_t firstInstance, int32_t vertexOffset)
@@ -245,6 +251,10 @@ namespace ge::renderer {
 		vkCmdBindIndexBuffer(GetCurrentCommandBuffer(), vulkanIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(GetCurrentCommandBuffer(), indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 		_renderStats.drawCalls++;
+
+		TrackObject(pipeline);
+		TrackObject(vertexBuffer);
+		TrackObject(indexBuffer);
 	}
 
 	void Vulkan_RenderAPI::DrawStaticMesh(ge::mem::Ref<Pipeline>& pipeline, ge::mem::Ref<StaticMesh>& mesh, uint32_t lodIndex, ge::mem::Ref<MaterialTable> materialTable, const glm::mat4& transform)
@@ -270,6 +280,8 @@ namespace ge::renderer {
 			vkCmdDrawIndexed(GetCurrentCommandBuffer(), submesh.indexCount, 1, submesh.indexOffset, 0, 0);
 			_renderStats.drawCalls++;
 		}
+
+		TrackObject(pipeline);
 	}
 
 	void Vulkan_RenderAPI::BeginCopyPass() {
@@ -315,6 +327,8 @@ namespace ge::renderer {
 				_barriersForImages.emplace(vk_image.Get());
 			}
 
+			if (!attachment.isSwapchainImage) (TrackObject(vk_image));
+
 			colorAttachments.emplace_back(
 				VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 				nullptr,
@@ -337,6 +351,8 @@ namespace ge::renderer {
 		}
 
 		auto vk_depthStencilImage = spec.depthStencilAttachment.image.Cast<Vulkan_Image>();
+		if (vk_depthStencilImage) (TrackObject(vk_depthStencilImage));
+
 		const auto has_depth = vk_depthStencilImage != nullptr;
 		const auto has_stencil = has_depth ? 
 			utility::IsDepthStencilFormat(vk_depthStencilImage->GetSpecRef().imageFormat) : false;
@@ -409,6 +425,7 @@ namespace ge::renderer {
 		else if (dataSize < (1u<<20) * 64) {
 			vkCmdUpdateBuffer(cmd, 
 				buffer.Cast<Vulkan_Buffer>()->GetVkBuffer(), 0, dataSize, data);
+			TrackObject(buffer);
 			return;
 		}
 		
@@ -431,6 +448,7 @@ namespace ge::renderer {
 		vkCmdCopyBuffer(cmd, 
 			buffer.Cast<Vulkan_Buffer>()->GetVkBuffer(), staging_buffer->GetVkBuffer(),
 			1, &bufferCopy);
+		TrackObject(buffer);
 	}
 
 	void Vulkan_RenderAPI::ILoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) {
@@ -475,6 +493,7 @@ namespace ge::renderer {
 
 		vk_image->_imageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		_barriersForImages.emplace(vk_image.Get());
+		TrackObject(vk_image);
 	}
 	
 	void Vulkan_RenderAPI::BeginDebugLabel(std::string_view label) {
@@ -578,6 +597,9 @@ namespace ge::renderer {
 
 		// _barriersForBuffers.emplace(&vk_src);
 		// _barriersForBuffers.emplace(&vk_dst);
+		TrackObject(src);
+		TrackObject(dst);
+
 	}
 
 	void Vulkan_RenderAPI::ICopyBufferToImage(
@@ -620,6 +642,8 @@ namespace ge::renderer {
 		);
 
 		_barriersForImages.emplace(&vk_dst);
+		TrackObject(src);
+		TrackObject(dst);
 	}
 
 	void Vulkan_RenderAPI::ICopyImageToBuffer(
@@ -661,6 +685,8 @@ namespace ge::renderer {
 		);
 
 		_barriersForImages.emplace(&vk_src);
+		TrackObject(src);
+		TrackObject(dst);
 	}
 
 	void Vulkan_RenderAPI::ICopyImageToImage(
@@ -705,6 +731,8 @@ namespace ge::renderer {
 
 		_barriersForImages.emplace(&vk_dst);
 		_barriersForImages.emplace(&vk_src);
+		TrackObject(src);
+		TrackObject(dst);
 	}
 
 	ImTextureID Vulkan_RenderAPI::GetImGuiTexture(ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler) {
@@ -712,5 +740,6 @@ namespace ge::renderer {
 			sampler.Cast<Vulkan_Sampler>()->GetSampler(), 
 			image.Cast<Vulkan_Image>()->CreateGetImageView(subresource), 
 			utility::Vulkan_OptimalImageLayout(image->GetSpecRef().usageFlags));
+		TrackObject(image);
 	}
 }

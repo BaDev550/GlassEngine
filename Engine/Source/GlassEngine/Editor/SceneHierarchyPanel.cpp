@@ -68,7 +68,7 @@ namespace ge::editor {
 		auto& tag = entity->GetComponent<IdentityComponent>().name;
 		ImGuiTreeNodeFlags flags = ((_selectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+		bool opened = ImGui::TreeNodeEx((void*)entity, flags, tag.c_str());
 		if (ImGui::IsItemClicked()) {
 			_selectionContext = entity;
 		}
@@ -89,7 +89,7 @@ namespace ge::editor {
 
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
-			strncpy_s(buffer, sizeof(buffer), tag.c_str(), sizeof(buffer));
+			snprintf(buffer, sizeof(buffer), "%s", tag.c_str());
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 			{
 				tag = std::string(buffer);

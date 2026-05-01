@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <string>
+#include <string.h>
 #include <filesystem>
 #include "GlassEngine/Asset/Asset.h"
 #include "GlassEngine/Editor/EditorPanel.h"
@@ -30,7 +31,7 @@ namespace ge::editor {
                     nfdfilteritem_t filterItem[1] = { { "GLTF Models", "gltf,glb" } };
 
                     if (NFD::OpenDialog(outPath, filterItem, 1) == NFD_OKAY) {
-                        strncpy_s(sourcePathBuffer, sizeof(sourcePathBuffer), outPath, _TRUNCATE);
+                        snprintf(sourcePathBuffer, sizeof(sourcePathBuffer), "%s", outPath);
                         NFD::FreePath(outPath);
                     }
                 }
@@ -41,7 +42,7 @@ namespace ge::editor {
                     nfdchar_t* outPath = nullptr;
 
                     if (NFD::PickFolder(outPath, nullptr) == NFD_OKAY) {
-                        strncpy_s(targetPathBuffer, sizeof(targetPathBuffer), outPath, _TRUNCATE);
+                        snprintf(targetPathBuffer, sizeof(targetPathBuffer), "%s", outPath);
                         NFD::FreePath(outPath);
                     }
                 }

@@ -55,11 +55,16 @@ namespace ge::renderer {
 
 		VkCommandBuffer GetCurrentCommandBuffer();
 	private:
+		void TrackObject(ge::mem::Ref<RenderObject> object) {
+		GE_ASSERT(_frameStarted, "Cannot get track objects while frame is not started");
+			_frames[Renderer3D::GetFrameIndex()].renderObjects.push_back(object);
+		}
+
 		struct FrameContext {
 			VkCommandPool commandPool;
 			VkCommandBuffer commandBuffer;
 			// for life time
-			GEVector<RenderObject, ge::mem::RendererAllocTag> renderObjects;
+			GEVector<ge::mem::Ref<RenderObject>, ge::mem::RendererAllocTag> renderObjects;
 		} _frames[Renderer3D::MaxFramesInFlight]; // TEMP ig
 		bool _frameStarted = false;
 
