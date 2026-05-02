@@ -66,6 +66,7 @@ namespace ge {
 		AssetHandle _assetHandle = GE_INVALID_ASSET_HANDLE;
 		static AssetType GetStaticAssetType() { return GE_INVALID_ASSET_TYPE; }
 		virtual AssetType GetAssetType() const { return GetStaticAssetType(); }
+		virtual void OnDependencyUpdated(AssetHandle handle) {}
 	};
 
 	struct PackedAsset {

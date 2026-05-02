@@ -8,6 +8,14 @@ namespace ge {
 	EditorAssetManager* AssetManager::_editorAssetManagerInstance = nullptr;
 	RuntimeAssetManager* AssetManager::_runtimeAssetManagerInstance = nullptr;
 
+	std::filesystem::path AssetManagerBase::TryToGetGassetFile(std::filesystem::path sourcePath) {
+		std::filesystem::path originalPath = sourcePath;
+		std::filesystem::path gassetPath = sourcePath.replace_extension(GE_ASSET_EXTENSION);
+		if (std::filesystem::exists(gassetPath) && AssetInRegistry(GetMetadata(gassetPath).handle))
+			return gassetPath;
+		return originalPath;
+	}
+
 	void AssetManager::Init(Project* project) {
 		EngineMode mode = Engine::Get().GetSpecs().mode;
 		switch (mode)
@@ -33,6 +41,10 @@ namespace ge {
 
 	[[nodiscard]] AssetMetadata AssetManager::GetMetadata(AssetHandle handle) { return _assetManager->GetMetadata(handle); }
 	[[nodiscard]] AssetMetadata AssetManager::GetMetadata(const std::filesystem::path& path) { return _assetManager->GetMetadata(path); }
+
+	void AssetManager::Editor_RegisterDependency(AssetHandle handle, AssetHandle dependency) {
+		_editorAssetManagerInstance->RegisterDependency(handle, dependency);
+	}
 
 	void AssetManager::Editor_CompileIntoPakFile(const std::filesystem::path& outPath) { _editorAssetManagerInstance->CompileIntoPakFile(outPath); }
 	void AssetManager::Editor_CompileIntoManifest(const std::filesystem::path& outPath) { _editorAssetManagerInstance->CompileIntoManifest(outPath); }

@@ -48,7 +48,7 @@ namespace ge::renderer {
 
 		_endlessGrid = mem::Ref<EndlessGrid>::Create(_framebuffer);
 	}
-	
+
 	SceneRenderer::~SceneRenderer() {}
 
 	void SceneRenderer::DrawScene(const ge::mem::Ref<Camera>& camera)
@@ -66,14 +66,19 @@ namespace ge::renderer {
 			if (smc.isVisible) {
 				auto staticMesh = AssetManager::GetAsset<StaticMesh>(smc.meshHandle);
 				if (staticMesh) {
+					const auto& lods = staticMesh->GetLODs();
 					uint32_t lodIndex = 0;
 					if (smc.calculateLOD) {
-						lodIndex = staticMesh->GetLODManager().GetLODindex(staticMesh->GetLODs(), camera, tc.position);
+						lodIndex = staticMesh->GetLODManager().GetLODindex(lods, camera, tc.position);
 						smc.lodLevel = lodIndex;
 					}
 					else {
 						lodIndex = smc.lodLevel;
 					}
+					if (lodIndex >= lods.size()) {
+						lodIndex = lods.empty() ? 0 : lods.size() - 1;
+					}
+
 					Renderer3D::DrawStaticMesh(_pipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
 				}
 			}

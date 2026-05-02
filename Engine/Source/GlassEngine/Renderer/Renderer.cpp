@@ -38,8 +38,9 @@ namespace ge::renderer {
 			whiteTextureData.format = ImageFormat::RGBA8;
 			s_data._defaultWhiteTexture = Texture2D::Create(whiteTextureData, &whiteTextureData);
 			s_data._defaultSampler = Sampler::Create(SamplerSpec{});
-			// temp
-			[[maybe_unused]] const auto _ = s_data._defaultSampler->GetHandle();
+			
+			[[maybe_unused]] const uint32_t _wtbi = s_data._defaultWhiteTexture->GetHandle();
+			[[maybe_unused]] const uint32_t _dsbi = s_data._defaultSampler->GetHandle();
 
 			TextureSpec blackTextureData{};
 			uint32_t blackData = 0x00000000;

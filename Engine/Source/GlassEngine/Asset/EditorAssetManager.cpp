@@ -73,10 +73,6 @@ namespace ge {
 		return nullptr;
 	}
 
-	void EditorAssetManager::ImportAssetAsync(const ImportAssetData& asset, std::function<void(AssetHandle)> loadedFunc, std::filesystem::path sourcePath, std::filesystem::path targetPath) {
-		// TODO (0x): rewrite this
-	}
-
 	AssetHandle EditorAssetManager::ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath)
 	{
 		if (!std::filesystem::exists(sourcePath)) {
@@ -137,23 +133,42 @@ namespace ge {
 
 	AssetHandle EditorAssetManager::CreateAsset(const std::filesystem::path& targetPath, mem::Ref<Asset> asset)
 	{
-		AssetHandle handle = AssetHandle();
-		asset->_assetHandle = handle;
-
 		AssetMetadata mtd;
-		mtd.handle = handle;
+		mtd.handle = asset->_assetHandle;
 		mtd.path = targetPath;
 		mtd.type = asset->GetAssetType();
 		mtd.state = AssetLoadingState::Loaded;
 
 		_importer->SerializeToFile(targetPath, asset, mtd);
 
-		_assetRegistry[handle] = mtd;
-		_loadedAssets[handle] = asset;
+		_assetRegistry[asset->_assetHandle] = mtd;
+		_loadedAssets[asset->_assetHandle] = asset;
 		SaveAssetRegistry();
 
 		GE_CORE_INFO("Created new asset: {} at {}", AssetTypeToString(mtd.type), targetPath.string());
-		return handle;
+		return asset->_assetHandle;
+	}
+
+	void EditorAssetManager::RegisterDependency(AssetHandle handle, AssetHandle dependency) {
+		_assetDependencies[handle].insert(dependency);
+	}
+
+	void EditorAssetManager::UpdateDependencies(AssetHandle handle) {
+		std::unordered_set<AssetHandle> dependencies;
+		{
+			if (auto it = _assetDependencies.find(handle); it != _assetDependencies.end())
+				dependencies = it->second;
+		}
+		for (AssetHandle dependency : dependencies) {
+			mem::Ref<Asset> asset = GetAsset(dependency);
+			if (asset)
+				asset->OnDependencyUpdated(handle);
+		}
+	}
+
+	void EditorAssetManager::OnAssetDeleted(AssetHandle handle) {
+		RemoveAsset(handle);
+		SaveAssetRegistry();
 	}
 
 	AssetMap EditorAssetManager::GetLoadedAssetsWithType(AssetType type)
@@ -165,6 +180,14 @@ namespace ge {
 				result[id] = asset;
 		}
 		return result;
+	}
+
+	void EditorAssetManager::RemoveAsset(AssetHandle handle)
+	{
+		if (_loadedAssets.contains(handle))
+			_loadedAssets.erase(handle);
+		if (_assetRegistry.contains(handle))
+			_assetRegistry.erase(handle);
 	}
 
 	void EditorAssetManager::CompileIntoPakFile(const std::filesystem::path& outPath)

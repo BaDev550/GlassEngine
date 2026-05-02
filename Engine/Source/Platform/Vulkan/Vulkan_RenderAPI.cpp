@@ -174,9 +174,9 @@ namespace ge::renderer {
 
 	void Vulkan_RenderAPI::BeginCommandBuffer() {
 		const auto frameIndex = Renderer3D::GetFrameIndex();
-		auto &frame = _frames[frameIndex];
+		auto& frame = _frames[frameIndex];
 		frame.isRecordState = true;
-
+		
 		frame.renderObjects.clear();
 		frame.stagingBuffers.clear();
 
@@ -324,9 +324,9 @@ namespace ge::renderer {
 		memBarriers.reserve(spec.colorAttachments.size() + 1);
 		memBarriers.reserve(spec.colorAttachments.size() + 1);
 
-		for (const auto& attachment : spec.colorAttachments) {
+		for (auto& attachment : spec.colorAttachments) {
 			auto vk_image = attachment.image.Cast<Vulkan_Image>();
-			auto &swapchain = static_cast<Vulkan_Swapchain&>(window.GetSwapchain());
+			auto& swapchain = static_cast<Vulkan_Swapchain&>(window.GetSwapchain());
 
 			if (!attachment.isSwapchainImage && vk_image->GetImageLayout() != VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
 				memBarriers.emplace_back(
@@ -340,7 +340,7 @@ namespace ge::renderer {
 			}
 
 			if (!attachment.isSwapchainImage) {
-				TrackObject(vk_image);
+				TrackObject(attachment.image);
 			} 
 			else if (GetCurrentFrame().swapchainImageUsed == false) {
 				memBarriers.emplace_back(

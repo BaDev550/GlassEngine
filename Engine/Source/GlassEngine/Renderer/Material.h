@@ -22,13 +22,14 @@ namespace ge::renderer {
 
 	class MaterialAsset : public Asset {
 	public:
-		MaterialAsset(const ge::mem::Ref<Material>& material) : _material(material) {}
+		MaterialAsset(const ge::mem::Ref<Material>& material) : _material(material) { _assetHandle = AssetHandle(); }
 		void SetAlbedoTexture(const AssetHandle& textureHandle);
 		void SetRoughnessTexture(const AssetHandle& textureHandle);
 		void SetNormalTexture(const AssetHandle& textureHandle);
 		ge::mem::Ref<Material>& GetMaterial();
 		static AssetType GetStaticAssetType() { return AssetType::Material; }
 		virtual AssetType GetAssetType() const override { return GetStaticAssetType(); }
+		virtual void OnDependencyUpdated(AssetHandle handle) override;
 	private:
 		struct TextureHandles {
 			AssetHandle albedoTextureHandle = GE_INVALID_ASSET_HANDLE;

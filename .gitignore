@@ -12,6 +12,11 @@
 *.userosscache
 *.sln.docstates
 
+# Engine extensions
+*.gasset
+*.bin
+*.pak
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
