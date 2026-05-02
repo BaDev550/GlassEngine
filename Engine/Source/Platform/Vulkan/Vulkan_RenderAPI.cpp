@@ -176,12 +176,12 @@ namespace ge::renderer {
 		const auto frameIndex = Renderer3D::GetFrameIndex();
 		auto& frame = _frames[frameIndex];
 		frame.isRecordState = true;
-		
-		frame.renderObjects.clear();
-		frame.stagingBuffers.clear();
 
 		vkWaitForFences(VK_RENDER_CONTEXT->GetDevice(), 1, &frame.inFlightFence, VK_TRUE, UINT64_MAX);
 		vkResetFences(VK_RENDER_CONTEXT->GetDevice(), 1, &frame.inFlightFence);
+
+		frame.renderObjects.clear();
+		frame.stagingBuffers.clear();
 
 		constexpr VkCommandBufferBeginInfo beginInfo{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,

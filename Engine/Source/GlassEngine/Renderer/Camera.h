@@ -15,6 +15,7 @@ namespace ge::renderer {
 
 		void SetFarPlane(float farplane) { _farPlane = farplane; }
 		void SetNearPlane(float nearplane) { _nearPlane = nearplane; }
+		void SetAspectRatio(float aspectRatio);
 		void Orbit(float pitchOffset, float yawOffset);
 		void SetFirstMouse() { _firstMouse = true; }
 		void SetPosition(const glm::vec3& pos) { _position = pos; }
@@ -22,6 +23,7 @@ namespace ge::renderer {
 		void SetForward(const glm::vec3& forward) { _forward = forward; }
 		float GetFarPlane() const { return _farPlane; }
 		float GetNearPlane() const { return _nearPlane; }
+		float GetAspectRatio() const { return _aspectRatio; }
 		glm::mat4 GetView() const { return _viewMatrix; }
 		glm::mat4 GetViewProjection() const { return _viewMatrix * _projectionMatrix; }
 		glm::mat4 GetProjection() const { return _projectionMatrix; }
@@ -35,6 +37,7 @@ namespace ge::renderer {
 
 		float _farPlane = 1000.0f;
 		float _nearPlane = 0.1f;
+		float _aspectRatio = 0.0f;
 		bool _firstMouse = false;
 		glm::mat4 _viewMatrix = glm::mat4(1.0f);
 		glm::mat4 _projectionMatrix = glm::mat4(1.0f);

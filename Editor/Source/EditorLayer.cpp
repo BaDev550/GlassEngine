@@ -1,5 +1,7 @@
 #include "EditorLayer.h"
 
+#include <imgui_impl_vulkan.h>
+
 namespace ge::editor {
 	void EditorLayer::OnAttach()
 	{
@@ -31,6 +33,14 @@ namespace ge::editor {
 	{
 		_camera->Update(deltaTime);
 
+		auto spec = _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetSpecification();
+		if (_viewportSize.x > 0.0f && _viewportSize.y > 0.0f && (spec.width != _viewportSize.x || spec.height != _viewportSize.y)) {
+			_activeScene->GetSceneRenderer()->Resize(_viewportSize.x, _viewportSize.y);
+			_camera->SetAspectRatio(((float)_viewportSize.x / (float)_viewportSize.y));
+			ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet)_viewportTextureId); // TEMP
+			_viewportTextureId = renderer::Renderer3D::GetImGuiTexture(_activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0)); // TODO (dnm): add texture cache
+		}
+
 		_activeScene->OnEditorUpdate(deltaTime, _camera);
 
 		if (Engine::Get().GetInputManager().IsKeyJustPressed(key::Tab)) {
@@ -53,8 +63,8 @@ namespace ge::editor {
 		Layer::OnImGuiRender();
 
 		ImGui::Begin("Viewport");
-		ImVec2 viewportSize = ImGui::GetWindowSize();
-		ImGui::Image(_viewportTextureId, viewportSize);
+		_viewportSize = ImGui::GetContentRegionAvail();
+		ImGui::Image(_viewportTextureId, _viewportSize);
 		ImGui::End();
 		EndDockspace();
 	}

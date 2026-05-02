@@ -4,6 +4,11 @@
 #include "GlassEngine/Core/Application.h"
 
 namespace ge::renderer {
+	void Camera::SetAspectRatio(float aspectRatio)
+	{
+		_aspectRatio = aspectRatio;
+	}
+
 	void Camera::Orbit(float pitchOffset, float yawOffset)
 	{
 		AddPitch(pitchOffset);
@@ -20,7 +25,7 @@ namespace ge::renderer {
 		auto& window = Engine::Get().GetApplicationWindow();
 		float width = (float)window.GetWidth();
 		float height = (float)window.GetHeight();
-		float aspect = width / height;
+		float aspect = _aspectRatio == 0.0f ? (width / height) : _aspectRatio;
 
 		glm::vec3 worldUp = glm::vec3(0.0f, -1.0f, 0.0f);
 		if (glm::abs(glm::dot(_forward, worldUp)) > 0.999f) { _right = glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), _forward)); }

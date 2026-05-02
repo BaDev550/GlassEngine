@@ -49,6 +49,10 @@ namespace ge::renderer {
 		_endlessGrid = mem::Ref<EndlessGrid>::Create(_framebuffer);
 	}
 
+	void SceneRenderer::Resize(uint32_t width, uint32_t height) {
+		_framebuffer->Resize(width, height);
+	}
+
 	SceneRenderer::~SceneRenderer() {}
 
 	void SceneRenderer::DrawScene(const ge::mem::Ref<Camera>& camera)

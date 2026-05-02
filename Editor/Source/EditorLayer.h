@@ -37,6 +37,7 @@ namespace ge::editor {
 		mem::Ref<renderer::FreeCamera> _camera;
 
 		ImTextureID _viewportTextureId;
+		ImVec2 _viewportSize;
 
 		bool _consoleEnabled = false;
 		bool _cursor = false;
