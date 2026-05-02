@@ -54,6 +54,6 @@ namespace ge::renderer {
 		GEVector<ge::mem::Ref<Image>> _colorAttachments;
 		ge::mem::Ref<Image> _depthStencilAttachment;
 		FramebufferSpec _specs;
-		bool _hasSwapchainImage;
+		bool _hasSwapchainImage{};
 	};
 }

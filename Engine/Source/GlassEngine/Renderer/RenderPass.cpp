@@ -21,7 +21,7 @@ namespace ge::renderer {
 		colorAttachments.reserve(_framebuffer->GetAttachmentCount());
 	
 		beginSpec.extent = {_framebuffer->GetSpecification().width, _framebuffer->GetSpecification().height};
-		for (const auto attachment : _framebuffer->GetAttachments()) {
+		for (const auto &attachment : _framebuffer->GetAttachments()) {
 			if (attachment.isSwapchain) {
 				colorAttachments.emplace_back(
 					nullptr,
