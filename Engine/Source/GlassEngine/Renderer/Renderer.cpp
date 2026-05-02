@@ -58,11 +58,9 @@ namespace ge::renderer {
 		g_renderAPI = nullptr;
 	}
 
-	bool Renderer3D::BeginFrame() {
-		return g_renderAPI->BeginFrame();
-	}
+	// TODO (0x): TEMP
 	void Renderer3D::EndFrame() {
-		g_renderAPI->EndFrame();
+		// g_renderAPI->EndFrame();
 		g_frameIndex = (g_frameIndex + 1) % MaxFramesInFlight;
 	}
 

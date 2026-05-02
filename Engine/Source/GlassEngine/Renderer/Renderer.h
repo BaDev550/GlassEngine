@@ -18,8 +18,8 @@ namespace ge::renderer {
 		static void Destroy();
 		static void Submit(std::function<void()> func);
 
-		static bool BeginFrame();
 		static void EndFrame();
+		
 		static void BeginDefaultPass();
 		static void EndDefaultPass();
 		static void WaitAndRender();

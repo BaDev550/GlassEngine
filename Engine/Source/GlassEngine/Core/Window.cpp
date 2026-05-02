@@ -62,7 +62,7 @@ namespace ge {
 
 	bool Window::Swapbuffers()
 	{
-		return _swapchain->Swapbuffers(&_imageIndex);
+		return _swapchain->Swapbuffers();
 	}
 
 	bool Window::ShoudClose() const {

@@ -42,11 +42,9 @@ namespace ge::renderer {
 				ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
 
 		auto texture = ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
-		Renderer3D::GetRenderAPI()->BeginFrame(); // TODO (dnm): runtime texture loading causes app to crash
 		Renderer3D::GetRenderAPI()->BeginCopyPass();
 		Renderer3D::GetRenderAPI()->LoadDataToTexture2D(*texture, dataPtr, dataSize);
 		Renderer3D::GetRenderAPI()->EndCopyPass();	
-		Renderer3D::GetRenderAPI()->EndFrame();
 		return texture;
 	}
 
@@ -67,11 +65,9 @@ namespace ge::renderer {
 		if (!spec.compress)
 			texture->_data = std::vector<uint8_t>(dataPtr, dataPtr + dataSize);
 
-		Renderer3D::GetRenderAPI()->BeginFrame();
 		Renderer3D::GetRenderAPI()->BeginCopyPass();
 		Renderer3D::GetRenderAPI()->LoadDataToTexture2D(*texture, dataPtr, dataSize);
 		Renderer3D::GetRenderAPI()->EndCopyPass();
-		Renderer3D::GetRenderAPI()->EndFrame();
 		return texture;
 	}
 

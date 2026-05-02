@@ -2,6 +2,7 @@
 #include "GlassEngine/Core/Window.h"
 #include "GlassEngine/Memory/Memory.h"
 #include "GlassEngine/Renderer/Buffer.h"
+#include "GlassEngine/Renderer/Renderer.h"
 #include "GlassEngine/Renderer/Swapchain.h"
 #include "GlassEngine/Renderer/Types.h"
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
@@ -16,6 +17,7 @@
 #include "Vulkan_Pipeline.h"
 #include <cstdint>
 #include <imgui_impl_vulkan.h>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 namespace ge::renderer {
@@ -87,6 +89,9 @@ namespace ge::renderer {
 
 	Vulkan_RenderAPI::Vulkan_RenderAPI()
 	{
+		VkSemaphoreCreateInfo semaphoreInfo{};
+		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		
 		for (uint32_t i = 0; i < Renderer3D::MaxFramesInFlight; i++) { // TEMP
 			auto& frame = _frames[i];
 
@@ -102,7 +107,56 @@ namespace ge::renderer {
 			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 			allocInfo.commandPool = frame.commandPool;
 			vkAllocateCommandBuffers(VK_RENDER_CONTEXT->GetDevice(), &allocInfo, &frame.commandBuffer);
+
+			VkFenceCreateInfo fenceInfo{};
+			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			// TODO (dnm): 
+			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT * (i != 1);
+
+			vkCreateFence(VK_RENDER_CONTEXT->GetDevice(), 
+					&fenceInfo, VK_ALLOCATOR_CALLBACKS, &_frames[i].inFlightFence);
+
+			// vkCreateSemaphore(VK_RENDER_CONTEXT->GetDevice(), 
+			// 		&semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_frames[i].imageAvailableSemaphore);
 		}
+
+		BeginCommandBuffer();
+
+		auto& window = Engine::Get().GetApplicationWindow();
+		auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
+
+		std::vector<VkImageMemoryBarrier> memBarrier;
+		memBarrier.reserve(swapchain.GetImages().size());
+		for (const auto image : swapchain.GetImages()) {
+			memBarrier.emplace_back(
+				VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, // sType
+				nullptr, // pNext
+				VkAccessFlags{}, // srcAccessMask
+				VkAccessFlags{}, // dstAccessMask
+				VK_IMAGE_LAYOUT_UNDEFINED, // oldLayout
+				VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, // newLayout
+				VK_QUEUE_FAMILY_IGNORED, // srcQueueFamilyIndex
+				VK_QUEUE_FAMILY_IGNORED, // dstQueueFamilyIndex
+				image, // image
+				VkImageSubresourceRange{
+					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+					.baseMipLevel = 0,
+					.levelCount = 1,
+					.baseArrayLayer = 0,
+					.layerCount = 1
+				} // subresourceRange
+			);
+		}
+
+		vkCmdPipelineBarrier(
+			GetCurrentCommandBuffer(),
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			memBarrier.size(), memBarrier.data()
+		);
 	}
 
 	Vulkan_RenderAPI::~Vulkan_RenderAPI()
@@ -110,6 +164,7 @@ namespace ge::renderer {
 		for (uint32_t i = 0; i < Renderer3D::MaxFramesInFlight; i++) {
 			vkFreeCommandBuffers(VK_RENDER_CONTEXT->GetDevice(), _frames[i].commandPool, 1, &_frames[i].commandBuffer);
 			vkDestroyCommandPool(VK_RENDER_CONTEXT->GetDevice(), _frames[i].commandPool, VK_ALLOCATOR_CALLBACKS);
+			vkDestroyFence(VK_RENDER_CONTEXT->GetDevice(), _frames[i].inFlightFence, VK_ALLOCATOR_CALLBACKS);
 		}
 	}
 
@@ -117,111 +172,66 @@ namespace ge::renderer {
 		VK_RENDER_CONTEXT->GetDescriptorManager().PushConstant(GetCurrentCommandBuffer(), ptr, size, offset);
 	}
 
-	bool Vulkan_RenderAPI::BeginFrame()
-	{
-		GE_ASSERT(!_frameStarted, "Cannot call beginFrame while processing a frame");
-		_frameStarted = true;
-		uint32_t frameIndex = Renderer3D::GetFrameIndex();
-		FrameContext& frame = _frames[frameIndex];
-
-		auto& window = Engine::Get().GetApplicationWindow();
-		auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
-
-		if (window.HasResized()) {
-			SwapchainSpec newSpec = swapchain.GetSpecs();
-			newSpec.extent.x = window.GetWidth();
-			newSpec.extent.y = window.GetHeight();
-			swapchain.ReCreateSwapchain(newSpec);
-			_frameStarted = false;
-			window.ResetResizeFlag();
-			return false;
-		}
-
-		Engine::Get().GetApplicationWindow().Swapbuffers();
+	void Vulkan_RenderAPI::BeginCommandBuffer() {
+		const auto frameIndex = Renderer3D::GetFrameIndex();
+		auto &frame = _frames[frameIndex];
+		frame.isRecordState = true;
 
 		frame.renderObjects.clear();
-		staging_buffers.clear();
+		frame.stagingBuffers.clear();
 
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		vkWaitForFences(VK_RENDER_CONTEXT->GetDevice(), 1, &frame.inFlightFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(VK_RENDER_CONTEXT->GetDevice(), 1, &frame.inFlightFence);
+
+		constexpr VkCommandBufferBeginInfo beginInfo{
+			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+			.pNext = nullptr,
+			.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+			.pInheritanceInfo = nullptr
+		};
 
 		vkResetCommandPool(VK_RENDER_CONTEXT->GetDevice(), frame.commandPool, 0);
 		vkBeginCommandBuffer(frame.commandBuffer, &beginInfo);
 
-		const auto image = swapchain.GetImages()[window.GetImageIndex()];
-
 		VK_RENDER_CONTEXT->GetDescriptorManager().BindDescriptors(frame.commandBuffer);
-
-		VkImageMemoryBarrier barrier{};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.srcAccessMask = {};
-		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
-		barrier.oldLayout = frameIndex <= swapchain.GetImages().size() ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = image;
-		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
-
-		vkCmdPipelineBarrier(
-			frame.commandBuffer,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			0,
-			0, nullptr,
-			0, nullptr,
-			1, &barrier
-		);
-		return true;
 	}
 
-	void Vulkan_RenderAPI::EndFrame()
-	{
-		GE_ASSERT(_frameStarted, "Cannot call endFrame while not processing a frame");
-		VkCommandBuffer cmd = GetCurrentCommandBuffer();
-		auto& window = Engine::Get().GetApplicationWindow();
-		auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
-		uint32_t frameIndex = Renderer3D::GetFrameIndex();
-		uint32_t imageIndex = window.GetImageIndex();
+	void Vulkan_RenderAPI::EndCommandBuffer() {
+		auto &frame = GetCurrentFrame();
 
-		const auto image = swapchain.GetImages()[window.GetImageIndex()];
-
-		VkImageMemoryBarrier barrier{};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		barrier.dstAccessMask = {};
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = image;
-		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
-
-		vkCmdPipelineBarrier(
-			cmd,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			0,
-			0, nullptr,
-			0, nullptr,
-			1, &barrier
-		);
-
-		vkEndCommandBuffer(cmd);
-		VkResult result = swapchain.Submit(&cmd, &imageIndex);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.HasResized()) {
-			window.ResetResizeFlag();
+		frame.isRecordState = false;
+		if (frame.swapchainImageUsed) {
+			auto& window = Engine::Get().GetApplicationWindow();
+			auto &swapchain = static_cast<Vulkan_Swapchain &>(window.GetSwapchain());
+			VkImageMemoryBarrier barrier{};
+			barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			barrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrier.dstAccessMask = {};
+			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.image = swapchain.GetCurrentImage();
+			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			barrier.subresourceRange.baseMipLevel = 0;
+			barrier.subresourceRange.levelCount = 1;
+			barrier.subresourceRange.baseArrayLayer = 0;
+			barrier.subresourceRange.layerCount = 1;
+	
+			vkCmdPipelineBarrier(
+				frame.commandBuffer,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				0,
+				0, nullptr,
+				0, nullptr,
+				1, &barrier
+			);
+			frame.swapchainImageUsed = false;
 		}
-		_renderStats.Reset();
-		_frameStarted = false;
+
+		vkEndCommandBuffer(frame.commandBuffer);
+
+		Renderer3D::EndFrame();
 	}
 
 	void Vulkan_RenderAPI::Draw(ge::mem::Ref<Pipeline>& pipeline, uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex, uint32_t firstInstance)
@@ -293,8 +303,10 @@ namespace ge::renderer {
 	}
 
 	VkCommandBuffer Vulkan_RenderAPI::GetCurrentCommandBuffer() {
-		GE_ASSERT(_frameStarted, "Cannot get active command buffer while frame is not started");
-		return _frames[Renderer3D::GetFrameIndex()].commandBuffer;
+		auto &frame = GetCurrentFrame();
+		if (frame.isRecordState == false)
+			BeginCommandBuffer();
+		return frame.commandBuffer;
 	}
 
 	void Vulkan_RenderAPI::BeginRenderPass(const BeginRenderPassSpec& spec) {
@@ -302,8 +314,7 @@ namespace ge::renderer {
 
 		VkCommandBuffer cmd = GetCurrentCommandBuffer();
 		
-		const auto& window = Engine::Get().GetApplicationWindow();
-		const uint32_t imageIndex = window.GetImageIndex();
+		auto& window = Engine::Get().GetApplicationWindow();
 
 		GEVector<VkRenderingAttachmentInfo> colorAttachments;
 		colorAttachments.reserve(spec.colorAttachments.size());
@@ -315,6 +326,7 @@ namespace ge::renderer {
 
 		for (const auto& attachment : spec.colorAttachments) {
 			auto vk_image = attachment.image.Cast<Vulkan_Image>();
+			auto &swapchain = static_cast<Vulkan_Swapchain&>(window.GetSwapchain());
 
 			if (!attachment.isSwapchainImage && vk_image->GetImageLayout() != VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
 				memBarriers.emplace_back(
@@ -327,13 +339,40 @@ namespace ge::renderer {
 				_barriersForImages.emplace(vk_image.Get());
 			}
 
-			if (!attachment.isSwapchainImage) (TrackObject(vk_image));
+			if (!attachment.isSwapchainImage) {
+				TrackObject(vk_image);
+			} 
+			else if (GetCurrentFrame().swapchainImageUsed == false) {
+				memBarriers.emplace_back(
+					VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2, // sType
+					nullptr, // pNext
+					VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, // srcStageMask
+					// VkPipelineStageFlags2{}, // srcStageMask
+					VkAccessFlags2{}, // srcAccessMask
+					VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, // dstStageMask
+					VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, // dstAccessMask
+					// VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, // oldLayout
+					VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, // oldLayout
+					VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, // newLayout
+					VK_QUEUE_FAMILY_IGNORED, // srcQueueFamilyIndex
+					VK_QUEUE_FAMILY_IGNORED, // dstQueueFamilyIndex
+					swapchain.GetCurrentImage(), // image
+					VkImageSubresourceRange{
+						.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+						.baseMipLevel = 0,
+						.levelCount = 1,
+						.baseArrayLayer = 0,
+						.layerCount = 1
+					} // subresourceRange
+				);
+				GetCurrentFrame().swapchainImageUsed = true;
+			} 
 
 			colorAttachments.emplace_back(
 				VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 				nullptr,
 				attachment.isSwapchainImage ? 
-					static_cast<const Vulkan_Swapchain&>(window.GetSwapchain()).GetImageViews()[imageIndex]
+					swapchain.GetCurrentImageView()
 					: vk_image->CreateGetImageView(attachment.subresource),
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 				VkResolveModeFlagBits{},
@@ -429,7 +468,7 @@ namespace ge::renderer {
 			return;
 		}
 		
-		const auto &staging_buffer = staging_buffers.emplace_back(ge::mem::CreateScope<Vulkan_Buffer>(BufferSpec{
+		const auto &staging_buffer = GetCurrentFrame().stagingBuffers.emplace_back(ge::mem::CreateScope<Vulkan_Buffer>(BufferSpec{
 			.elementSize = static_cast<uint32_t>(dataSize),
 			.elementCount = 1,
 			.usageFlags = BufferUsageFlagsBits::TransferSrc,
@@ -464,7 +503,7 @@ namespace ge::renderer {
 
 		vkCmdPipelineBarrier2(GetCurrentCommandBuffer(), &dependencyInfo);
 
-		const auto &buffer = staging_buffers.emplace_back(ge::mem::CreateScope<Vulkan_Buffer>(BufferSpec{
+		const auto &buffer = GetCurrentFrame().stagingBuffers.emplace_back(ge::mem::CreateScope<Vulkan_Buffer>(BufferSpec{
 			.elementSize = static_cast<uint32_t>(dataSize),
 			.elementCount = 1,
 			.usageFlags = BufferUsageFlagsBits::TransferSrc,

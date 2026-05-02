@@ -5,6 +5,7 @@
 #include "GlassEngine/Renderer/RenderObject.h"
 #include "GlassEngine/Renderer/Renderer.h"
 #include "GlassEngine/Renderer/Texture.h"
+#include "Platform/Vulkan/Vulkan_Swapchain.h"
 #include "Vulkan_RenderContext.h"
 #include <unordered_set>
 
@@ -13,8 +14,6 @@ namespace ge::renderer {
 	public:
 		Vulkan_RenderAPI();
 		~Vulkan_RenderAPI();
-		virtual bool BeginFrame() override;
-		virtual void EndFrame() override;
 
 		virtual void Draw(ge::mem::Ref<Pipeline>& pipeline, uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex = 0, uint32_t firstInstance = 0) override;
 		virtual void DrawIndexed(ge::mem::Ref<Pipeline>& pipeline, uint32_t indexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, ge::mem::Ref<Buffer> indexBuffer, uint32_t firstIndex = 0, uint32_t firstInstance = 0, int32_t vertexOffset = 0) override;
@@ -54,19 +53,28 @@ namespace ge::renderer {
 		virtual void EndDebugLabel() override;
 
 		VkCommandBuffer GetCurrentCommandBuffer();
+		auto GetCurrentInFlightFence() const noexcept { return _frames[Renderer3D::GetFrameIndex()].inFlightFence; }
 	private:
 		void TrackObject(ge::mem::Ref<RenderObject> object) {
-		GE_ASSERT(_frameStarted, "Cannot get track objects while frame is not started");
 			_frames[Renderer3D::GetFrameIndex()].renderObjects.push_back(object);
 		}
+
+		auto &GetCurrentFrame() const { return _frames[Renderer3D::GetFrameIndex()]; }
+		auto &GetCurrentFrame() { return _frames[Renderer3D::GetFrameIndex()]; }
+
+		void BeginCommandBuffer();
+		void EndCommandBuffer();
 
 		struct FrameContext {
 			VkCommandPool commandPool;
 			VkCommandBuffer commandBuffer;
+			VkFence inFlightFence;
+			bool isRecordState = false;
+			bool swapchainImageUsed = false;
 			// for life time
 			GEVector<ge::mem::Ref<RenderObject>, ge::mem::RendererAllocTag> renderObjects;
-		} _frames[Renderer3D::MaxFramesInFlight]; // TEMP ig
-		bool _frameStarted = false;
+			GEVector<ge::mem::Scope<Vulkan_Buffer>> stagingBuffers;
+		} _frames[Renderer3D::MaxFramesInFlight];
 
 		VkImageMemoryBarrier2 GetMemoryBarrier(Vulkan_Image& image, const VkImageLayout newImageLayout, bool loadOpIsLoad = false);
 
@@ -75,6 +83,6 @@ namespace ge::renderer {
 		std::unordered_set<Vulkan_Buffer*> _barriersForBuffers; // TODO (0x): better name
 		
 		void Barrier();
-		GEVector<ge::mem::Scope<Vulkan_Buffer>> staging_buffers;
+		friend Vulkan_Swapchain;
 	};
 }

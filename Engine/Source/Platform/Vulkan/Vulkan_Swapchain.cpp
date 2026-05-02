@@ -1,7 +1,9 @@
 #include "Vulkan_Swapchain.h"
 #include "GlassEngine/Renderer/Renderer.h"
 #include "GlassEngine/Utilities/Counter.h"
+#include "Platform/Vulkan/Vulkan_RenderAPI.h"
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 namespace ge::renderer {
@@ -24,7 +26,6 @@ namespace ge::renderer {
 
 		for (const auto i : Counter(Renderer3D::MaxFramesInFlight)) {
 			vkDestroySemaphore(device, _imageAvailableSemaphores[i], VK_ALLOCATOR_CALLBACKS);
-			vkDestroyFence(device, _inFlightFences[i], VK_ALLOCATOR_CALLBACKS);
 		}
 
 		for (const auto imageView : _imageViews) {
@@ -128,6 +129,8 @@ namespace ge::renderer {
 			}
 		}
 
+		auto oldSwapchain = _swapchain;
+
 		VkSwapchainCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		createInfo.oldSwapchain = _swapchain;
@@ -145,6 +148,8 @@ namespace ge::renderer {
 		createInfo.preTransform = currentTransform;
 
 		vkCreateSwapchainKHR(device, &createInfo, VK_ALLOCATOR_CALLBACKS, &_swapchain);
+
+		vkDestroySwapchainKHR(device, oldSwapchain, VK_ALLOCATOR_CALLBACKS);
 
 		{
 			vkGetSwapchainImagesKHR(device, _swapchain, &_imageCount, nullptr);
@@ -176,6 +181,28 @@ namespace ge::renderer {
 				vkCreateImageView(device, &imageViewCreateInfo, VK_ALLOCATOR_CALLBACKS, &imageView);
 				_imageViews.push_back(imageView);
 			}
+
+			// for (const auto image : _images) {
+			// 	VkImageMemoryBarrier barrier{};
+			// 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			// 	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			// 	barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			// 	barrier.srcAccessMask = {};
+			// 	barrier.dstAccessMask = {};
+			// 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			// 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			// 	barrier.image = image;
+			// 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			// 	barrier.subresourceRange.baseMipLevel = 0;
+			// 	barrier.subresourceRange.levelCount = 1;
+			// 	barrier.subresourceRange.baseArrayLayer = 0;
+			// 	barrier.subresourceRange.layerCount = 1;
+
+			// 	vkCmdPipelineBarrier(
+			// 		Renderer3D::GetRenderAPI().Cast<Vulkan_RenderAPI>()->GetCurrentCommandBuffer(),
+			// 		VkPipelineStageFlags{}, VkPipelineStageFlagBits{}, {}, 0, nullptr, 0, nullptr, 
+			// 		1, &barrier);
+			// }
 		}
 
 		if (_renderFinishedSemaphores.empty()) {
@@ -196,31 +223,89 @@ namespace ge::renderer {
 			for (const auto i : Counter(Renderer3D::MaxFramesInFlight)) {
 				vkCreateSemaphore(device, 
 					&semaphoreInfo, VK_ALLOCATOR_CALLBACKS, &_imageAvailableSemaphores[i]);
-				vkCreateFence(device, 
-					&fenceInfo, VK_ALLOCATOR_CALLBACKS, &_inFlightFences[i]);	
 			}
+		}
+		else {
+			std::vector<VkImageMemoryBarrier> memBarrier;
+			memBarrier.reserve(GetImages().size());
+			for (const auto image : GetImages()) {
+				memBarrier.emplace_back(
+					VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, // sType
+					nullptr, // pNext
+					VkAccessFlags{}, // srcAccessMask
+					VkAccessFlags{}, // dstAccessMask
+					VK_IMAGE_LAYOUT_UNDEFINED, // oldLayout
+					VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, // newLayout
+					VK_QUEUE_FAMILY_IGNORED, // srcQueueFamilyIndex
+					VK_QUEUE_FAMILY_IGNORED, // dstQueueFamilyIndex
+					image, // image
+					VkImageSubresourceRange{
+						.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+						.baseMipLevel = 0,
+						.levelCount = 1,
+						.baseArrayLayer = 0,
+						.layerCount = 1
+					} // subresourceRange
+				);
+			}
+
+			auto renderApi = Renderer3D::GetRenderAPI().Cast<Vulkan_RenderAPI>();
+
+			vkCmdPipelineBarrier(
+				renderApi->GetCurrentCommandBuffer(),
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				0,
+				0, nullptr,
+				0, nullptr,
+				memBarrier.size(), memBarrier.data()
+			);
 		}
 	}
 
-	VkResult Vulkan_Swapchain::Submit(VkCommandBuffer* cmd, uint32_t* imageIndex)
-	{
-		uint32_t frameIndex = Renderer3D::GetFrameIndex();
-		auto renderContext = CastChecked<Vulkan_RenderContext>(&Engine::Get().GetApplicationWindow().GetRenderContext());
+	uint32_t Vulkan_Swapchain::GetImageIndex() noexcept {
+		if (_imageIndex != -1)
+			return _imageIndex;
+
+		const uint32_t frameIndex = Renderer3D::GetFrameIndex();
+
+		VkResult result = vkAcquireNextImageKHR(VK_RENDER_CONTEXT->GetDevice(), _swapchain, UINT64_MAX, _imageAvailableSemaphores[frameIndex], VK_NULL_HANDLE, &_imageIndex);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR) { 
+			return false;
+		}
+		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { 
+			return false;
+		}
+		
+		return _imageIndex;
+	}
+
+	bool Vulkan_Swapchain::Swapbuffers() {
+		auto renderApi = Renderer3D::GetRenderAPI().Cast<Vulkan_RenderAPI>();
+
+		const uint32_t frameIndex = Renderer3D::GetFrameIndex();
+
+		const auto currentCommandBuffer = renderApi->GetCurrentCommandBuffer();
+
+		const auto renderContext = CastChecked<Vulkan_RenderContext>(&Engine::Get().GetApplicationWindow().GetRenderContext());
+
+		const VkSemaphore waitSemaphores[] = { _imageAvailableSemaphores[frameIndex] };
+		const VkSemaphore signalSemaphores[] = { _renderFinishedSemaphores[_imageIndex] };
+		constexpr VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		VkSemaphore waitSemaphores[] = { _imageAvailableSemaphores[frameIndex] };
-		VkSemaphore signalSemaphores[] = { _renderFinishedSemaphores[*imageIndex] };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = cmd;
+		submitInfo.pCommandBuffers = &currentCommandBuffer;
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		VkResult submitResult = vkQueueSubmit(renderContext->GetGraphicsQueue(), 1, &submitInfo, _inFlightFences[frameIndex]);
+		renderApi->EndCommandBuffer();
+
+		VkResult submitResult = vkQueueSubmit(renderContext->GetGraphicsQueue(), 1, &submitInfo, renderApi->GetCurrentInFlightFence());
 		if (submitResult != VK_SUCCESS) {
 			return submitResult;
 		}
@@ -231,24 +316,24 @@ namespace ge::renderer {
 		presentInfo.pWaitSemaphores = signalSemaphores;
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = &_swapchain;
-		presentInfo.pImageIndices = imageIndex;
+		presentInfo.pImageIndices = &_imageIndex;
 
-		return vkQueuePresentKHR(renderContext->GetGraphicsQueue(), &presentInfo);
-	}
+		const auto result = vkQueuePresentKHR(renderContext->GetGraphicsQueue(), &presentInfo);
 
-	bool Vulkan_Swapchain::Swapbuffers(uint32_t* imageIndex)
-	{
-		uint32_t frameIndex = Renderer3D::GetFrameIndex();
-		vkWaitForFences(VK_RENDER_CONTEXT->GetDevice(), 1, &_inFlightFences[frameIndex], VK_TRUE, UINT64_MAX);
+		_imageIndex = -1;
 
-		VkResult result = vkAcquireNextImageKHR(VK_RENDER_CONTEXT->GetDevice(), _swapchain, UINT64_MAX, _imageAvailableSemaphores[frameIndex], VK_NULL_HANDLE, imageIndex);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR) { 
-			return false;
+		{
+			auto& window = Engine::Get().GetApplicationWindow();
+	
+			if (window.HasResized()) {
+				SwapchainSpec newSpec = GetSpecs();
+				newSpec.extent.x = window.GetWidth();
+				newSpec.extent.y = window.GetHeight();
+				ReCreateSwapchain(newSpec);
+				window.ResetResizeFlag();
+			}
 		}
-		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { 
-			return false;
-		}
-		vkResetFences(VK_RENDER_CONTEXT->GetDevice(), 1, &_inFlightFences[frameIndex]);
-		return true;
+
+		return result;
 	}
 }

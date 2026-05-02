@@ -1,3 +1,4 @@
+#include "GlassEngine/Core/Window.h"
 #include "gepch.h"
 #include "Engine.h"
 #include "GlassEngine/Renderer/Renderer.h"
@@ -45,17 +46,13 @@ namespace ge {
 			_window->PollEvents();
 			_inputManager->Update();
 
-			if (!renderer::Renderer3D::BeginFrame()) {
-				continue;
-			}
-
 			GetApplication()->Update(_deltaTime);
 
 			renderer::Renderer3D::Submit([this]() { _imGuiLayer->Begin(); GetApplication()->DrawImGui(); });
-			renderer::Renderer3D::Submit([=]() { _imGuiLayer->End(); });
+			renderer::Renderer3D::Submit([this]() { _imGuiLayer->End(); });
 
 			renderer::Renderer3D::WaitAndRender();
-			renderer::Renderer3D::EndFrame();
+			Engine::Get().GetApplicationWindow().Swapbuffers();
 		}
 		_window->GetRenderContext().Wait();
 	}

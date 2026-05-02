@@ -19,7 +19,7 @@ namespace ge::renderer {
 		Swapchain(const SwapchainSpec& spec, RenderContext& renderContext) : _spec(spec), _renderContext(renderContext) {}
 		virtual ~Swapchain() = default;
 
-		virtual bool Swapbuffers(uint32_t* imageIndex = nullptr) = 0;
+		virtual bool Swapbuffers() = 0;
 		void ReCreateSwapchain(const SwapchainSpec& spec) {
 			// TODO (dnm): check spec is valid
 			_spec = spec;

@@ -39,11 +39,13 @@ namespace ge::renderer {
 				imageSpec.usageFlags |= ImageUsageFlagsBits::DepthStencilAttachment;
 				_depthStencilAttachment = Image::Create(imageSpec);
 				attachment.existingImage = _depthStencilAttachment;
+				attachment.existingImage->SetDebugName("framebuffer depth stencil attachment");
 			}
 			else {
 				imageSpec.usageFlags |= ImageUsageFlagsBits::ColorAttachment;
 				imageSpec.usageFlags |= ImageUsageFlagsBits::Readonly;
 				attachment.existingImage = _colorAttachments.emplace_back(Image::Create(imageSpec));
+				attachment.existingImage->SetDebugName("framebuffer color attachment");
 			}
 		}
 	}

@@ -1,3 +1,5 @@
+#include "GlassEngine/Renderer/RenderAPI.h"
+#include "GlassEngine/Renderer/Types.h"
 #include "gepch.h"
 #include "GlassEngine/Renderer/Renderer.h"
 #include "Vulkan_ImGuiLayer.h"
@@ -5,6 +7,7 @@
 #include "Vulkan_RenderAPI.h"
 #include "Vulkan_RenderContext.h"
 
+#include <glm/ext/vector_float4.hpp>
 #include <imgui_impl_vulkan.h>
 #include <imgui_impl_glfw.h>
 #include <imgui.h>
@@ -98,27 +101,21 @@ namespace ge {
 		auto renderAPI = renderer::Renderer3D::GetRenderAPI().Cast<renderer::Vulkan_RenderAPI>();
 
 		auto cmd = renderAPI->GetCurrentCommandBuffer();
+		
+		renderer::Attachment colorAttachment{};
+		colorAttachment.clearValue = glm::vec4{0,0,0, 0};
+		colorAttachment.isSwapchainImage = true;
+		colorAttachment.loadOp = renderer::AttachmentLoadOp::Clear;
+		colorAttachment.storeOp = renderer::AttachmentStoreOp::Store;
 
-		VkExtent2D extent = VkExtent2D({ swapchain->GetExtent().x, swapchain->GetExtent().y });
-
-		VkRenderingAttachmentInfo colorAttachment{};
-		colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-		colorAttachment.imageView = swapchain->GetImageViews()[Engine::Get().GetApplicationWindow().GetImageIndex()];
-		colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-		VkRenderingInfo renderingInfo{};
-		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-		renderingInfo.renderArea = { {0, 0}, extent };
-		renderingInfo.layerCount = 1;
-		renderingInfo.colorAttachmentCount = 1;
-		renderingInfo.pColorAttachments = &colorAttachment;
+		renderer::BeginRenderPassSpec beginDesc{};
+		beginDesc.colorAttachments = std::span(&colorAttachment, 1);
+		beginDesc.extent = swapchain->GetExtent();
 
 		renderer::Renderer3D::GetRenderAPI()->BeginDebugLabel("IMGUI_PASS");
-		vkCmdBeginRendering(cmd, &renderingInfo);
+		renderer::Renderer3D::GetRenderAPI()->BeginRenderPass(beginDesc);
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
-		vkCmdEndRendering(cmd);
+		renderer::Renderer3D::GetRenderAPI()->EndRenderPass();
 		renderer::Renderer3D::GetRenderAPI()->EndDebugLabel();
 
 		ImGuiIO& io = ImGui::GetIO();
