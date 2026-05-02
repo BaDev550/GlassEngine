@@ -81,7 +81,7 @@ namespace ge::renderer {
 		void LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize);
 
 		// when imgui version is 1.92.8 delete sampler
-		virtual ImTextureID GetImGuiTexture(ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler = {}) = 0;
+		virtual ImTextureID GetImGuiTexture(const GEString& name, ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler = {}) = 0;
 
 		static inline RenderStats GetRenderStats() { return _renderStats; }
 		static inline GraphicsAPI GetAPI() { return _graphicsAPI; }

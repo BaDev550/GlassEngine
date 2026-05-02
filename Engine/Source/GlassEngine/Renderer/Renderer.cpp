@@ -78,8 +78,8 @@ namespace ge::renderer {
 		g_renderCommandQueue.Execute();
 	}
 
-	ImTextureID Renderer3D::GetImGuiTexture(ge::mem::Ref<Image>& image) {
-		return g_renderAPI->GetImGuiTexture(image, ImageSubresource{}, s_data._defaultSampler);
+	ImTextureID Renderer3D::GetImGuiTexture(const GEString& name, ge::mem::Ref<Image>& image) {
+		return g_renderAPI->GetImGuiTexture(name, image, ImageSubresource{}, s_data._defaultSampler);
 	}
 
 	void Renderer3D::Submit(std::function<void()> func) { g_renderCommandQueue.Submit(func); }

@@ -7,7 +7,7 @@ namespace ge::renderer {
 		auto texture = AssetManager::GetAsset<Texture2D>(textureHandle);
 		if (texture) {
 			_material->_bindlessData.albedoTextureIndex = texture->GetHandle();
-			AssetManager::Editor_RegisterDependency(textureHandle, _assetHandle);
+			//AssetManager::Editor_RegisterDependency(textureHandle, _assetHandle);
 		}
 	}
 
@@ -16,7 +16,7 @@ namespace ge::renderer {
 		auto texture = AssetManager::GetAsset<Texture2D>(textureHandle);
 		if (texture) {
 			_material->_bindlessData.roughnessTextureIndex = texture->GetHandle();
-			AssetManager::Editor_RegisterDependency(textureHandle, _assetHandle);
+			//AssetManager::Editor_RegisterDependency(textureHandle, _assetHandle);
 		}
 	}
 	
@@ -25,7 +25,7 @@ namespace ge::renderer {
 		auto texture = AssetManager::GetAsset<Texture2D>(textureHandle);
 		if (texture) {
 			_material->_bindlessData.normalTextureIndex = texture->GetHandle();
-			AssetManager::Editor_RegisterDependency(textureHandle, _assetHandle);
+			//AssetManager::Editor_RegisterDependency(textureHandle, _assetHandle);
 		}
 	}
 

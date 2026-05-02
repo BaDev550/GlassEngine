@@ -182,6 +182,14 @@ namespace ge::renderer {
 
 		frame.renderObjects.clear();
 		frame.stagingBuffers.clear();
+#if 0
+		for (auto& [name, textureData] : _imguiTextureCache) {
+			if (textureData.pendingDelete) {
+				ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet)textureData.id);
+				textureData.pendingDelete = false;
+			}
+		}
+#endif
 
 		constexpr VkCommandBufferBeginInfo beginInfo{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -232,6 +240,7 @@ namespace ge::renderer {
 		vkEndCommandBuffer(frame.commandBuffer);
 
 		Renderer3D::EndFrame();
+		_renderStats.Reset();
 	}
 
 	void Vulkan_RenderAPI::Draw(ge::mem::Ref<Pipeline>& pipeline, uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex, uint32_t firstInstance)
@@ -774,11 +783,26 @@ namespace ge::renderer {
 		TrackObject(dst);
 	}
 
-	ImTextureID Vulkan_RenderAPI::GetImGuiTexture(ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler) {
-		return (ImTextureID)ImGui_ImplVulkan_AddTexture(
-			sampler.Cast<Vulkan_Sampler>()->GetSampler(), 
-			image.Cast<Vulkan_Image>()->CreateGetImageView(subresource), 
-			utility::Vulkan_OptimalImageLayout(image->GetSpecRef().usageFlags));
+	ImTextureID Vulkan_RenderAPI::GetImGuiTexture(const GEString& name, ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler) {
+#if 0
+		if (_imguiTextureCache.contains(name) && image != nullptr) {
+			_imguiTextureCache[name].SetStatus(ImTextureStatus_WantDestroy);
+			_imguiTextureCache[name].WantDestroyNextFrame = true;
+		}
+		else if (image == nullptr) {
+			return _imguiTextureCache[name].GetTexID();
+		}
+		
+		_imguiTextureCache[name].Create(ImTextureFormat_RGBA32, image->GetSpec().extent.x, image->GetSpec().extent.y);
+		memcpy(_imguiTextureCache[name].GetPixels(), nullptr, _imguiTextureCache[name].GetSizeInBytes());
+		_imguiTextureCache[name].SetStatus(ImTextureStatus_WantCreate);
+
 		TrackObject(image);
+		return _imguiTextureCache[name].GetTexID();
+#endif
+		return (ImTextureID)ImGui_ImplVulkan_AddTexture(
+			sampler.Cast<Vulkan_Sampler>()->GetSampler(),
+			image.Cast<Vulkan_Image>()->CreateGetImageView(subresource),
+			utility::Vulkan_OptimalImageLayout(image->GetSpecRef().usageFlags));
 	}
 }

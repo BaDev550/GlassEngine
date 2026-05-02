@@ -18,11 +18,11 @@ namespace ge::editor {
 		_icons.push_back(ge::SourceTextureSerializer::ImportTextureFromFile(ImportAssetData(), (GE_ENGINE_DIR / "Resources/Icons/ContentBrowser/Texture.png")).Cast<renderer::Texture2D>());
 		_icons.push_back(ge::SourceTextureSerializer::ImportTextureFromFile(ImportAssetData(), (GE_ENGINE_DIR / "Resources/Icons/ContentBrowser/Material.png")).Cast<renderer::Texture2D>());
 
-		_directoryIconTextureId = renderer::Renderer3D::GetImGuiTexture(_icons[0]->GetImage());
-		_defaultFileIconTextureId = renderer::Renderer3D::GetImGuiTexture(_icons[1]->GetImage());
-		_staticMeshFileIconTextureId = renderer::Renderer3D::GetImGuiTexture(_icons[2]->GetImage());
-		_textureFileIconTextureId = renderer::Renderer3D::GetImGuiTexture(_icons[3]->GetImage());
-		_materialFileIconTextureId = renderer::Renderer3D::GetImGuiTexture(_icons[4]->GetImage());
+		_directoryIconTextureId = renderer::Renderer3D::GetImGuiTexture("CB_IMGT_DIR", _icons[0]->GetImage());
+		_defaultFileIconTextureId = renderer::Renderer3D::GetImGuiTexture("CB_IMGT_DEF", _icons[1]->GetImage());
+		_staticMeshFileIconTextureId = renderer::Renderer3D::GetImGuiTexture("CB_IMGT_STM", _icons[2]->GetImage());
+		_textureFileIconTextureId = renderer::Renderer3D::GetImGuiTexture("CB_IMGT_TEX", _icons[3]->GetImage());
+		_materialFileIconTextureId = renderer::Renderer3D::GetImGuiTexture("CB_IMGT_MAT", _icons[4]->GetImage());
 	}
 
 	void ContentBrowserPanel::Init() {

@@ -44,7 +44,7 @@ namespace ge::renderer {
 			glm::uvec3 extent, glm::uvec3 srcOffset = {0,0,0}, glm::uvec3 dstOffset = {0,0,0}
 		) override;
 
-		virtual ImTextureID GetImGuiTexture(ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler = {}) override;
+		virtual ImTextureID GetImGuiTexture(const GEString& name, ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler = {}) override;
 
 		virtual void ILoadDataToBuffer(const ge::mem::Ref<Buffer>& buffer, const void* data, uint64_t dataSize) override;
 		virtual void ILoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) override;
@@ -73,7 +73,7 @@ namespace ge::renderer {
 			bool swapchainImageUsed = false;
 			// for life time
 			GEVector<ge::mem::Ref<RenderObject>, ge::mem::RendererAllocTag> renderObjects;
-			GEVector<ge::mem::Scope<Vulkan_Buffer>> stagingBuffers;
+			GEVector<ge::mem::Scope<Vulkan_Buffer>, ge::mem::RendererAllocTag> stagingBuffers;
 		} _frames[Renderer3D::MaxFramesInFlight];
 
 		VkImageMemoryBarrier2 GetMemoryBarrier(Vulkan_Image& image, const VkImageLayout newImageLayout, bool loadOpIsLoad = false);
@@ -81,7 +81,8 @@ namespace ge::renderer {
 		// translates image layout to Vulkan_OptimalImageLayout() when called End*Pass() func
 		std::unordered_set<Vulkan_Image*> _barriersForImages; // TODO (0x): better name
 		std::unordered_set<Vulkan_Buffer*> _barriersForBuffers; // TODO (0x): better name
-		
+		GEUnorderedMap<GEString, ImTextureID> _imguiTextureCache;
+
 		void Barrier();
 		friend Vulkan_Swapchain;
 	};

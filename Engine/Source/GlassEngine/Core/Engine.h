@@ -47,6 +47,7 @@ namespace ge {
 		Window& GetApplicationWindow() { return *_window; }
 		ThreadManager& GetApplicationThreadManager() { return GetApplication()->GetThreadManager(); }
 		ApplicationSpecification GetApplicationSpecs() { return GetApplication()->GetSpecs(); }
+		const float GetDeltaTime() const { return _deltaTime; }
 
 		InputManager& GetInputManager() { return *_inputManager; }
 		EngineSpecification GetSpecs() { return _specs; }
