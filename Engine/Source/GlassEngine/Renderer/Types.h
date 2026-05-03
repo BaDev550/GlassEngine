@@ -88,6 +88,9 @@ namespace ge::renderer {
 		RGBA8Srgb,
 		RGBA8Int,
 		RGBA8Uint,
+		RG8Uint,
+		RG8Unorm,
+		R10G10B10A2Unorm,
 		RGBA16Float,
 		RGBA16Int,
 		RGBA16Uint,
@@ -296,26 +299,30 @@ namespace ge::renderer {
 
 		[[nodiscard]] constexpr uint32_t GetPixelSize(ImageFormat imageFormat) noexcept {
 			switch (imageFormat) {
-			case ImageFormat::RGBA8Unorm:  return 4;
-			case ImageFormat::RGBA8Srgb:   return 4;
-			case ImageFormat::RGBA8Int:    return 4;
-			case ImageFormat::RGBA8Uint:   return 4;
-			case ImageFormat::RGBA16Float: return 8;
-			case ImageFormat::RGBA16Int:   return 8;
-			case ImageFormat::RGBA16Uint:  return 8;
-			case ImageFormat::RGBA32Float: return 16;
-			case ImageFormat::RGBA32Int:   return 16;
-			case ImageFormat::RGBA32Uint:  return 16;
-			case ImageFormat::BC3Unorm:    return 1;
-			case ImageFormat::BC3Srgb:     return 1;
-			case ImageFormat::BC5Unorm:    return 1;
-			case ImageFormat::BC5Srgb:     return 1;
-			case ImageFormat::BC7Unorm:    return 1;
-			case ImageFormat::BC7Srgb:     return 1;
-			case ImageFormat::D16:         return 2;
-			case ImageFormat::D32:         return 4;
-			case ImageFormat::D32S8:       return 8;
-			case ImageFormat::D24S8:       return 4;
+			case ImageFormat::RGBA8Unorm:  		return 4;
+			case ImageFormat::RGBA8Srgb:   		return 4;
+			case ImageFormat::RGBA8Int:    		return 4;
+			case ImageFormat::RGBA8Uint:   		return 4;
+			case ImageFormat::RGBA16Float: 		return 8;
+			case ImageFormat::RGBA16Int:   		return 8;
+			case ImageFormat::RGBA16Uint:  		return 8;
+			case ImageFormat::RGBA32Float: 		return 16;
+			case ImageFormat::RGBA32Int:   		return 16;
+			case ImageFormat::RGBA32Uint:  		return 16;
+			case ImageFormat::BC3Unorm:    		return 1;
+			case ImageFormat::BC3Srgb:     		return 1;
+			case ImageFormat::BC5Unorm:    		return 1;
+			case ImageFormat::BC5Srgb:     		return 1;
+			case ImageFormat::BC7Unorm:    		return 1;
+			case ImageFormat::BC7Srgb:     		return 1;
+			case ImageFormat::D16:         		return 2;
+			case ImageFormat::D32:         		return 4;
+			case ImageFormat::D32S8:       		return 8;
+			case ImageFormat::D24S8:       		return 4;
+			case ImageFormat::RG8Uint:			return 2;
+			case ImageFormat::RG8Unorm:			return 2;
+			case ImageFormat::R10G10B10A2Unorm:	return 4;
+				break;
 			}
 			return 0;
 		}

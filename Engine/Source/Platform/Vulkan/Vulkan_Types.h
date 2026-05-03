@@ -56,26 +56,30 @@ namespace ge::renderer::utility {
 
 	[[nodiscard]] constexpr VkFormat Vulkan_GetImageFormat(ImageFormat imageFormat) noexcept {
 		switch (imageFormat) {
-		case ImageFormat::RGBA8Unorm:  return VK_FORMAT_R8G8B8A8_UNORM;
-		case ImageFormat::RGBA8Srgb:   return VK_FORMAT_R8G8B8A8_SRGB;
-		case ImageFormat::RGBA8Int:    return VK_FORMAT_R8G8B8A8_SINT;
-		case ImageFormat::RGBA8Uint:   return VK_FORMAT_R8G8B8A8_UINT;
-		case ImageFormat::RGBA16Float: return VK_FORMAT_R16G16B16A16_SFLOAT;
-		case ImageFormat::RGBA16Int:   return VK_FORMAT_R16G16B16A16_SINT;
-		case ImageFormat::RGBA16Uint:  return VK_FORMAT_R16G16B16A16_UINT;
-		case ImageFormat::RGBA32Float: return VK_FORMAT_R32G32B32A32_SFLOAT;
-		case ImageFormat::RGBA32Int:   return VK_FORMAT_R32G32B32A32_SINT;
-		case ImageFormat::RGBA32Uint:  return VK_FORMAT_R32G32B32A32_UINT;
-		case ImageFormat::BC3Unorm:    return VK_FORMAT_BC3_UNORM_BLOCK;
-		case ImageFormat::BC3Srgb:     return VK_FORMAT_BC3_SRGB_BLOCK;
-		case ImageFormat::BC5Unorm:    return VK_FORMAT_BC5_UNORM_BLOCK;
-		case ImageFormat::BC5Srgb:     return VK_FORMAT_BC5_SNORM_BLOCK;
-		case ImageFormat::BC7Unorm:    return VK_FORMAT_BC7_UNORM_BLOCK;
-		case ImageFormat::BC7Srgb:     return VK_FORMAT_BC7_SRGB_BLOCK;
-		case ImageFormat::D16:         return VK_FORMAT_D16_UNORM;
-		case ImageFormat::D32:         return VK_FORMAT_D32_SFLOAT;
-		case ImageFormat::D32S8:       return VK_FORMAT_D32_SFLOAT_S8_UINT;
-		case ImageFormat::D24S8:       return VK_FORMAT_D24_UNORM_S8_UINT;
+			case ImageFormat::RGBA8Unorm:  		return VK_FORMAT_R8G8B8A8_UNORM;
+			case ImageFormat::RGBA8Srgb:   		return VK_FORMAT_R8G8B8A8_SRGB;
+			case ImageFormat::RGBA8Int:    		return VK_FORMAT_R8G8B8A8_SINT;
+			case ImageFormat::RGBA8Uint:   		return VK_FORMAT_R8G8B8A8_UINT;
+			case ImageFormat::RGBA16Float: 		return VK_FORMAT_R16G16B16A16_SFLOAT;
+			case ImageFormat::RGBA16Int:   		return VK_FORMAT_R16G16B16A16_SINT;
+			case ImageFormat::RGBA16Uint:  		return VK_FORMAT_R16G16B16A16_UINT;
+			case ImageFormat::RGBA32Float: 		return VK_FORMAT_R32G32B32A32_SFLOAT;
+			case ImageFormat::RGBA32Int:   		return VK_FORMAT_R32G32B32A32_SINT;
+			case ImageFormat::RGBA32Uint:  		return VK_FORMAT_R32G32B32A32_UINT;
+			case ImageFormat::BC3Unorm:    		return VK_FORMAT_BC3_UNORM_BLOCK;
+			case ImageFormat::BC3Srgb:     		return VK_FORMAT_BC3_SRGB_BLOCK;
+			case ImageFormat::BC5Unorm:    		return VK_FORMAT_BC5_UNORM_BLOCK;
+			case ImageFormat::BC5Srgb:     		return VK_FORMAT_BC5_SNORM_BLOCK;
+			case ImageFormat::BC7Unorm:    		return VK_FORMAT_BC7_UNORM_BLOCK;
+			case ImageFormat::BC7Srgb:     		return VK_FORMAT_BC7_SRGB_BLOCK;
+			case ImageFormat::D16:         		return VK_FORMAT_D16_UNORM;
+			case ImageFormat::D32:         		return VK_FORMAT_D32_SFLOAT;
+			case ImageFormat::D32S8:       		return VK_FORMAT_D32_SFLOAT_S8_UINT;
+			case ImageFormat::D24S8:       		return VK_FORMAT_D24_UNORM_S8_UINT;
+			case ImageFormat::RG8Uint:			return VK_FORMAT_R8G8_UINT;
+			case ImageFormat::RG8Unorm:			return VK_FORMAT_R8G8_UNORM;
+			case ImageFormat::R10G10B10A2Unorm:	return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
+			break;
 		}
 		return {};
 	}
