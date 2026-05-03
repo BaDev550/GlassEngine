@@ -182,14 +182,10 @@ namespace ge::renderer {
 
 		frame.renderObjects.clear();
 		frame.stagingBuffers.clear();
-#if 0
-		for (auto& [name, textureData] : _imguiTextureCache) {
-			if (textureData.pendingDelete) {
-				ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet)textureData.id);
-				textureData.pendingDelete = false;
-			}
+		for (auto& textureID : _imguiTexturePendingDeleteList) {
+			ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet)textureID);
 		}
-#endif
+		_imguiTexturePendingDeleteList.clear();
 
 		constexpr VkCommandBufferBeginInfo beginInfo{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -784,25 +780,18 @@ namespace ge::renderer {
 	}
 
 	ImTextureID Vulkan_RenderAPI::GetImGuiTexture(const GEString& name, ge::mem::Ref<Image>& image, ImageSubresource subresource, ge::mem::Ref<Sampler> sampler) {
-#if 0
-		if (_imguiTextureCache.contains(name) && image != nullptr) {
-			_imguiTextureCache[name].SetStatus(ImTextureStatus_WantDestroy);
-			_imguiTextureCache[name].WantDestroyNextFrame = true;
+		if (_imguiTextureCache.contains(name) && _imguiTextureCache[name] != 0 && image != nullptr) {
+			_imguiTexturePendingDeleteList.push_back(_imguiTextureCache[name]);
 		}
 		else if (image == nullptr) {
-			return _imguiTextureCache[name].GetTexID();
+			return _imguiTextureCache[name];
 		}
-		
-		_imguiTextureCache[name].Create(ImTextureFormat_RGBA32, image->GetSpec().extent.x, image->GetSpec().extent.y);
-		memcpy(_imguiTextureCache[name].GetPixels(), nullptr, _imguiTextureCache[name].GetSizeInBytes());
-		_imguiTextureCache[name].SetStatus(ImTextureStatus_WantCreate);
 
-		TrackObject(image);
-		return _imguiTextureCache[name].GetTexID();
-#endif
-		return (ImTextureID)ImGui_ImplVulkan_AddTexture(
+		_imguiTextureCache[name] = (ImTextureID)ImGui_ImplVulkan_AddTexture(
 			sampler.Cast<Vulkan_Sampler>()->GetSampler(),
 			image.Cast<Vulkan_Image>()->CreateGetImageView(subresource),
 			utility::Vulkan_OptimalImageLayout(image->GetSpecRef().usageFlags));
+		TrackObject(image);
+		return _imguiTextureCache[name];
 	}
 }

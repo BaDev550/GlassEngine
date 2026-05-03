@@ -82,6 +82,7 @@ namespace ge::renderer {
 		std::unordered_set<Vulkan_Image*> _barriersForImages; // TODO (0x): better name
 		std::unordered_set<Vulkan_Buffer*> _barriersForBuffers; // TODO (0x): better name
 		GEUnorderedMap<GEString, ImTextureID> _imguiTextureCache;
+		GEVector<ImTextureID> _imguiTexturePendingDeleteList;
 
 		void Barrier();
 		friend Vulkan_Swapchain;

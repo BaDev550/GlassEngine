@@ -37,7 +37,7 @@ namespace ge::editor {
 		if (_viewportSize.x > 0.0f && _viewportSize.y > 0.0f && (spec.width != _viewportSize.x || spec.height != _viewportSize.y)) {
 			_activeScene->GetSceneRenderer()->Resize(_viewportSize.x, _viewportSize.y);
 			_camera->SetAspectRatio(((float)_viewportSize.x / (float)_viewportSize.y));
-			_viewportTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_VIEWPORT_ID", _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0)); // TODO (dnm): add texture cache
+			_viewportTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_VIEWPORT_ID", _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
 		}
 
 		_activeScene->OnEditorUpdate(deltaTime, _camera);
