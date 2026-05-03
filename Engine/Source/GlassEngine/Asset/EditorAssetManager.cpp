@@ -83,7 +83,7 @@ namespace ge {
 		if (targetPath.empty())
 			targetPath = sourcePath;
 
-		AssetHandle handle = AssetHandle();
+		AssetHandle handle = AssetHandle(sourcePath.string());
 		AssetType compiledType = _importer->ImportToGAsset(asset, sourcePath, targetPath);
 		GE_CORE_INFO("Getting Asset from: {}", sourcePath.string());
 

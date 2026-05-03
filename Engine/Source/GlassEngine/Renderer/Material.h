@@ -22,7 +22,7 @@ namespace ge::renderer {
 
 	class MaterialAsset : public Asset {
 	public:
-		MaterialAsset(const ge::mem::Ref<Material>& material) : _material(material) { _assetHandle = AssetHandle(); }
+		MaterialAsset(const ge::mem::Ref<Material>& material) : _material(material) { }
 		void SetAlbedoTexture(const AssetHandle& textureHandle);
 		void SetRoughnessTexture(const AssetHandle& textureHandle);
 		void SetNormalTexture(const AssetHandle& textureHandle);

@@ -163,6 +163,7 @@ namespace ge {
 					std::filesystem::path matTargetPath = targetPath.parent_path() / (matName + GE_ASSET_EXTENSION);
 					mem::Ref<renderer::Material> mat = mem::Ref<renderer::Material>::Create();
 					mem::Ref<renderer::MaterialAsset> matAsset = mem::Ref<renderer::MaterialAsset>::Create(mat);
+					matAsset->_assetHandle = AssetHandle(TEXT(matTargetPath.string()));
 
 					bool hasAlbedo = aiMat->GetTexture(AI_MATKEY_BASE_COLOR_TEXTURE, &aiTexturePath) == AI_SUCCESS;
 					if (!hasAlbedo)

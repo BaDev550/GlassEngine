@@ -35,5 +35,6 @@ namespace std {
 		}
 	};
 }
+#define TEXT(...) GEString(__VA_ARGS__)
 
 // TODO (badev): make a GEWString class using wstring utf16 for localization

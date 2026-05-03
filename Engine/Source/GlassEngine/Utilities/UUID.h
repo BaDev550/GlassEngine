@@ -14,7 +14,7 @@ namespace ge {
 			_uuid = dis(gen);
 		}
 		UUID(uint64_t uuid) : _uuid(uuid) {}
-		UUID(const std::string& uuidStr) { _uuid = std::stoull(uuidStr, nullptr, 16); }
+		UUID(const std::string& uuidStr) { _uuid = std::hash<std::string>{}(uuidStr); }
 		std::string ToString() const {
 			std::stringstream ss;
 			ss << std::hex << _uuid;
