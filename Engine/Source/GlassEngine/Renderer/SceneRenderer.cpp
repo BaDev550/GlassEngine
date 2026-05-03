@@ -82,12 +82,11 @@ namespace ge::renderer {
 					if (lodIndex >= lods.size()) {
 						lodIndex = lods.empty() ? 0 : lods.size() - 1;
 					}
-
+					
 					Renderer3D::DrawStaticMesh(_pipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
 				}
 			}
 			});
-
 		_renderPass->End();
 	}
 }

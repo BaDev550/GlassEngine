@@ -21,11 +21,11 @@ namespace ge::editor {
 		_sceneHierarchyPanel->SetContext(_activeScene);
 
 		{
-			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Model/DamagedHelmet.gltf");
-			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/mario_2/mario_2.obj");
-			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/SheenChair/SheenChair.gltf");
-			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/SciFiHelmet/SciFiHelmet.gltf");
-			AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Sponza/Sponza.gltf");
+			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Model/DamagedHelmet.gltf");
+			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/mario_2/mario_2.obj");
+			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/SheenChair/SheenChair.gltf");
+			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/SciFiHelmet/SciFiHelmet.gltf");
+			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Sponza/Sponza.gltf");
 		}
 	}
 
@@ -64,6 +64,25 @@ namespace ge::editor {
 		ImGui::Begin("Viewport");
 		_viewportSize = ImGui::GetContentRegionAvail();
 		ImGui::Image(_viewportTextureId, _viewportSize);
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				AssetHandle droppedHandle = *(const AssetHandle*)payload->Data;
+				AssetType type = AssetManager::GetMetadata(droppedHandle).type;
+
+				if (type == AssetType::StaticMesh) {
+					mem::Ref<renderer::StaticMesh> mesh = AssetManager::GetAsset<renderer::StaticMesh>(droppedHandle);
+					if (mesh) {
+						auto meshEntity = _activeScene->CreateEntity("New Mesh");
+						auto& meshComponent = meshEntity->AddComponent<StaticMeshComponent>();
+						meshComponent.meshHandle = mesh->_assetHandle;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
 		ImGui::End();
 		EndDockspace();
 	}
