@@ -19,14 +19,6 @@ namespace ge::editor {
 		_contentBrowserPanel->Init();
 		_sceneHierarchyPanel = CastChecked<editor::SceneHierarchyPanel>(GetPanelManager().ShowPanel("sceneHierarchy"));
 		_sceneHierarchyPanel->SetContext(_activeScene);
-
-		{
-			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Model/DamagedHelmet.gltf");
-			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/mario_2/mario_2.obj");
-			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/SheenChair/SheenChair.gltf");
-			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/SciFiHelmet/SciFiHelmet.gltf");
-			//AssetManager::GetOrImportAsset<renderer::StaticMesh>(projectPath.parent_path() / "Assets/Sponza/Sponza.gltf");
-		}
 	}
 
 	void EditorLayer::OnUpdate(float deltaTime)
@@ -70,12 +62,12 @@ namespace ge::editor {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
 				AssetHandle droppedHandle = *(const AssetHandle*)payload->Data;
-				AssetType type = AssetManager::GetMetadata(droppedHandle).type;
-
-				if (type == AssetType::StaticMesh) {
+				auto droppedMTD = AssetManager::GetMetadata(droppedHandle);
+				
+				if (droppedMTD.type == AssetType::StaticMesh) {
 					mem::Ref<renderer::StaticMesh> mesh = AssetManager::GetAsset<renderer::StaticMesh>(droppedHandle);
 					if (mesh) {
-						auto meshEntity = _activeScene->CreateEntity("New Mesh");
+						auto meshEntity = _activeScene->CreateEntity(TEXT(droppedMTD.path.stem().string()));
 						auto& meshComponent = meshEntity->AddComponent<StaticMeshComponent>();
 						meshComponent.meshHandle = mesh->_assetHandle;
 					}

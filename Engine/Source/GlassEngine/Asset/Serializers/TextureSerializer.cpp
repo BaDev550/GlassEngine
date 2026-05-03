@@ -72,7 +72,11 @@ namespace ge {
         asset.textureSpecs->width = width;
         asset.textureSpecs->height = height;
 
-        out.WriteData(TEXTURE_MAGIC, 4);
+        GAssetHeader header{};
+        std::memcpy(header.magic, TEXTURE_MAGIC, 4);
+        header.type = AssetType::Texture;
+
+        out.WriteData(reinterpret_cast<const char*>(&header), sizeof(GAssetHeader));
         out.WriteData(reinterpret_cast<const char*>(asset.textureSpecs), sizeof(renderer::TextureSpec));
         out.WriteData(reinterpret_cast<const char*>(&dataSize), sizeof(uint32_t));
         out.WriteData(reinterpret_cast<const char*>(outData.data()), outData.size());
@@ -110,9 +114,9 @@ namespace ge {
             return nullptr;
         }
 
-        char magic[4];
-        in.ReadData(magic, 4);
-        if (strncmp(magic, TEXTURE_MAGIC, 4) != 0) {
+        GAssetHeader header;
+        in.ReadData(reinterpret_cast<char*>(&header), sizeof(GAssetHeader));
+        if (strncmp(header.magic, TEXTURE_MAGIC, 4) != 0) {
             GE_CORE_ERROR("Invalid magic bytes for texture asset!");
             return nullptr;
         }
@@ -132,8 +136,9 @@ namespace ge {
     mem::Ref<Asset> TextureSerializer::DeserializeFromFile(const GEVector<uint8_t>& buffer)
     {
         file::BufferReader in(buffer);
-        char magic[4];
-        if (!in.ReadData(magic, 4) || strncmp(magic, TEXTURE_MAGIC, 4) != 0) {
+
+        GAssetHeader header;
+        if (!in.ReadData(reinterpret_cast<char*>(&header), sizeof(GAssetHeader)) || strncmp(header.magic, TEXTURE_MAGIC, 4) != 0) {
             GE_CORE_ERROR("Invalid magic for texture asset");
             return nullptr;
         }

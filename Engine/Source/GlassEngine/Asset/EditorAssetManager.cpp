@@ -1,12 +1,14 @@
 #include "gepch.h"
 #include "AssetManager.h"
+#include "GlassEngine/Project/Project.h"
 #include "GlassEngine/Core/Application.h"
 #include "GlassEngine/Asset/AssetExtensions.h"
 
 namespace ge {
 	EditorAssetManager::EditorAssetManager(const std::filesystem::path& assetRegistry) : _assetRegistryPath(assetRegistry)
 	{
-		LoadAssetRegistry();
+		if (!LoadAssetRegistry())
+			TryToRebuildRegistry();
 
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "cookAssets", [this](const GEVector<GEString>& args) { CookAssets(args[0].ToPath()); }, "cookAssets <outputPakFile>");
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "compileAssetsToPAK", [this](const GEVector<GEString>& args) { CompileIntoPakFile(args[0].ToPath()); }, "compileAssetsToPAK <outputPakFile>");
@@ -83,8 +85,8 @@ namespace ge {
 		if (targetPath.empty())
 			targetPath = sourcePath;
 
-		AssetHandle handle = AssetHandle(sourcePath.string());
 		AssetType compiledType = _importer->ImportToGAsset(asset, sourcePath, targetPath);
+		AssetHandle handle = AssetHandle(TEXT(targetPath.string()));
 		GE_CORE_INFO("Getting Asset from: {}", sourcePath.string());
 
 		auto existingMtd = GetMetadata(targetPath);
@@ -291,12 +293,12 @@ namespace ge {
 		}
 	}
 
-	void EditorAssetManager::LoadAssetRegistry()
+	bool EditorAssetManager::LoadAssetRegistry()
 	{
 		file::Reader in(_assetRegistryPath);
 		if (!in.IsStreamGood()) {
 			GE_CORE_ERROR("Failed to open asset registry");
-			return;
+			return false;
 		}
 		_assetRegistry.clear();
 
@@ -317,5 +319,29 @@ namespace ge {
 			_assetRegistry[handle] = mtd;
 		}
 		GE_CORE_INFO("Loaded {} assets from asset registry", registrySize);
+		return true;
+	}
+
+	bool EditorAssetManager::TryToRebuildRegistry()
+	{
+		GE_CORE_WARN("Trying to rebuild registry from asset dir");
+		for (auto& file : std::filesystem::recursive_directory_iterator(Project::GetAssetDirectory())) {
+			if (file.path().extension() == GE_ASSET_EXTENSION) {
+				file::Reader reader(file.path());
+
+				GAssetHeader header{};
+				reader.ReadData(reinterpret_cast<char*>(&header), sizeof(GAssetHeader));
+
+				AssetHandle handle = AssetHandle(file.path().string());
+				AssetMetadata mtd;
+				mtd.handle = handle;
+				mtd.path = file.path();
+				mtd.type = header.type;
+
+				_assetRegistry[handle] = mtd;
+			}
+		}
+		SaveAssetRegistry();
+		return true;
 	}
 }

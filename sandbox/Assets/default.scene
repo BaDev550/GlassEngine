@@ -8,17 +8,28 @@ Entities:
       Rotation: [0, 0, 0]
       Scale: [0.05, 0.05, 0.05]
     StaticMeshComponent:
-      MeshHandle: 14949712859219031677
+      MeshHandle: 6216381201776050449
       IsVisible: true
       LODLevel: 0
   - Entity: 11561377806070761793
     IdentityComponent:
-      Name: Mario
+      Name: waWW
     TransformComponent:
       Position: [0, 3.2, 0]
       Rotation: [0, 2.8, 0]
       Scale: [2, 2, 2]
     StaticMeshComponent:
-      MeshHandle: 15346428913179317653
+      MeshHandle: 13328485924950516671
+      IsVisible: true
+      LODLevel: 0
+  - Entity: 4969705447260390750
+    IdentityComponent:
+      Name: a
+    TransformComponent:
+      Position: [3.2, 2.9, -0.2]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    StaticMeshComponent:
+      MeshHandle: 13328485924950516671
       IsVisible: true
       LODLevel: 0

@@ -61,7 +61,8 @@ namespace ge {
 		DependencyMap _assetDependencies;
 
 		void SaveAssetRegistry();
-		void LoadAssetRegistry();
+		bool LoadAssetRegistry();
+		bool TryToRebuildRegistry();
 		std::filesystem::path _assetRegistryPath = "assetregistry.ge";
 	};
 
@@ -98,6 +99,7 @@ namespace ge {
 
 		[[nodiscard]] static AssetMetadata GetMetadata(AssetHandle handle);
 		[[nodiscard]] static AssetMetadata GetMetadata(const std::filesystem::path& path);
+		[[nodiscard]] static bool AssetInRegistry(AssetHandle handle);
 
 		template<typename T>
 		static mem::Ref<T> GetAsset(AssetHandle handle) {

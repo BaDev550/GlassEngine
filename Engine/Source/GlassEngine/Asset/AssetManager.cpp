@@ -42,6 +42,10 @@ namespace ge {
 	[[nodiscard]] AssetMetadata AssetManager::GetMetadata(AssetHandle handle) { return _assetManager->GetMetadata(handle); }
 	[[nodiscard]] AssetMetadata AssetManager::GetMetadata(const std::filesystem::path& path) { return _assetManager->GetMetadata(path); }
 
+	bool AssetManager::AssetInRegistry(AssetHandle handle) {
+		return _assetManager->AssetInRegistry(handle);
+	}
+
 	void AssetManager::Editor_RegisterDependency(AssetHandle handle, AssetHandle dependency) {
 		_editorAssetManagerInstance->RegisterDependency(handle, dependency);
 	}

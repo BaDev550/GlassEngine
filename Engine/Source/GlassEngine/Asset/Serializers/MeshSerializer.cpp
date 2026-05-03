@@ -223,7 +223,12 @@ namespace ge {
 				return GE_INVALID_ASSET_TYPE;
 			}
 			uint32_t lodCount = static_cast<uint32_t>(allLods.size());
-			out.WriteData(STATIC_MESH_MAGIC, 4);
+
+			GAssetHeader header{};
+			std::memcpy(header.magic, STATIC_MESH_MAGIC, 4);
+			header.type = AssetType::StaticMesh;
+
+			out.WriteData(reinterpret_cast<const char*>(&header), sizeof(GAssetHeader));
 			out.WriteData(reinterpret_cast<const char*>(&lodCount), sizeof(uint32_t));
 			out.WriteData(reinterpret_cast<const char*>(&materialCount), sizeof(uint32_t));
 			out.WriteData(reinterpret_cast<const char*>(materialHandles.data()), materialCount * sizeof(AssetHandle));
@@ -255,9 +260,9 @@ namespace ge {
 			return nullptr;
 		}
 
-		char magic[4];
-		in.ReadData(magic, 4);
-		if (strncmp(magic, STATIC_MESH_MAGIC, 4) != 0) {
+		GAssetHeader header{};
+		in.ReadData(reinterpret_cast<char*>(&header), sizeof(GAssetHeader));
+		if (strncmp(header.magic, STATIC_MESH_MAGIC, 4) != 0) {
 			GE_CORE_ERROR("Invalid magic for mesh asset!");
 			return nullptr;
 		}
@@ -303,8 +308,8 @@ namespace ge {
 	mem::Ref<Asset> MeshAssetSerializer::DeserializeFromFile(const GEVector<uint8_t>& buffer)
 	{
 		file::BufferReader in(buffer);
-		char magic[4];
-		if (!in.ReadData(magic, 4) || strncmp(magic, STATIC_MESH_MAGIC, 4) != 0) {
+		GAssetHeader header{};
+		if (!in.ReadData(reinterpret_cast<char*>(&header), sizeof(GAssetHeader)) || strncmp(header.magic, STATIC_MESH_MAGIC, 4) != 0) {
 			GE_CORE_ERROR("Invalid magic for static mesh asset");
 			return nullptr;
 		}

@@ -69,6 +69,11 @@ namespace ge {
 		virtual void OnDependencyUpdated(AssetHandle handle) {}
 	};
 
+	struct GAssetHeader {
+		char magic[4];
+		AssetType type;
+	};
+
 	struct PackedAsset {
 		AssetHandle handle;
 		uint64_t offset;

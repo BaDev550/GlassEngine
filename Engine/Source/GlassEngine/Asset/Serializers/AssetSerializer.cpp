@@ -11,8 +11,10 @@ namespace ge {
 			GE_CORE_ERROR("Failed to write Material asset to: {}", target.string());
 			return;
 		}
-
-		out.WriteData(MATERIAL_MAGIC, 4);
+		GAssetHeader header{};
+		std::memcpy(header.magic, MATERIAL_MAGIC, 4);
+		header.type = AssetType::Material;
+		out.WriteData(reinterpret_cast<const char*>(&header), sizeof(GAssetHeader));
 
 		auto& handles = materialAsset->GetTextureHandles();
 		out.WriteData(reinterpret_cast<const char*>(&handles.albedoTextureHandle), sizeof(AssetHandle));
@@ -25,9 +27,9 @@ namespace ge {
 		file::Reader in(mtd.path);
 		if (!in.IsStreamGood()) return nullptr;
 
-		char magic[4];
-		in.ReadData(magic, 4);
-		if (strncmp(magic, MATERIAL_MAGIC, 4) != 0) return nullptr;
+		GAssetHeader header{};
+		in.ReadData(reinterpret_cast<char*>(&header), sizeof(GAssetHeader));
+		if (strncmp(header.magic, MATERIAL_MAGIC, 4) != 0) return nullptr;
 
 		mem::Ref<renderer::Material> mat = mem::Ref<renderer::Material>::Create();
 		mem::Ref<renderer::MaterialAsset> matAsset = mem::Ref<renderer::MaterialAsset>::Create(mat);
@@ -49,9 +51,9 @@ namespace ge {
 		file::BufferReader in(buffer);
 		if (!in.IsStreamGood()) return nullptr;
 
-		char magic[4];
-		in.ReadData(magic, 4);
-		if (strncmp(magic, MATERIAL_MAGIC, 4) != 0) return nullptr;
+		GAssetHeader header{};
+		in.ReadData(reinterpret_cast<char*>(&header), sizeof(GAssetHeader));
+		if (strncmp(header.magic, MATERIAL_MAGIC, 4) != 0) return nullptr;
 
 		mem::Ref<renderer::Material> mat = mem::Ref<renderer::Material>::Create();
 		mem::Ref<renderer::MaterialAsset> matAsset = mem::Ref<renderer::MaterialAsset>::Create(mat);
