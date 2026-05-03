@@ -1,5 +1,6 @@
 #include "Vulkan_DescriptorManager.h"
 #include "GlassEngine/Core/String.h"
+#include "GlassEngine/Utilities/Counter.h"
 #include "GlassEngine/Utilities/Logger.h"
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
 #include "Platform/Vulkan/Vulkan_Types.h"
@@ -87,13 +88,15 @@ namespace ge::renderer {
 
 		{
 			GEVector<VkDescriptorSetLayoutBinding> bindings{};
-			bindings.emplace_back(
-				0,
-				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-				1,
-				VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT
-			);
-
+			for (const uint32_t i : Counter(10)) {
+				bindings.emplace_back(
+					i,
+					VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+					1,
+					VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_COMPUTE_BIT
+				);
+			}
+			
 			VkDescriptorSetLayoutCreateInfo dstLayoutCreateInfo{};
 			dstLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 			dstLayoutCreateInfo.bindingCount = bindings.size();

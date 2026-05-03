@@ -32,5 +32,5 @@ VertexOut VertMain(VertexIn in) {
 
 [shader("fragment")]
 float4 FragMain(VertexOut vertOut) : SV_Target {
-    return GetBindless<ReadonlyImage2D>(pc.albedoTextureIndex).Sample(GetBindless<Sampler>(0), vertOut.uv);
+    return GetBindless<ReadonlyImage2D>(pc.albedoTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
 }

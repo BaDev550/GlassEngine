@@ -1,6 +1,8 @@
 #include "Renderer.h"
+#include "GlassEngine/Renderer/Buffer.h"
 #include "GlassEngine/Renderer/Texture.h"
 #include "GlassEngine/Renderer/Sampler.h"
+#include "GlassEngine/Renderer/Types.h"
 #include "ShaderLibrary.h"
 
 namespace ge::renderer {
@@ -9,6 +11,7 @@ namespace ge::renderer {
 		mem::Ref<Sampler> _defaultSampler = nullptr;
 		mem::Ref<Texture2D> _defaultWhiteTexture = nullptr;
 		mem::Ref<Texture2D> _defaultBlackTexture = nullptr;
+		mem::Ref<Buffer> _defaultsUbo = nullptr;
 	} static s_data;
 
 	static mem::Ref<RenderAPI> g_renderAPI = nullptr;
@@ -32,22 +35,42 @@ namespace ge::renderer {
 
 		{
 			TextureSpec whiteTextureData{};
-			uint32_t whiteData = 0xffffffff;
+			constexpr uint32_t whiteData = 0xffffffff;
 			whiteTextureData.width = 1;
 			whiteTextureData.height = 1;
 			whiteTextureData.format = ImageFormat::RGBA8;
-			s_data._defaultWhiteTexture = Texture2D::Create(whiteTextureData, &whiteTextureData);
-			s_data._defaultSampler = Sampler::Create(SamplerSpec{});
-			
-			[[maybe_unused]] const uint32_t _wtbi = s_data._defaultWhiteTexture->GetHandle();
-			[[maybe_unused]] const uint32_t _dsbi = s_data._defaultSampler->GetHandle();
+			s_data._defaultWhiteTexture = Texture2D::Create(whiteTextureData, &whiteData);
+			s_data._defaultWhiteTexture->SetDebugName("White Texture");
 
+			s_data._defaultSampler = Sampler::Create(SamplerSpec{});
+			s_data._defaultSampler->SetDebugName("Default Sampler");
+			
 			TextureSpec blackTextureData{};
-			uint32_t blackData = 0x00000000;
-			whiteTextureData.width = 1;
-			whiteTextureData.height = 1;
-			whiteTextureData.format = ImageFormat::RGBA8;
-			s_data._defaultBlackTexture = Texture2D::Create(whiteTextureData, &blackTextureData);
+			constexpr uint32_t blackData = 0x00000000;
+			blackTextureData.width = 1;
+			blackTextureData.height = 1;
+			blackTextureData.format = ImageFormat::RGBA8;
+			s_data._defaultBlackTexture = Texture2D::Create(blackTextureData, &blackData);
+			s_data._defaultBlackTexture->SetDebugName("Black Texture");
+
+			struct Defaults {
+				uint32_t defaultSampler = s_data._defaultSampler->GetHandle();
+				uint32_t whiteTexture = s_data._defaultWhiteTexture->GetHandle();
+				uint32_t blackTexture = s_data._defaultBlackTexture->GetHandle();
+			} const defaults{};
+
+			BufferSpec defaultsUboSpec{};
+			defaultsUboSpec.cpuAccess = BufferCpuAccess::Write;
+			defaultsUboSpec.memoryType = BufferMemoryType::DeviceMemory;
+			defaultsUboSpec.usageFlags = BufferUsageFlagsBits::Uniform;
+			defaultsUboSpec.elementSize = sizeof(defaults);
+			defaultsUboSpec.elementCount = 1;
+			s_data._defaultsUbo = Buffer::Create(defaultsUboSpec);
+			s_data._defaultsUbo->SetDebugName("Defaults Buffer");
+
+			*s_data._defaultsUbo->GetMappedPtr<Defaults>() = defaults;
+
+			Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(s_data._defaultsUbo, 2);
 		}
 	}
 
@@ -56,6 +79,7 @@ namespace ge::renderer {
 		s_data._defaultSampler = nullptr;
 		s_data._defaultWhiteTexture = nullptr;
 		s_data._defaultBlackTexture = nullptr;
+		s_data._defaultsUbo = nullptr;
 		g_renderAPI = nullptr;
 	}
 

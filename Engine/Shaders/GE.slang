@@ -1,5 +1,6 @@
-static const constexpr uint DxilCameraBufferIndex = 0;
-static const constexpr uint DxilLightBufferIndex = 1;
+static const constexpr uint __GE_Global_Camera_Buffer_Index__ = 0;
+static const constexpr uint __GE_Global_Light_Buffer_Index__ = 1;
+static const constexpr uint __GE_Defaults_Buffer_Index__ = 2;
 
 // TODO: better name
 struct CameraData {
@@ -10,7 +11,14 @@ struct CameraData {
 
 // TODO: better name
 struct LightData {
-    float4x4 asd;
+    uint GGXLut;
+};
+
+// TODO: better name
+struct Defaults {
+    uint defaultSampler;
+    uint whiteTexture;
+    uint blackTexture;
 };
 
 interface IBindlessDescriptor {};
@@ -72,21 +80,28 @@ extension ReadonlyImageCube : IBindlessDescriptor {}
 
 extension Sampler : IBindlessDescriptor {}
 
-[vk::binding(1, 0)]
-[require(spirv)]
-ConstantBuffer<LightData> __GE_Global_Light_Buffer__;
-
-[vk::binding(0, 0)]
+[vk::binding(__GE_Global_Camera_Buffer_Index__, 0)]
 [require(spirv)]
 ConstantBuffer<CameraData> __GE_Global_Camera_Buffer__;
 
+[vk::binding(__GE_Global_Light_Buffer_Index__, 0)]
+[require(spirv)]
+ConstantBuffer<LightData> __GE_Global_Light_Buffer__;
+
+[vk::binding(__GE_Defaults_Buffer_Index__, 0)]
+[require(spirv)]
+ConstantBuffer<Defaults> __GE_Defaults_Buffer__;
+
 [vk::binding(0, 1)]
+[require(spirv)]
 __DynamicResource<__DynamicResourceKind.General> __GE_SpirV_Bindless_Readonly_Image_Array__[];
 
 [vk::binding(0, 2)]
+[require(spirv)]
 __DynamicResource<__DynamicResourceKind.General> __GE_SpirV_Bindless_Writable_Image_Array__[];
 
 [vk::binding(0, 3)]
+[require(spirv)]
 __DynamicResource<__DynamicResourceKind.Sampler> __GE_SpirV_Bindless_Sampler_Array__[];
 
 T GetBindless<T>(uint handle)
@@ -126,7 +141,7 @@ CameraData GetCamaraData() {
     case spirv:
         return __GE_Global_Camera_Buffer__;
     case hlsl: {
-        return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(DxilCameraBufferIndex);
+        return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(__GE_Global_Camera_Buffer_Index__);
     }
     default: static_assert(false, "unsupported shader target");
         return {};
@@ -139,9 +154,34 @@ LightData GetLightData() {
     case spirv:
         return __GE_Global_Light_Buffer__;
     case hlsl: {
-        return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(DxilLightBufferIndex);
+        return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(__GE_Global_Light_Buffer_Index__);
     }
     default: static_assert(false, "unsupported shader target");
         return {};
     }
+}
+
+Defaults GetDefaults() {
+    __target_switch
+    {
+    case spirv:
+        return __GE_Defaults_Buffer__;
+    case hlsl: {
+        return __loadResourceDescriptorFromHeap<UniformBuffer<Defaults, DefaultDataLayout>>(__GE_Defaults_Buffer_Index__);
+    }
+    default: static_assert(false, "unsupported shader target");
+        return {};
+    }
+}
+
+Sampler GetDefaultSampler() {
+    return GetBindless<Sampler>(GetDefaults().defaultSampler);
+}
+
+ReadonlyImage2D GetWhiteTexture() {
+    return GetBindless<ReadonlyImage2D>(GetDefaults().whiteTexture);
+}
+
+ReadonlyImage2D GetBlackTexture() {
+    return GetBindless<ReadonlyImage2D>(GetDefaults().blackTexture);
 }
