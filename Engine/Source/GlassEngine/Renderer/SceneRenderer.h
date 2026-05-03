@@ -2,6 +2,7 @@
 #include "GlassEngine/Core/Core.h"
 #include "RenderPass.h"
 #include "Camera.h"
+#include "Light.h"
 #include "EndlessGrid.h"
 
 namespace ge { class Scene; }
@@ -20,13 +21,34 @@ namespace ge::renderer {
 		ge::mem::Ref<Framebuffer> _framebuffer;
 		ge::mem::Ref<Pipeline> _pipeline;
 		ge::mem::Ref<RenderPass> _renderPass;
+		ge::mem::Ref<EndlessGrid> _endlessGrid;
+
+		struct LightEnviromentData {
+			mem::Ref<Texture2D> LUTtexture;
+			GEVector<PointLight> pointLights;
+			GEVector<SpotLight> spotLights;
+			DirectionalLight directionalLight;
+		} _lightEnviromentData;
 
 		struct CameraData {
 			glm::mat4 proj;
 			glm::mat4 view;
 			glm::vec3 pos;
-		} _cameraData;
+		} *_cameraData;
 		ge::mem::Ref<Buffer> _cameraBuffer;
-		ge::mem::Ref<EndlessGrid> _endlessGrid;
+
+		struct GPULightData {
+			uint32_t lutIndex;
+			uint32_t enviromentMapIndex;
+			uint64_t pointLightBufferGPUAddress;
+			uint32_t pointLightCount;
+			uint64_t spotLightBufferGPUAddress;
+			uint32_t spotLightCount;
+			uint64_t directionalLightBufferGPUAddress;
+		} *_lightGPUData;
+		ge::mem::Ref<Buffer> _lightDataBuffer;
+		ge::mem::Ref<Buffer> _pointLightsBuffer;
+		ge::mem::Ref<Buffer> _spotLightBuffer;
+		ge::mem::Ref<Buffer> _directionalLightBuffer;
 	};
 }

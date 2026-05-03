@@ -30,13 +30,14 @@ namespace comp {
         dst.dwPitch = 0;
         dst.dwDataSize = CMP_CalculateBufferSize(&dst);
         out_image.resize(dst.dwDataSize);
+        dst.pMipSet;
         dst.pData = static_cast<CMP_BYTE*>(out_image.data());
 
         CMP_CompressOptions options{};
         options.dwSize = sizeof(options);
         options.fquality = 0.0;
         options.dwnumThreads = 8;
-        
+
         CMP_ConvertTexture(&src, &dst, &options, CompressionCallback);
     }
 }
@@ -47,7 +48,7 @@ namespace ge {
         int width, height, channels;
         bool compress = asset.textureSpecs->compress;
         stbi_set_flip_vertically_on_load(asset.textureSpecs->flipV);
-
+        
         uint8_t* pixels = stbi_load(source.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
         if (!pixels) {
             GE_CORE_ERROR("Failed to load source image: {}", source.string());

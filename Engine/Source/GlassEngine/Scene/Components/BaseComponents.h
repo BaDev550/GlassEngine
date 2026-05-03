@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "GlassEngine/Core/Core.h"
+#include "GlassEngine/Renderer/Light.h"
 
 namespace ge {
 #define GE_INVALID_ENTITY_ID 0
@@ -41,5 +42,26 @@ namespace ge {
 
 		StaticMeshComponent(AssetHandle handle = GE_INVALID_ASSET_HANDLE) : meshHandle(handle) {}
 		StaticMeshComponent(const StaticMeshComponent&) = default;
+	};
+
+	struct PointLightComponent {
+		PointLight handle;
+
+		PointLightComponent() = default;
+		PointLightComponent(const PointLightComponent&) = default;
+	};
+
+	struct SpotLightComponent {
+		SpotLight handle;
+
+		SpotLightComponent() = default;
+		SpotLightComponent(const SpotLightComponent&) = default;
+	};
+
+	struct DirectionalLightComponent {
+		DirectionalLight handle;
+
+		DirectionalLightComponent() = default;
+		DirectionalLightComponent(const DirectionalLightComponent&) = default;
 	};
 }

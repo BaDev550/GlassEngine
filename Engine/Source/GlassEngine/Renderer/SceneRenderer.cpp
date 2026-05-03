@@ -8,30 +8,33 @@
 
 namespace ge::renderer {
 	SceneRenderer::SceneRenderer(Scene* scene) : _scene(scene) {
-		FramebufferSpec fspec{};
-		fspec.attachments = { FramebufferAttachment{ImageFormat::RGBA8Srgb}, FramebufferAttachment{ImageFormat::D32S8} };
-		fspec.attachments[1].clearValue = {1.f, 0};
-		fspec.width = Engine::Get().GetApplicationWindow().GetWidth();
-		fspec.height = Engine::Get().GetApplicationWindow().GetHeight();
-		_framebuffer = Framebuffer::Create(fspec);
-		_renderPass = RenderPass::Create(_framebuffer, "SCENE_RENDER_PASS");
+		// framebuffer + Render pass
+		{
+			FramebufferSpec fspec{};
+			fspec.attachments = { FramebufferAttachment{ImageFormat::RGBA8Srgb}, FramebufferAttachment{ImageFormat::D32S8} };
+			fspec.attachments[1].clearValue = { 1.f, 0 };
+			fspec.width = Engine::Get().GetApplicationWindow().GetWidth();
+			fspec.height = Engine::Get().GetApplicationWindow().GetHeight();
+			_framebuffer = Framebuffer::Create(fspec);
+			_renderPass = RenderPass::Create(_framebuffer, "SCENE_RENDER_PASS");
 
-		PipelineSpec spec{};
-		spec.inputAssemblySpec.vertexAttributes = {
-			VertexAttribute{VertexFormat::RGBA32Float, 0, 0, 0, },
-			VertexAttribute{VertexFormat::RGBA32Float, 16, 1, 0, },
-			VertexAttribute{VertexFormat::RG32Float, 32, 2, 0, }
-		};
-		spec.inputAssemblySpec.vertexBindings = {
-			VertexBinding{40, 0, VertexInputRate::Vertex}
-		};
-		spec.depthStencilSpec.depthTestEnable = true;
-		spec.depthStencilSpec.depthWriteEnable = true;
-		spec.depthStencilSpec.depthTestCompareOp = CompareOp::Less;
-		spec.resterizerSpec.cullMode = CullMode::Back;
-		spec.shader = Renderer3D::GetShaderLibrary().GetShader("dnm");
-		spec.targetFramebuffer = _framebuffer;
-		_pipeline = Pipeline::Create(spec);
+			PipelineSpec spec{};
+			spec.inputAssemblySpec.vertexAttributes = {
+				VertexAttribute{VertexFormat::RGBA32Float, 0, 0, 0, },
+				VertexAttribute{VertexFormat::RGBA32Float, 16, 1, 0, },
+				VertexAttribute{VertexFormat::RG32Float, 32, 2, 0, }
+			};
+			spec.inputAssemblySpec.vertexBindings = {
+				VertexBinding{40, 0, VertexInputRate::Vertex}
+			};
+			spec.depthStencilSpec.depthTestEnable = true;
+			spec.depthStencilSpec.depthWriteEnable = true;
+			spec.depthStencilSpec.depthTestCompareOp = CompareOp::Less;
+			spec.resterizerSpec.cullMode = CullMode::Back;
+			spec.shader = Renderer3D::GetShaderLibrary().GetShader("dnm");
+			spec.targetFramebuffer = _framebuffer;
+			_pipeline = Pipeline::Create(spec);
+		}
 
 		// Camera buffer
 		{
@@ -42,8 +45,58 @@ namespace ge::renderer {
 			spec.memoryType = BufferMemoryType::DeviceMemory;
 			spec.usageFlags = BufferUsageFlagsBits::Uniform;
 			_cameraBuffer = Buffer::Create(spec);
-			std::memcpy(_cameraBuffer->GetMappedPtr(), &_cameraData, sizeof(CameraData));
+			_cameraData = _cameraBuffer->GetMappedPtr<CameraData>();
 			Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(_cameraBuffer, 0);
+		}
+
+		// Light buffers
+		{
+			// GPU Light data
+			{
+				BufferSpec spec{};
+				spec.cpuAccess = BufferCpuAccess::Write;
+				spec.elementSize = sizeof(GPULightData);
+				spec.elementCount = 1;
+				spec.memoryType = BufferMemoryType::DeviceMemory;
+				spec.usageFlags = BufferUsageFlagsBits::Readonly;
+				_lightDataBuffer = Buffer::Create(spec);
+				_lightGPUData = _lightDataBuffer->GetMappedPtr<GPULightData>();
+				Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(_lightDataBuffer, 1);
+			}
+
+			// Point light buffer
+			{
+				BufferSpec spec{};
+				spec.cpuAccess = BufferCpuAccess::Write;
+				spec.elementSize = sizeof(PointLight);
+				spec.elementCount = GE_MAX_POINT_LIGHT_COUNT;
+				spec.memoryType = BufferMemoryType::DeviceMemory;
+				spec.usageFlags = BufferUsageFlagsBits::Readonly;
+				_pointLightsBuffer = Buffer::Create(spec);
+				_lightGPUData->pointLightBufferGPUAddress = _pointLightsBuffer->GetGPUAddress();
+			}
+			// Spot light buffer
+			{
+				BufferSpec spec{};
+				spec.cpuAccess = BufferCpuAccess::Write;
+				spec.elementSize = sizeof(SpotLight);
+				spec.elementCount = GE_MAX_SPOT_LIGHT_COUNT;
+				spec.memoryType = BufferMemoryType::DeviceMemory;
+				spec.usageFlags = BufferUsageFlagsBits::Readonly;
+				_spotLightBuffer = Buffer::Create(spec);
+				_lightGPUData->spotLightBufferGPUAddress = _spotLightBuffer->GetGPUAddress();
+			}
+			// Directional light buffer
+			{
+				BufferSpec spec{};
+				spec.cpuAccess = BufferCpuAccess::Write;
+				spec.elementSize = sizeof(DirectionalLight);
+				spec.elementCount = 1;
+				spec.memoryType = BufferMemoryType::DeviceMemory;
+				spec.usageFlags = BufferUsageFlagsBits::Readonly;
+				_directionalLightBuffer = Buffer::Create(spec);
+				_lightGPUData->directionalLightBufferGPUAddress = _directionalLightBuffer->GetGPUAddress();
+			}
 		}
 
 		_endlessGrid = mem::Ref<EndlessGrid>::Create(_framebuffer);
@@ -57,11 +110,10 @@ namespace ge::renderer {
 
 	void SceneRenderer::DrawScene(const ge::mem::Ref<Camera>& camera)
 	{
-		_cameraData.view = camera->GetView();
-		_cameraData.proj = camera->GetProjection();
-		_cameraData.pos = camera->GetPosition();
-		std::memcpy(_cameraBuffer->GetMappedPtr(), &_cameraData, sizeof(CameraData));
-
+		_cameraData->view = camera->GetView();
+		_cameraData->proj = camera->GetProjection();
+		_cameraData->pos = camera->GetPosition();
+		
 		_renderPass->Begin();
 		_endlessGrid->Draw();
 
