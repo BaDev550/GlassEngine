@@ -11,7 +11,13 @@ namespace ge::renderer {
 		// framebuffer + Render pass
 		{
 			FramebufferSpec fspec{};
-			fspec.attachments = { FramebufferAttachment{ImageFormat::RGBA8Srgb}, FramebufferAttachment{ImageFormat::D32S8} };
+			fspec.attachments = { 
+				FramebufferAttachment{ImageFormat::R10G10B10A2Unorm}, // surface 
+				FramebufferAttachment{ImageFormat::RGBA8Unorm}, // albedo
+				FramebufferAttachment{ImageFormat::RGBA8Unorm}, // emissive, instensity
+				FramebufferAttachment{ImageFormat::RG8Unorm}, // metallic roughness
+				FramebufferAttachment{ImageFormat::D32S8} 
+			};
 			fspec.attachments[1].clearValue = { 1.f, 0 };
 			fspec.width = Engine::Get().GetApplicationWindow().GetWidth();
 			fspec.height = Engine::Get().GetApplicationWindow().GetHeight();
