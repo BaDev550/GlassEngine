@@ -19,6 +19,7 @@ namespace ge::renderer {
 
 	class Texture : public RenderObject {
 	public:
+		Texture(ge::mem::Ref<Image> image, ImageSubresource subresource, const TextureSpec& specs) : _image(image), _subresource(subresource), _specs(specs) { }
 		virtual ~Texture() = default;
 		ImageFormat GetImageFormat() const { return _specs.format; }
 		ImageFilter GetImageFilter() const { return _specs.filter; }
@@ -33,8 +34,6 @@ namespace ge::renderer {
 			_image->SetDebugName(name);
 		}
 	protected:
-		Texture(ge::mem::Ref<Image> image, ImageSubresource subresource, const TextureSpec& specs)
-			: _image(image), _subresource(subresource), _specs(specs) { }
 		ge::mem::Ref<Image> _image = nullptr;
 		ImageSubresource _subresource{};
 		TextureSpec _specs;

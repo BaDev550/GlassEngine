@@ -68,7 +68,6 @@ namespace ge::renderer {
 
 	void RenderAPI::LoadDataToTexture2D(Texture2D& texture, const void* data, uint64_t dataSize) {
 		GE_ASSERT(texture.GetImage()->GetSpecRef().usageFlags.Has(ge::renderer::ImageUsageFlagsBits::TransferDst), "texture image has ImageUsageFlagsBits::TransferDst bit");
-
 		ILoadDataToTexture2D(texture, data, dataSize);
 	}
 }

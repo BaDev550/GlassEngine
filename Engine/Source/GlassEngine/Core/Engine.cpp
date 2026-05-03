@@ -50,8 +50,8 @@ namespace ge {
 
 			renderer::Renderer3D::Submit([this]() { _imGuiLayer->Begin(); GetApplication()->DrawImGui(); });
 			renderer::Renderer3D::Submit([this]() { _imGuiLayer->End(); });
-
 			renderer::Renderer3D::WaitAndRender();
+
 			Engine::Get().GetApplicationWindow().Swapbuffers();
 		}
 		_window->GetRenderContext().Wait();
