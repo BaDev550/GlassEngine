@@ -1,6 +1,7 @@
 #pragma once
 #include "GlassEngine/Core/Core.h"
 #include "RenderPass.h"
+#include "Texture.h"
 #include "Camera.h"
 #include "Light.h"
 #include "EndlessGrid.h"
@@ -31,20 +32,21 @@ namespace ge::renderer {
 		} _lightEnviromentData;
 
 		struct SceneData {
-			struct CameraData {
+			struct alignas(16) CameraData {
 				glm::mat4 proj;
 				glm::mat4 view;
 				glm::vec3 pos;
 			} cameraData;
+			
+			uint64_t pointLightBufferGPUAddress;
+			uint64_t spotLightBufferGPUAddress;
+			uint64_t directionalLightBufferGPUAddress;
 
 			uint32_t lutIndex;
 			uint32_t enviromentMapIndex;
-
-			uint64_t pointLightBufferGPUAddress;
+			
 			uint32_t pointLightCount;
-			uint64_t spotLightBufferGPUAddress;
 			uint32_t spotLightCount;
-			uint64_t directionalLightBufferGPUAddress;
 		} *_data;
 		ge::mem::Ref<Buffer> _sceneDataBuffer;
 		ge::mem::Ref<Buffer> _pointLightsBuffer;

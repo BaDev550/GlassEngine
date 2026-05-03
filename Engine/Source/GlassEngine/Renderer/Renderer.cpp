@@ -11,7 +11,7 @@ namespace ge::renderer {
 		mem::Ref<Sampler> _defaultSampler = nullptr;
 		mem::Ref<Texture2D> _defaultWhiteTexture = nullptr;
 		mem::Ref<Texture2D> _defaultBlackTexture = nullptr;
-		mem::Ref<Buffer> _defaultsUbo = nullptr;
+		mem::Ref<Buffer> _engineGlobals = nullptr;
 	} static s_data;
 
 	static mem::Ref<RenderAPI> g_renderAPI = nullptr;
@@ -53,24 +53,24 @@ namespace ge::renderer {
 			s_data._defaultBlackTexture = Texture2D::Create(blackTextureData, &blackData);
 			s_data._defaultBlackTexture->SetDebugName("Black Texture");
 
-			struct Defaults {
-				uint32_t defaultSampler = s_data._defaultSampler->GetHandle();
+			struct EngineGlobals {
+				uint32_t EngineGlobalsampler = s_data._defaultSampler->GetHandle();
 				uint32_t whiteTexture = s_data._defaultWhiteTexture->GetHandle();
 				uint32_t blackTexture = s_data._defaultBlackTexture->GetHandle();
-			} const defaults{};
+			} const engineGlobals{};
 
-			BufferSpec defaultsUboSpec{};
-			defaultsUboSpec.cpuAccess = BufferCpuAccess::Write;
-			defaultsUboSpec.memoryType = BufferMemoryType::DeviceMemory;
-			defaultsUboSpec.usageFlags = BufferUsageFlagsBits::Uniform;
-			defaultsUboSpec.elementSize = sizeof(defaults);
-			defaultsUboSpec.elementCount = 1;
-			s_data._defaultsUbo = Buffer::Create(defaultsUboSpec);
-			s_data._defaultsUbo->SetDebugName("Defaults Buffer");
+			BufferSpec spec{};
+			spec.cpuAccess = BufferCpuAccess::Write;
+			spec.memoryType = BufferMemoryType::DeviceMemory;
+			spec.usageFlags = BufferUsageFlagsBits::Uniform;
+			spec.elementSize = sizeof(EngineGlobals);
+			spec.elementCount = 1;
+			s_data._engineGlobals = Buffer::Create(spec);
+			s_data._engineGlobals->SetDebugName("EngineGlobals Buffer");
 
-			*s_data._defaultsUbo->GetMappedPtr<Defaults>() = defaults;
+			*s_data._engineGlobals->GetMappedPtr<EngineGlobals>() = engineGlobals;
 
-			Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(s_data._defaultsUbo, 2);
+			Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(s_data._engineGlobals, 1);
 		}
 	}
 
@@ -79,7 +79,7 @@ namespace ge::renderer {
 		s_data._defaultSampler = nullptr;
 		s_data._defaultWhiteTexture = nullptr;
 		s_data._defaultBlackTexture = nullptr;
-		s_data._defaultsUbo = nullptr;
+		s_data._engineGlobals = nullptr;
 		g_renderAPI = nullptr;
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Memory/Ref.h"
+#include "GlassEngine/Renderer/Image.h"
 #include <cstdint>
 #include <initializer_list>
 #include "Types.h"

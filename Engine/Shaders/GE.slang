@@ -1,21 +1,28 @@
-static const constexpr uint __GE_Global_Camera_Buffer_Index__ = 0;
-static const constexpr uint __GE_Global_Light_Buffer_Index__ = 1;
-static const constexpr uint __GE_Defaults_Buffer_Index__ = 2;
+static const constexpr uint __GE_Scene_Data_Index__ = 0;
+static const constexpr uint __GE_Engine_Global_Data_Index__ = 1;
 
-// TODO: better name
 struct CameraData {
     float4x4 proj;
     float4x4 view;
-    float3 pos;
+    float4 pos;
+}
+
+struct SceneData {
+    CameraData cameraData;
+
+    uint64_t pointLightBufferGPUAddress;
+    uint64_t spotLightBufferGPUAddress;
+    uint64_t directionalLightBufferGPUAddress;
+    
+    uint32_t lutIndex;
+    uint32_t enviromentMapIndex;
+
+    uint32_t pointLightCount;
+    uint32_t spotLightCount;
 };
 
 // TODO: better name
-struct LightData {
-    uint GGXLut;
-};
-
-// TODO: better name
-struct Defaults {
+struct EngineGlobalData {
     uint defaultSampler;
     uint whiteTexture;
     uint blackTexture;
@@ -80,17 +87,13 @@ extension ReadonlyImageCube : IBindlessDescriptor {}
 
 extension Sampler : IBindlessDescriptor {}
 
-[vk::binding(__GE_Global_Camera_Buffer_Index__, 0)]
+[vk::binding(__GE_Scene_Data_Index__, 0)]
 [require(spirv)]
-ConstantBuffer<CameraData> __GE_Global_Camera_Buffer__;
+ConstantBuffer<SceneData> __GE_Scene_Data__;
 
-[vk::binding(__GE_Global_Light_Buffer_Index__, 0)]
+[vk::binding(__GE_Engine_Global_Data_Index__, 0)]
 [require(spirv)]
-ConstantBuffer<LightData> __GE_Global_Light_Buffer__;
-
-[vk::binding(__GE_Defaults_Buffer_Index__, 0)]
-[require(spirv)]
-ConstantBuffer<Defaults> __GE_Defaults_Buffer__;
+ConstantBuffer<EngineGlobalData> __GE_Engine_Global_Data_Buffer__;
 
 [vk::binding(0, 1)]
 [require(spirv)]
@@ -135,39 +138,39 @@ T GetBindless<T>(uint handle)
     }
 }
 
+SceneData GetSceneData() {
+    __target_switch
+    {
+    case spirv:
+        return __GE_Scene_Data__;
+    case hlsl: {
+        return __loadResourceDescriptorFromHeap<UniformBuffer<SceneData, DefaultDataLayout>>(__GE_Scene_Data_Index__);
+    }
+    default: static_assert(false, "unsupported shader target");
+        return {};
+    }
+}
+
 CameraData GetCamaraData() {
     __target_switch
     {
     case spirv:
-        return __GE_Global_Camera_Buffer__;
+        return __GE_Scene_Data__.cameraData;
     case hlsl: {
-        return __loadResourceDescriptorFromHeap<UniformBuffer<CameraData, DefaultDataLayout>>(__GE_Global_Camera_Buffer_Index__);
+        return __loadResourceDescriptorFromHeap<UniformBuffer<SceneData, DefaultDataLayout>>(__GE_Scene_Data_Index__).cameraData;
     }
     default: static_assert(false, "unsupported shader target");
         return {};
     }
 }
 
-LightData GetLightData() {
+EngineGlobalData GetEngineGlobalData() {
     __target_switch
     {
     case spirv:
-        return __GE_Global_Light_Buffer__;
+        return __GE_Engine_Global_Data_Buffer__;
     case hlsl: {
-        return __loadResourceDescriptorFromHeap<UniformBuffer<LightData, DefaultDataLayout>>(__GE_Global_Light_Buffer_Index__);
-    }
-    default: static_assert(false, "unsupported shader target");
-        return {};
-    }
-}
-
-Defaults GetDefaults() {
-    __target_switch
-    {
-    case spirv:
-        return __GE_Defaults_Buffer__;
-    case hlsl: {
-        return __loadResourceDescriptorFromHeap<UniformBuffer<Defaults, DefaultDataLayout>>(__GE_Defaults_Buffer_Index__);
+        return __loadResourceDescriptorFromHeap<UniformBuffer<EngineGlobalData, DefaultDataLayout>>(__GE_Engine_Global_Data_Index__);
     }
     default: static_assert(false, "unsupported shader target");
         return {};
@@ -175,13 +178,13 @@ Defaults GetDefaults() {
 }
 
 Sampler GetDefaultSampler() {
-    return GetBindless<Sampler>(GetDefaults().defaultSampler);
+    return GetBindless<Sampler>(GetEngineGlobalData().defaultSampler);
 }
 
 ReadonlyImage2D GetWhiteTexture() {
-    return GetBindless<ReadonlyImage2D>(GetDefaults().whiteTexture);
+    return GetBindless<ReadonlyImage2D>(GetEngineGlobalData().whiteTexture);
 }
 
 ReadonlyImage2D GetBlackTexture() {
-    return GetBindless<ReadonlyImage2D>(GetDefaults().blackTexture);
+    return GetBindless<ReadonlyImage2D>(GetEngineGlobalData().blackTexture);
 }
