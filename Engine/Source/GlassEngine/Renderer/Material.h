@@ -9,6 +9,14 @@ namespace ge::renderer {
 		uint32_t normalTextureIndex = 0;
 	};
 
+	struct MaterialData {
+		glm::u8vec4 albedoColor;
+		glm::u8vec4 emissiveColor;
+		uint8_t metallic;
+		uint8_t roughness;
+		uint8_t emissiveIntensity;
+	};
+
 	class Material : public RenderObject {
 	public:
 		MaterialBindlessData& GetBindlessData() { return _bindlessData; }
@@ -36,6 +44,7 @@ namespace ge::renderer {
 			AssetHandle roughnessTextureHandle = GE_INVALID_ASSET_HANDLE;
 			AssetHandle normalTextureHandle = GE_INVALID_ASSET_HANDLE;
 		} _textureHandles;
+		MaterialData _materialData;
 		ge::mem::Ref<Material> _material;
 	public:
 		TextureHandles& GetTextureHandles() { return _textureHandles; }

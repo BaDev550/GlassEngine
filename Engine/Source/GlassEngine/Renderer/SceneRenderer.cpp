@@ -42,34 +42,21 @@ namespace ge::renderer {
 			_pipeline = Pipeline::Create(spec);
 		}
 
-		// Camera buffer
+		// Scene Data
 		{
 			BufferSpec spec{};
 			spec.cpuAccess = BufferCpuAccess::Write;
-			spec.elementSize = sizeof(CameraData);
+			spec.elementSize = sizeof(SceneData);
 			spec.elementCount = 1;
 			spec.memoryType = BufferMemoryType::DeviceMemory;
-			spec.usageFlags = BufferUsageFlagsBits::Uniform;
-			_cameraBuffer = Buffer::Create(spec);
-			_cameraData = _cameraBuffer->GetMappedPtr<CameraData>();
-			Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(_cameraBuffer, 0);
+			spec.usageFlags = BufferUsageFlagsBits::Readonly;
+			_sceneDataBuffer = Buffer::Create(spec);
+			_data = _sceneDataBuffer->GetMappedPtr<SceneData>();
+			Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(_sceneDataBuffer, 0);
 		}
 
 		// Light buffers
 		{
-			// GPU Light data
-			{
-				BufferSpec spec{};
-				spec.cpuAccess = BufferCpuAccess::Write;
-				spec.elementSize = sizeof(GPULightData);
-				spec.elementCount = 1;
-				spec.memoryType = BufferMemoryType::DeviceMemory;
-				spec.usageFlags = BufferUsageFlagsBits::Readonly;
-				_lightDataBuffer = Buffer::Create(spec);
-				_lightGPUData = _lightDataBuffer->GetMappedPtr<GPULightData>();
-				Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(_lightDataBuffer, 1);
-			}
-
 			// Point light buffer
 			{
 				BufferSpec spec{};
@@ -79,7 +66,7 @@ namespace ge::renderer {
 				spec.memoryType = BufferMemoryType::DeviceMemory;
 				spec.usageFlags = BufferUsageFlagsBits::Readonly;
 				_pointLightsBuffer = Buffer::Create(spec);
-				_lightGPUData->pointLightBufferGPUAddress = _pointLightsBuffer->GetGPUAddress();
+				_data->pointLightBufferGPUAddress = _pointLightsBuffer->GetGPUAddress();
 			}
 			// Spot light buffer
 			{
@@ -90,7 +77,7 @@ namespace ge::renderer {
 				spec.memoryType = BufferMemoryType::DeviceMemory;
 				spec.usageFlags = BufferUsageFlagsBits::Readonly;
 				_spotLightBuffer = Buffer::Create(spec);
-				_lightGPUData->spotLightBufferGPUAddress = _spotLightBuffer->GetGPUAddress();
+				_data->spotLightBufferGPUAddress = _spotLightBuffer->GetGPUAddress();
 			}
 			// Directional light buffer
 			{
@@ -101,7 +88,7 @@ namespace ge::renderer {
 				spec.memoryType = BufferMemoryType::DeviceMemory;
 				spec.usageFlags = BufferUsageFlagsBits::Readonly;
 				_directionalLightBuffer = Buffer::Create(spec);
-				_lightGPUData->directionalLightBufferGPUAddress = _directionalLightBuffer->GetGPUAddress();
+				_data->directionalLightBufferGPUAddress = _directionalLightBuffer->GetGPUAddress();
 			}
 		}
 
@@ -116,9 +103,9 @@ namespace ge::renderer {
 
 	void SceneRenderer::DrawScene(const ge::mem::Ref<Camera>& camera)
 	{
-		_cameraData->view = camera->GetView();
-		_cameraData->proj = camera->GetProjection();
-		_cameraData->pos = camera->GetPosition();
+		_data->cameraData.view = camera->GetView();
+		_data->cameraData.proj = camera->GetProjection();
+		_data->cameraData.pos = camera->GetPosition();
 		
 		_renderPass->Begin();
 		_endlessGrid->Draw();

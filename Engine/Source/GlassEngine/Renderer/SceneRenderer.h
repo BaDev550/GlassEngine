@@ -30,23 +30,23 @@ namespace ge::renderer {
 			DirectionalLight directionalLight;
 		} _lightEnviromentData;
 
-		struct CameraData {
-			glm::mat4 proj;
-			glm::mat4 view;
-			glm::vec3 pos;
-		} *_cameraData;
-		ge::mem::Ref<Buffer> _cameraBuffer;
+		struct SceneData {
+			struct CameraData {
+				glm::mat4 proj;
+				glm::mat4 view;
+				glm::vec3 pos;
+			} cameraData;
 
-		struct GPULightData {
 			uint32_t lutIndex;
 			uint32_t enviromentMapIndex;
+
 			uint64_t pointLightBufferGPUAddress;
 			uint32_t pointLightCount;
 			uint64_t spotLightBufferGPUAddress;
 			uint32_t spotLightCount;
 			uint64_t directionalLightBufferGPUAddress;
-		} *_lightGPUData;
-		ge::mem::Ref<Buffer> _lightDataBuffer;
+		} *_data;
+		ge::mem::Ref<Buffer> _sceneDataBuffer;
 		ge::mem::Ref<Buffer> _pointLightsBuffer;
 		ge::mem::Ref<Buffer> _spotLightBuffer;
 		ge::mem::Ref<Buffer> _directionalLightBuffer;
