@@ -51,6 +51,7 @@ namespace ge {
         uint8_t* pixels = stbi_load(source.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
         if (!pixels) {
             GE_CORE_ERROR("Failed to load source image: {}", source.string());
+            stbi_image_free(pixels);
             return GE_INVALID_ASSET_TYPE;
         }
 

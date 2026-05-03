@@ -49,6 +49,10 @@ namespace ge::editor {
 		if (ImGui::Button("New Folder")) {
 			ImGui::OpenPopup("Create New Folder");
 		}
+		ImGui::SameLine();
+		if (ImGui::Button("Import Model")) {
+			GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.showPanel modelImporter");
+		}
 
 		float cellSize = _thumbnailSize + _padding;
 		float panelWidth = ImGui::GetContentRegionAvail().x;
@@ -96,11 +100,15 @@ namespace ge::editor {
 					ImGui::OpenPopup("Rename Item");
 				}
 
-				if (ImGui::MenuItem("Import")) {
-					AssetManager::GetOrImportAsset<Asset>(entry.path);
+				if (entry.path.extension() != GE_ASSET_EXTENSION) {
+					if (ImGui::MenuItem("Import")) {
+						AssetManager::GetOrImportAsset<Asset>(entry.path);
+						RefreshAssetTree();
+					}
 				}
 
 				if (ImGui::MenuItem("Delete")) {
+					AssetManager::Editor_OnAssetDeleted(entry.handle);
 					std::filesystem::path target = _currentDirectory / entry.path.filename();
 					if (std::filesystem::exists(target)) {
 						std::filesystem::remove_all(target);

@@ -16,7 +16,7 @@ namespace ge {
 		virtual void OnAttach() { RegisterLayerPanels(); }
 		virtual void OnDetach() {}
 		virtual void OnUpdate(float deltaTime) {}
-		virtual void OnImGuiRender() { for (auto& [name, panel] : _panelManager) { panel->Draw(); } }
+		virtual void OnImGuiRender() { for (auto& [name, panel] : _panelManager) { if (panel) panel->Draw(); } }
 		virtual void RegisterConsoleCommands() {}
 		virtual void RegisterLayerPanels() {}
 		inline const char* GetDebugName() const { return _debugName.c_str(); }

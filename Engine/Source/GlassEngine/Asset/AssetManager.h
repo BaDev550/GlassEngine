@@ -47,6 +47,7 @@ namespace ge {
 		void CompileIntoPakFile(const std::filesystem::path& outPath);
 		void CompileIntoManifest(const std::filesystem::path& outPath);
 		void CookAssets(const std::filesystem::path& outPath);
+		void DeleteAllGAssetFiles();
 
 		[[nodiscard]] AssetHandle CreateAsset(const std::filesystem::path& targetPath, mem::Ref<Asset> asset);
 
@@ -114,6 +115,7 @@ namespace ge {
 		static void Editor_CompileIntoPakFile(const std::filesystem::path& outPath);
 		static void Editor_CompileIntoManifest(const std::filesystem::path& outPath);
 		static void Editor_CookAssets(const std::filesystem::path& outPath);
+		static void Editor_OnAssetDeleted(AssetHandle handle);
 		[[nodiscard]] static AssetMap Editor_GetLoadedAssetsWithType(AssetType type);
 		[[nodiscard]] static AssetHandle Editor_ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath = "");
 		[[nodiscard]] static AssetHandle Editor_CreateAsset(const std::filesystem::path& targetPath, mem::Ref<Asset> asset);

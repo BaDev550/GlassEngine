@@ -49,8 +49,9 @@ namespace ge::editor {
 
                 ImGui::Separator();
 
-                std::string srcPath(sourcePathBuffer);
-                std::string tgtPath(targetPathBuffer);
+                std::filesystem::path srcPath(sourcePathBuffer);
+                std::filesystem::path tgtPath = targetPathBuffer / srcPath.filename();
+                tgtPath.replace_extension(GE_ASSET_EXTENSION);
 
                 if (!srcPath.empty()) {
                     ImGui::Text("Import Settings");
@@ -61,8 +62,7 @@ namespace ge::editor {
                     if (ImGui::Button("Import", ImVec2(120, 0))) {
                         auto importedMesh = ge::AssetManager::GetOrImportAsset<ge::renderer::StaticMesh>(srcPath, tgtPath, importData);
                         if (importedMesh) {
-                            bIsOpen = false;
-                            ImGui::CloseCurrentPopup();
+                            GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.hidePanel modelImporter");
                         }
                         else {
                         }
@@ -71,8 +71,7 @@ namespace ge::editor {
                 }
 
                 if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-                    bIsOpen = false;
-                    ImGui::CloseCurrentPopup();
+                    GE_EXECUTE_CONSOLE_COMMAND("LAYER_Editor.hidePanel modelImporter");
                 }
 
                 ImGui::End();

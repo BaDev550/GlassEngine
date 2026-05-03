@@ -178,9 +178,17 @@ namespace ge {
 						textureSpec.filter = renderer::ImageFilter::Linear;
 						textureSpec.format = renderer::ImageFormat::BC3Srgb;
 						importData.textureSpecs = &textureSpec;
-						auto texturePath = meshDirectory / aiTexturePath.C_Str();
-						//auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.replace_extension(GE_ASSET_EXTENSION).filename());
-						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);
+						std::string rawPath = TEXT(aiTexturePath.C_Str());
+						std::replace(rawPath.begin(), rawPath.end(), '\\', '/');
+						auto texturePath = meshDirectory / rawPath;
+						std::filesystem::path textureSourcePath = meshDirectory / aiTexturePath.C_Str();
+						std::filesystem::path targetTexturePath;
+						if (!targetPath.empty()) {
+							std::filesystem::path textureFilename = textureSourcePath.filename();
+							textureFilename.replace_extension(GE_ASSET_EXTENSION);
+							targetTexturePath = targetMeshDirectory / textureFilename;
+						}
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, targetTexturePath, importData);
 						matAsset->SetAlbedoTexture(texture ? texture->_assetHandle : whiteTexture->_assetHandle);
 					}
 					else {
@@ -197,9 +205,17 @@ namespace ge {
 						textureSpec.filter = renderer::ImageFilter::Linear;
 						textureSpec.format = renderer::ImageFormat::BC3Unorm;
 						importData.textureSpecs = &textureSpec;
-						auto texturePath = meshDirectory / aiTexturePath.C_Str();
-						//auto targetTexturePath = (targetPath.empty() ? "" : targetMeshDirectory / texturePath.replace_extension(GE_ASSET_EXTENSION).filename());
-						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, "", importData);
+						std::string rawPath = TEXT(aiTexturePath.C_Str());
+						std::replace(rawPath.begin(), rawPath.end(), '\\', '/');
+						auto texturePath = meshDirectory / rawPath;
+						std::filesystem::path textureSourcePath = meshDirectory / aiTexturePath.C_Str();
+						std::filesystem::path targetTexturePath;
+						if (!targetPath.empty()) {
+							std::filesystem::path textureFilename = textureSourcePath.filename();
+							textureFilename.replace_extension(GE_ASSET_EXTENSION);
+							targetTexturePath = targetMeshDirectory / textureFilename;
+						}
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, targetTexturePath, importData);
 						matAsset->SetNormalTexture(texture ? texture->_assetHandle : whiteTexture->_assetHandle);
 					}
 					else {

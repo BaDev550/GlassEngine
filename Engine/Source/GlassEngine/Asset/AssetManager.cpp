@@ -53,6 +53,7 @@ namespace ge {
 	void AssetManager::Editor_CompileIntoPakFile(const std::filesystem::path& outPath) { _editorAssetManagerInstance->CompileIntoPakFile(outPath); }
 	void AssetManager::Editor_CompileIntoManifest(const std::filesystem::path& outPath) { _editorAssetManagerInstance->CompileIntoManifest(outPath); }
 	void AssetManager::Editor_CookAssets(const std::filesystem::path& outPath) { _editorAssetManagerInstance->CookAssets(outPath); }
+	void AssetManager::Editor_OnAssetDeleted(AssetHandle handle) { _editorAssetManagerInstance->OnAssetDeleted(handle); }
 	AssetMap AssetManager::Editor_GetLoadedAssetsWithType(AssetType type) { return _editorAssetManagerInstance->GetLoadedAssetsWithType(type); }
 
 	[[nodiscard]] AssetHandle AssetManager::Editor_ImportAsset(const ImportAssetData& asset, std::filesystem::path sourcePath, std::filesystem::path targetPath) {

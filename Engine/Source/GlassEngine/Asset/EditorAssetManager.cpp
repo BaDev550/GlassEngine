@@ -13,6 +13,7 @@ namespace ge {
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "cookAssets", [this](const GEVector<GEString>& args) { CookAssets(args[0].ToPath()); }, "cookAssets <outputPakFile>");
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "compileAssetsToPAK", [this](const GEVector<GEString>& args) { CompileIntoPakFile(args[0].ToPath()); }, "compileAssetsToPAK <outputPakFile>");
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "compileAssetsToManifest", [this](const GEVector<GEString>& args) { CompileIntoManifest(args[0].ToPath()); }, "compileAssetsToManifest <outputPakFile>");
+		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "deleteAllAssets", [this](const GEVector<GEString>& args) { DeleteAllGAssetFiles(); });
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ASSETMANAGER_CATAGORY, "loadAsset", [this](const GEVector<GEString>& args) { 
 			AssetHandle handle = ImportAsset(ImportAssetData(), args[0].ToPath());
 			GE_CORE_INFO("Asset Loaded: {} Handle: {}", args[0], handle.ToString());
@@ -213,6 +214,10 @@ namespace ge {
 
 		for (auto& [handle, mtd] : _assetRegistry) { // Open all the files in registry and write into .pak
 			file::Reader assetReader(mtd.path, std::ios::binary | std::ios::ate);
+			if (!assetReader.IsStreamGood()) {
+				GE_CORE_WARN("Failed to write asset to asset registry: {}", mtd.path.string());
+				continue;
+			}
 			uint64_t size = assetReader.GetStreamPosition();
 			uint64_t offset = out.GetStreamPosition();
 			assetReader.SetStreamPosition(0);
@@ -254,6 +259,18 @@ namespace ge {
 		std::filesystem::path manifestPath = outPath.parent_path() / (outPath.stem().string() + "_manifest");
 		manifestPath.replace_extension(".bin");
 		CompileIntoManifest(manifestPath);
+	}
+
+	void EditorAssetManager::DeleteAllGAssetFiles()
+	{
+		for (auto& file : std::filesystem::recursive_directory_iterator(Project::GetAssetDirectory())) {
+			if (file.path().extension() == GE_ASSET_EXTENSION) {
+				AssetMetadata mtd = GetMetadata(file.path());
+				std::filesystem::remove_all(file.path());
+				RemoveAsset(mtd.handle);
+			}
+		}
+		SaveAssetRegistry();
 	}
 
 	bool EditorAssetManager::AssetInRegistry(AssetHandle handle) { return _assetRegistry.contains(handle); }
