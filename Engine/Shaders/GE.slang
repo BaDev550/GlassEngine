@@ -7,18 +7,34 @@ struct CameraData {
     float4 pos;
 }
 
+struct PointLight {
+
+}
+
+struct SpotLight {
+}
+
+struct DirectionalLight {
+}
+
 struct SceneData {
     CameraData cameraData;
 
-    uint64_t pointLightBufferGPUAddress;
-    uint64_t spotLightBufferGPUAddress;
-    uint64_t directionalLightBufferGPUAddress;
+    Ptr<PointLight> pointLightBuffer;
+    Ptr<SpotLight> spotLightBuffer;
+    Ptr<DirectionalLight> directionalLightBuffer;
     
-    uint32_t lutIndex;
-    uint32_t enviromentMapIndex;
+    uint lutIndex;
+    uint enviromentMapIndex;
 
-    uint32_t pointLightCount;
-    uint32_t spotLightCount;
+    uint gBufferNormal;
+    uint gBufferAlbedoMetallic;
+    uint gBufferEmissive;
+    uint gBufferRoughness;
+    uint gBufferEntityId;
+
+    uint pointLightCount;
+    uint spotLightCount;
 };
 
 // TODO: better name
@@ -47,7 +63,8 @@ typealias ReadonlyImage1DArray = Texture1DArray;
 typealias WritableImage1DArray = RWTexture1DArray;
 typealias WriteonlyImage1DArray = WTexture1DArray;
 
-typealias ReadonlyImage2D = Texture2D;
+__generic<T : ITexelElement = float4>
+typealias ReadonlyImage2D = Texture2D<T>;
 typealias WritableImage2D = RWTexture2D;
 typealias WriteonlyImage2D = WTexture2D;
 
@@ -71,7 +88,8 @@ extension ReadonlyImage1DArray : IBindlessDescriptor {}
 extension WritableImage1DArray : IBindlessDescriptor {}
 extension WriteonlyImage1DArray : IBindlessDescriptor {}
 
-extension ReadonlyImage2D : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension ReadonlyImage2D<T> : IBindlessDescriptor {}
 extension WritableImage2D : IBindlessDescriptor {}
 extension WriteonlyImage2D : IBindlessDescriptor {}
 
@@ -188,3 +206,15 @@ ReadonlyImage2D GetWhiteTexture() {
 ReadonlyImage2D GetBlackTexture() {
     return GetBindless<ReadonlyImage2D>(GetEngineGlobalData().blackTexture);
 }
+
+ReadonlyImage2D GetGBufferAlbedoMetallic() {
+    return GetBindless<ReadonlyImage2D>(GetSceneData().gBufferAlbedoMetallic);
+}
+
+// ReadonlyImage2D GetGBufferAlbedo() {
+//     return GetBindless<ReadonlyImage2D>(GetEngineGlobalData().blackTexture);
+// }
+
+// ReadonlyImage2D GetGBufferAlbedo() {
+//     return GetBindless<ReadonlyImage2D>(GetEngineGlobalData().blackTexture);
+// }

@@ -79,8 +79,11 @@ namespace ge::renderer::utility {
 			case ImageFormat::RG8Uint:			return VK_FORMAT_R8G8_UINT;
 			case ImageFormat::RG8Unorm:			return VK_FORMAT_R8G8_UNORM;
 			case ImageFormat::R10G10B10A2Unorm:	return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
-			break;
-		}
+			case ImageFormat::R8Uint:			return VK_FORMAT_R8_UINT;
+			case ImageFormat::R8Unorm:			return VK_FORMAT_R8_UNORM;
+			case ImageFormat::R32Uint:			return VK_FORMAT_R32_UINT;
+				break;
+			}
 		return {};
 	}
 	

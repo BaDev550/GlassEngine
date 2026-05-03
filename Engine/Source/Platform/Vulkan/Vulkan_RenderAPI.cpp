@@ -241,12 +241,14 @@ namespace ge::renderer {
 
 	void Vulkan_RenderAPI::Draw(ge::mem::Ref<Pipeline>& pipeline, uint32_t vertexCount, uint32_t instanceCount, ge::mem::Ref<Buffer> vertexBuffer, uint32_t firstVertex, uint32_t firstInstance)
 	{
-		auto vulkanVertexBuffer = vertexBuffer.Cast<Vulkan_Buffer>()->GetVkBuffer();
-		auto vulkanPipeline = pipeline.Cast<Vulkan_Pipeline>()->GetPipeline();
+		if (vertexBuffer) {
+			auto vulkanVertexBuffer = vertexBuffer.Cast<Vulkan_Buffer>()->GetVkBuffer();
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(GetCurrentCommandBuffer(), 0, 1, &vulkanVertexBuffer, offsets);
+		}
 
-		VkDeviceSize offsets[] = { 0 };
+		auto vulkanPipeline = pipeline.Cast<Vulkan_Pipeline>()->GetPipeline();
 		vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
-		vkCmdBindVertexBuffers(GetCurrentCommandBuffer(), 0, 1, &vulkanVertexBuffer, offsets);
 		vkCmdDraw(GetCurrentCommandBuffer(), vertexCount, instanceCount, firstVertex, firstInstance);
 		_renderStats.drawCalls++;
 

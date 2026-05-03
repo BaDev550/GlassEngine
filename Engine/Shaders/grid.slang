@@ -32,7 +32,7 @@ VertexOutput VertMain(uint vertexID : SV_VertexID)
     vPos3D.z += GetCamaraData().pos.z;
 
     output.GridSize = GridSize;
-    output.CameraPosition = GetCamaraData().pos;
+    output.CameraPosition = GetCamaraData().pos.xyz;
     output.WorldPos = vPos3D;
 
     float4 vPos = float4(vPos3D, 1.0f);

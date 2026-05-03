@@ -90,6 +90,8 @@ namespace ge::renderer {
 		RGBA8Uint,
 		RG8Uint,
 		RG8Unorm,
+		R8Uint,
+		R8Unorm,
 		R10G10B10A2Unorm,
 		RGBA16Float,
 		RGBA16Int,
@@ -97,6 +99,7 @@ namespace ge::renderer {
 		RGBA32Float,
 		RGBA32Int,
 		RGBA32Uint,
+		R32Uint,
 		BC3Unorm,
 		BC3Srgb,
 		BC5Unorm,
@@ -322,6 +325,9 @@ namespace ge::renderer {
 			case ImageFormat::RG8Uint:			return 2;
 			case ImageFormat::RG8Unorm:			return 2;
 			case ImageFormat::R10G10B10A2Unorm:	return 4;
+			case ImageFormat::R8Uint:			return 1;
+			case ImageFormat::R8Unorm:			return 1;
+			case ImageFormat::R32Uint:			return 4;
 				break;
 			}
 			return 0;

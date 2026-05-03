@@ -1,5 +1,6 @@
 #include "SceneRenderer.h"
 #include "GlassEngine/Core/Application.h"
+#include "GlassEngine/Core/Engine.h"
 #include "GlassEngine/Renderer/Pipeline.h"
 #include "GlassEngine/Renderer/Types.h"
 #include "GlassEngine/Scene/Scene.h"
@@ -10,36 +11,59 @@ namespace ge::renderer {
 	SceneRenderer::SceneRenderer(Scene* scene) : _scene(scene) {
 		// framebuffer + Render pass
 		{
-			FramebufferSpec fspec{};
-			fspec.attachments = { 
-				FramebufferAttachment{ImageFormat::R10G10B10A2Unorm}, // surface 
-				FramebufferAttachment{ImageFormat::RGBA8Unorm}, // albedo
-				FramebufferAttachment{ImageFormat::RGBA8Unorm}, // emissive, instensity
-				FramebufferAttachment{ImageFormat::RG8Unorm}, // metallic roughness
-				FramebufferAttachment{ImageFormat::D32S8} 
-			};
-			fspec.attachments[1].clearValue = { 1.f, 0 };
-			fspec.width = Engine::Get().GetApplicationWindow().GetWidth();
-			fspec.height = Engine::Get().GetApplicationWindow().GetHeight();
-			_framebuffer = Framebuffer::Create(fspec);
-			_renderPass = RenderPass::Create(_framebuffer, "SCENE_RENDER_PASS");
+			// geometry pass
+			{
+				FramebufferSpec fspec{};
+				fspec.attachments = { 
+					FramebufferAttachment{ImageFormat::R10G10B10A2Unorm}, // surface 
+					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // albedo, metallic
+					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // emissive, instensity
+					FramebufferAttachment{ImageFormat::R8Unorm}, // roughness
+					FramebufferAttachment{ImageFormat::R32Uint}, // entityId
+					FramebufferAttachment{ImageFormat::D32S8} 
+				};
+				fspec.attachments[5].clearValue = { 1.f, 0 };
+				fspec.width = Engine::Get().GetApplicationWindow().GetWidth();
+				fspec.height = Engine::Get().GetApplicationWindow().GetHeight();
+				_gBuffer = Framebuffer::Create(fspec);
+				_geometryPass = RenderPass::Create(_gBuffer, "SCENE_GEOMETRY_PASS");
 
-			PipelineSpec spec{};
-			spec.inputAssemblySpec.vertexAttributes = {
-				VertexAttribute{VertexFormat::RGBA32Float, 0, 0, 0, },
-				VertexAttribute{VertexFormat::RGBA32Float, 16, 1, 0, },
-				VertexAttribute{VertexFormat::RG32Float, 32, 2, 0, }
-			};
-			spec.inputAssemblySpec.vertexBindings = {
-				VertexBinding{40, 0, VertexInputRate::Vertex}
-			};
-			spec.depthStencilSpec.depthTestEnable = true;
-			spec.depthStencilSpec.depthWriteEnable = true;
-			spec.depthStencilSpec.depthTestCompareOp = CompareOp::Less;
-			spec.resterizerSpec.cullMode = CullMode::Back;
-			spec.shader = Renderer3D::GetShaderLibrary().GetShader("dnm");
-			spec.targetFramebuffer = _framebuffer;
-			_pipeline = Pipeline::Create(spec);
+				PipelineSpec spec{};
+				spec.inputAssemblySpec.vertexAttributes = {
+					VertexAttribute{VertexFormat::RGBA32Float, 0, 0, 0, },
+					VertexAttribute{VertexFormat::RGBA32Float, 16, 1, 0, },
+					VertexAttribute{VertexFormat::RG32Float, 32, 2, 0, }
+				};
+				spec.inputAssemblySpec.vertexBindings = {
+					VertexBinding{40, 0, VertexInputRate::Vertex}
+				};
+				spec.depthStencilSpec.depthTestEnable = true;
+				spec.depthStencilSpec.depthWriteEnable = true;
+				spec.depthStencilSpec.depthTestCompareOp = CompareOp::Less;
+				spec.resterizerSpec.cullMode = CullMode::Back;
+				spec.shader = Renderer3D::GetShaderLibrary().GetShader("GeometryPass");
+				spec.targetFramebuffer = _gBuffer;
+				_geometryPassPipeline = Pipeline::Create(spec);
+			}
+
+			// lighting pass
+			{
+				FramebufferSpec fspec{};
+				fspec.attachments = { FramebufferAttachment{ImageFormat::RGBA8Unorm} };
+				fspec.width = Engine::Get().GetApplicationWindow().GetWidth();
+				fspec.height = Engine::Get().GetApplicationWindow().GetHeight();
+				_viewportFramebuffer = Framebuffer::Create(fspec);
+				_lightingPass = RenderPass::Create(_viewportFramebuffer, "SCENE_LIGHTING_PASS");
+
+				PipelineSpec spec{};
+				spec.depthStencilSpec.depthTestEnable = false;
+				spec.depthStencilSpec.depthWriteEnable = false;
+				spec.depthStencilSpec.depthTestCompareOp = CompareOp::None;
+				spec.resterizerSpec.cullMode = CullMode::None;
+				spec.shader = Renderer3D::GetShaderLibrary().GetShader("LightingPass");
+				spec.targetFramebuffer = _viewportFramebuffer;
+				_lightingPassPipeline = Pipeline::Create(spec);
+			}
 		}
 
 		// Scene Data
@@ -49,7 +73,7 @@ namespace ge::renderer {
 			spec.elementSize = sizeof(SceneData);
 			spec.elementCount = 1;
 			spec.memoryType = BufferMemoryType::DeviceMemory;
-			spec.usageFlags = BufferUsageFlagsBits::Readonly;
+			spec.usageFlags = BufferUsageFlagsBits::Uniform;
 			_sceneDataBuffer = Buffer::Create(spec);
 			_data = _sceneDataBuffer->GetMappedPtr<SceneData>();
 			Engine::Get().GetApplicationWindow().GetRenderContext().SetUniformBuffer(_sceneDataBuffer, 0);
@@ -90,13 +114,31 @@ namespace ge::renderer {
 				_directionalLightBuffer = Buffer::Create(spec);
 				_data->directionalLightBufferGPUAddress = _directionalLightBuffer->GetGPUAddress();
 			}
+
+			{
+				auto &renderContext = Engine::Get().GetApplicationWindow().GetRenderContext();
+				_data->gBufferNormal = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(0), {});
+				_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
+				_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
+				_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
+				_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
+			}
 		}
 
-		_endlessGrid = mem::Ref<EndlessGrid>::Create(_framebuffer);
+		_endlessGrid = mem::Ref<EndlessGrid>::Create(_viewportFramebuffer);
 	}
 
 	void SceneRenderer::Resize(uint32_t width, uint32_t height) {
-		_framebuffer->Resize(width, height);
+		_viewportFramebuffer->Resize(width, height);
+		_gBuffer->Resize(width, height);
+		{
+			auto &renderContext = Engine::Get().GetApplicationWindow().GetRenderContext();
+			_data->gBufferNormal = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(0), {});
+			_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
+			_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
+			_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
+			_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
+		}
 	}
 
 	SceneRenderer::~SceneRenderer() {}
@@ -107,9 +149,7 @@ namespace ge::renderer {
 		_data->cameraData.proj = camera->GetProjection();
 		_data->cameraData.pos = camera->GetPosition();
 		
-		_renderPass->Begin();
-		_endlessGrid->Draw();
-
+		_geometryPass->Begin();
 		auto view = _scene->GetRegistry().view<const TransformComponent, StaticMeshComponent>();
 		view.each([&](const TransformComponent& tc, StaticMeshComponent& smc) {
 			if (smc.isVisible) {
@@ -128,10 +168,15 @@ namespace ge::renderer {
 						lodIndex = lods.empty() ? 0 : lods.size() - 1;
 					}
 					
-					Renderer3D::DrawStaticMesh(_pipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
+					Renderer3D::DrawStaticMesh(_geometryPassPipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
 				}
 			}
 			});
-		_renderPass->End();
+		_geometryPass->End();
+
+		_lightingPass->Begin();
+		Renderer3D::DrawVertex(_lightingPassPipeline, 3, 1, nullptr);
+		// _endlessGrid->Draw();
+		_lightingPass->End();
 	}
 }

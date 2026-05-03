@@ -13,15 +13,20 @@ namespace ge::renderer {
 		SceneRenderer(Scene* scene);
 		~SceneRenderer();
 
-		ge::mem::Ref<Framebuffer>& GetOffscreenFramebuffer() { return _framebuffer; }
+		ge::mem::Ref<Framebuffer>& GetOffscreenFramebuffer() { return _viewportFramebuffer; }
 		void DrawScene(const ge::mem::Ref<Camera>& camera);
 		void Resize(uint32_t width, uint32_t height);
 	private:
 		Scene* _scene;
 
-		ge::mem::Ref<Framebuffer> _framebuffer;
-		ge::mem::Ref<Pipeline> _pipeline;
-		ge::mem::Ref<RenderPass> _renderPass;
+		ge::mem::Ref<Framebuffer> _gBuffer;
+		ge::mem::Ref<Pipeline> _geometryPassPipeline;
+		ge::mem::Ref<RenderPass> _geometryPass;
+
+		ge::mem::Ref<Framebuffer> _viewportFramebuffer;
+		ge::mem::Ref<Pipeline> _lightingPassPipeline;
+		ge::mem::Ref<RenderPass> _lightingPass;
+
 		ge::mem::Ref<EndlessGrid> _endlessGrid;
 
 		struct LightEnviromentData {
@@ -45,6 +50,12 @@ namespace ge::renderer {
 			uint32_t lutIndex;
 			uint32_t enviromentMapIndex;
 			
+			uint gBufferNormal;
+			uint gBufferAlbedoMetallic;
+			uint gBufferEmissive;
+			uint gBufferRoughness;
+			uint gBufferEntityId;
+
 			uint32_t pointLightCount;
 			uint32_t spotLightCount;
 		} *_data;
