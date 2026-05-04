@@ -291,6 +291,7 @@ namespace ge::renderer {
 		features12.hostQueryReset = true;
 		features12.drawIndirectCount = true;
 		features12.vulkanMemoryModel = true;
+		features12.vulkanMemoryModelDeviceScope = true;
 		features12.scalarBlockLayout = true;
 		features12.separateDepthStencilLayouts = true;
 		features11.shaderDrawParameters = true;
@@ -447,6 +448,7 @@ namespace ge::renderer {
 			FEATURE_MUST_BE_SUPPORTED(features12.uniformBufferStandardLayout)
 			FEATURE_MUST_BE_SUPPORTED(features12.drawIndirectCount)
 			FEATURE_MUST_BE_SUPPORTED(features12.vulkanMemoryModel)
+			FEATURE_MUST_BE_SUPPORTED(features12.vulkanMemoryModelDeviceScope)
 			FEATURE_MUST_BE_SUPPORTED(features12.scalarBlockLayout)
 			FEATURE_MUST_BE_SUPPORTED(features12.separateDepthStencilLayouts)
 			FEATURE_MUST_BE_SUPPORTED(features11.shaderDrawParameters)
