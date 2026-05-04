@@ -6,6 +6,7 @@
 #include "GlassEngine/Renderer/Swapchain.h"
 #include "GlassEngine/Renderer/Types.h"
 #include "GlassEngine/Utilities/Counter.h"
+#include "GlassEngine/Utilities/Logger.h"
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
 #include "Platform/Vulkan/Vulkan_Types.h"
 #include "gepch.h"
@@ -178,7 +179,26 @@ namespace ge::renderer {
 		auto& frame = _frames[frameIndex];
 		frame.isRecordState = true;
 
-		vkWaitForFences(VK_RENDER_CONTEXT->GetDevice(), 1, &frame.inFlightFence, VK_TRUE, UINT64_MAX);
+		const auto res = vkWaitForFences(VK_RENDER_CONTEXT->GetDevice(), 1, &frame.inFlightFence, VK_TRUE, UINT64_MAX);
+		if (res == VK_ERROR_DEVICE_LOST) {
+			VkDeviceFaultCountsEXT faultCounts{};
+			faultCounts.sType = VK_STRUCTURE_TYPE_DEVICE_FAULT_COUNTS_EXT;
+			vkGetDeviceFaultInfoEXT(VK_RENDER_CONTEXT->GetDevice(), &faultCounts, nullptr);
+			VkDeviceFaultInfoEXT faultInfo{};
+			faultInfo.sType = VK_STRUCTURE_TYPE_DEVICE_FAULT_INFO_EXT;
+			faultInfo.pAddressInfos = (VkDeviceFaultAddressInfoEXT*) malloc(sizeof(VkDeviceFaultAddressInfoEXT) *
+																	faultCounts.addressInfoCount);
+
+			faultInfo.pVendorInfos  = (VkDeviceFaultVendorInfoEXT*)  malloc(sizeof(VkDeviceFaultVendorInfoEXT)  *
+																	faultCounts.vendorInfoCount);
+
+			faultInfo.pVendorBinaryData = malloc(faultCounts.vendorBinarySize);
+
+			vkGetDeviceFaultInfoEXT(VK_RENDER_CONTEXT->GetDevice(), &faultCounts, &faultInfo);
+			for (const auto i : Counter(faultCounts.vendorInfoCount)) {
+				GE_GRAPHICS_ERROR("Device Lost {}", std::string(faultInfo.description));
+			}
+		}
 		vkResetFences(VK_RENDER_CONTEXT->GetDevice(), 1, &frame.inFlightFence);
 
 		frame.renderObjects.clear();

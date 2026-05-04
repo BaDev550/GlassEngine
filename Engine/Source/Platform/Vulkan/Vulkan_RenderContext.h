@@ -28,6 +28,7 @@ namespace ge::renderer {
 	VK_DEFINE_EXT_FUNC(vkDestroyDebugUtilsMessengerEXT);
 	VK_DEFINE_EXT_FUNC(vkCmdBeginDebugUtilsLabelEXT);
 	VK_DEFINE_EXT_FUNC(vkCmdEndDebugUtilsLabelEXT);
+	VK_DEFINE_EXT_FUNC(vkGetDeviceFaultInfoEXT);
 
 	struct Vulkan_DeviceFeatures {
 		bool unifiedImageLayouts;

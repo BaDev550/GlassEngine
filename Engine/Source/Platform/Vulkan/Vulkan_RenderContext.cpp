@@ -153,6 +153,7 @@ namespace ge::renderer {
 			VK_SET_EXT_FUNC(vkDestroyDebugUtilsMessengerEXT);
 			VK_SET_EXT_FUNC(vkCmdBeginDebugUtilsLabelEXT);
 			VK_SET_EXT_FUNC(vkCmdEndDebugUtilsLabelEXT);
+			VK_SET_EXT_FUNC(vkGetDeviceFaultInfoEXT);
 		}
 
 		if (_useValidationLayer) {
@@ -209,6 +210,15 @@ namespace ge::renderer {
 
 		// TODO (dnm): change with pipeline robustness
 #ifdef _DEBUG
+		VkPhysicalDeviceFaultFeaturesEXT deviceFault{};
+		deviceFault.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
+		deviceFault.deviceFault = true;
+		deviceFault.deviceFaultVendorBinary = true;
+
+		_deviceExtensions.emplace_back(VK_EXT_DEVICE_FAULT_EXTENSION_NAME);
+		deviceFault.pNext = pNext;
+		pNext = &deviceFault;		
+
 		VkPhysicalDeviceRobustness2FeaturesEXT robustness2{};
 		robustness2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
 		robustness2.nullDescriptor = true;
