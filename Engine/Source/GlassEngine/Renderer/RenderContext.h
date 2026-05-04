@@ -20,6 +20,10 @@ namespace ge::renderer {
 		[[nodiscard]] uint32_t GetWritableImageHandle(Image& image, ImageSubresource subresource);
 		[[nodiscard]] uint32_t GetSamplerHandle(Sampler& sampler);
 
+		virtual void RemoveReadonlyImageHandle(uint32_t i) = 0;
+		virtual void RemoveWritableImageHandle(uint32_t i) = 0;
+		virtual void RemoveSamplerHandle(uint32_t i) = 0;
+
 		void SetUniformBuffer(ge::mem::Ref<Buffer>& buffer, uint32_t binding) {
 			if (binding > 10) {
 				GE_GRAPHICS_ERROR("max binding is 10");

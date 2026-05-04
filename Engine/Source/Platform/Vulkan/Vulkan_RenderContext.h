@@ -56,6 +56,11 @@ namespace ge::renderer {
 		[[nodiscard]] virtual uint32_t IGetReadonlyImageHandle(Image& image, ImageSubresource subresource) override;
 		[[nodiscard]] virtual uint32_t IGetWritableImageHandle(Image& image, ImageSubresource subresource) override;
 		[[nodiscard]] virtual uint32_t IGetSamplerHandle(Sampler& sampler) override;
+
+		virtual void RemoveReadonlyImageHandle(uint32_t i) override;
+		virtual void RemoveWritableImageHandle(uint32_t i) override;
+		virtual void RemoveSamplerHandle(uint32_t i) override;
+
 		virtual void ISetUniformBuffer(ge::mem::Ref<Buffer>& buffer, uint32_t binding) override;
 
 		[[nodiscard]] virtual bool UmaOrRebar() override { return _deviceFeatures.umaOrRebar; }

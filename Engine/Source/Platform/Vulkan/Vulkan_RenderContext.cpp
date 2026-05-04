@@ -81,6 +81,18 @@ namespace ge::renderer {
 		return _descriptorManager->RegisterSampler(static_cast<Vulkan_Sampler&>(sampler));
 	}
 
+	void Vulkan_RenderContext::RemoveReadonlyImageHandle(uint32_t i) {
+		_descriptorManager->UnregisterReadonlyImage(i);
+	}
+
+	void Vulkan_RenderContext::RemoveWritableImageHandle(uint32_t i) {
+		_descriptorManager->UnregisterWritableImage(i);
+	}
+
+	void Vulkan_RenderContext::RemoveSamplerHandle(uint32_t i) {
+		_descriptorManager->UnregisterSampler(i);
+	}
+
 	void Vulkan_RenderContext::CreateVulkanAllocator() {
 		mem::Vulkan_AllocatorCallbacks::InitCallbacks();
 		_allocator = new mem::Vulkan_Allocator();

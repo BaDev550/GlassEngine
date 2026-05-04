@@ -133,6 +133,12 @@ namespace ge::renderer {
 		_gBuffer->Resize(width, height);
 		{
 			auto &renderContext = Engine::Get().GetApplicationWindow().GetRenderContext();
+			renderContext.RemoveReadonlyImageHandle(_data->gBufferNormal);
+			renderContext.RemoveReadonlyImageHandle(_data->gBufferAlbedoMetallic);
+			renderContext.RemoveReadonlyImageHandle(_data->gBufferEmissive);
+			renderContext.RemoveReadonlyImageHandle(_data->gBufferRoughness);
+			renderContext.RemoveReadonlyImageHandle(_data->gBufferEntityId);
+
 			_data->gBufferNormal = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(0), {});
 			_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
 			_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
