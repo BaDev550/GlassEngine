@@ -15,6 +15,8 @@ namespace ge::editor {
 
 		_camera = mem::Ref<renderer::FreeCamera>::Create();
 		_viewportTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_VIEWPORT_ID", _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
+		_gBufferNormalTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_NORM_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(0));
+		_gBufferAlbedoTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_ALB_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(1));
 		_contentBrowserPanel = CastChecked<editor::ContentBrowserPanel>(GetPanelManager().ShowPanel("contentBrowser"));
 		_contentBrowserPanel->Init();
 		_sceneHierarchyPanel = CastChecked<editor::SceneHierarchyPanel>(GetPanelManager().ShowPanel("sceneHierarchy"));
@@ -32,6 +34,8 @@ namespace ge::editor {
 			_activeScene->GetSceneRenderer()->Resize(_viewportSize.x, _viewportSize.y);
 			_camera->SetAspectRatio(((float)_viewportSize.x / (float)_viewportSize.y));
 			_viewportTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_VIEWPORT_ID", _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
+			_gBufferNormalTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_NORM_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(0));
+			_gBufferAlbedoTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_ALB_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(1));
 		}
 
 		_activeScene->OnEditorUpdate(deltaTime, _camera);
@@ -77,6 +81,11 @@ namespace ge::editor {
 			}
 			ImGui::EndDragDropTarget();
 		}
+		ImGui::End();
+
+		ImGui::Begin("GBuffer");
+		ImGui::Image(_gBufferNormalTextureId, ImVec2(300,300));
+		ImGui::Image(_gBufferAlbedoTextureId, ImVec2(300, 300));
 		ImGui::End();
 		EndDockspace();
 	}

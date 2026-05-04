@@ -14,6 +14,7 @@ namespace ge::renderer {
 		~SceneRenderer();
 
 		ge::mem::Ref<Framebuffer>& GetOffscreenFramebuffer() { return _viewportFramebuffer; }
+		ge::mem::Ref<Framebuffer>& GetGBufferFramebuffer() { return _gBuffer; }
 		void DrawScene(const ge::mem::Ref<Camera>& camera);
 		void Resize(uint32_t width, uint32_t height);
 	private:
