@@ -33,3 +33,14 @@ Entities:
       MeshHandle: 13328485924950516671
       IsVisible: true
       LODLevel: 0
+  - Entity: 15396958150873027299
+    IdentityComponent:
+      Name: DamagedHelmet
+    TransformComponent:
+      Position: [0, 5.2, 0]
+      Rotation: [1.6, 0, -1.4]
+      Scale: [2, 2, 2]
+    StaticMeshComponent:
+      MeshHandle: 8920419502527190666
+      IsVisible: true
+      LODLevel: 0
