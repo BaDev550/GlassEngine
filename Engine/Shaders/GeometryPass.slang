@@ -43,6 +43,7 @@ struct FragOut {
 [earlydepthstencil]
 FragOut FragMain(VertexOut vertOut) : SV_Target {
     FragOut out;
+    out.normal = GetBindless<ReadonlyImage2D>(pc.normalTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.albedoMetallic = GetBindless<ReadonlyImage2D>(pc.albedoTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.entityId = pc.entityId;
     return out;

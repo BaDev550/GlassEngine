@@ -181,12 +181,11 @@ namespace ge::renderer {
 		vkWaitForFences(VK_RENDER_CONTEXT->GetDevice(), 1, &frame.inFlightFence, VK_TRUE, UINT64_MAX);
 		vkResetFences(VK_RENDER_CONTEXT->GetDevice(), 1, &frame.inFlightFence);
 
+		for (auto& textureID : _imguiTexturePendingDeleteList)
+			ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet)textureID);
+		_imguiTexturePendingDeleteList.clear();
 		frame.renderObjects.clear();
 		frame.stagingBuffers.clear();
-		for (auto& textureID : _imguiTexturePendingDeleteList) {
-			ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet)textureID);
-		}
-		_imguiTexturePendingDeleteList.clear();
 
 		constexpr VkCommandBufferBeginInfo beginInfo{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,

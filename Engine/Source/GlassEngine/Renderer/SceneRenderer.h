@@ -50,11 +50,11 @@ namespace ge::renderer {
 			uint32_t lutIndex;
 			uint32_t enviromentMapIndex;
 			
-			uint gBufferNormal;
-			uint gBufferAlbedoMetallic;
-			uint gBufferEmissive;
-			uint gBufferRoughness;
-			uint gBufferEntityId;
+			uint32_t gBufferNormal;
+			uint32_t gBufferAlbedoMetallic;
+			uint32_t gBufferEmissive;
+			uint32_t gBufferRoughness;
+			uint32_t gBufferEntityId;
 
 			uint32_t pointLightCount;
 			uint32_t spotLightCount;

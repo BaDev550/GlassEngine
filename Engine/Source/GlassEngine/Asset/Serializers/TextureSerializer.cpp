@@ -58,13 +58,16 @@ namespace comp {
             CMP_GetMipLevel(&level, &dstMipSet, i, 0);
             if (!level || !level->m_pbData) continue;
 
+            if (level->m_nHeight < 4 || level->m_nWidth < 4) {
+                mipmapCount = i;
+                break;
+            }
+
             uint8_t* data = level->m_pbData;
             size_t   size = level->m_dwLinearSize;
 
             out_image.insert(out_image.end(), data, data + size);
         }
-
-        mipmapCount = dstMipSet.m_nMipLevels - 2;
 
         CMP_FreeMipSet(&srcMipSet);
         CMP_FreeMipSet(&dstMipSet);

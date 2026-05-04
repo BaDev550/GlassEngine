@@ -27,6 +27,8 @@ namespace ge::editor {
 
 		auto spec = _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetSpecification();
 		if (_viewportSize.x > 0.0f && _viewportSize.y > 0.0f && (spec.width != _viewportSize.x || spec.height != _viewportSize.y)) {
+			Engine::Get().GetApplicationWindow().GetRenderContext().Wait();
+
 			_activeScene->GetSceneRenderer()->Resize(_viewportSize.x, _viewportSize.y);
 			_camera->SetAspectRatio(((float)_viewportSize.x / (float)_viewportSize.y));
 			_viewportTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_VIEWPORT_ID", _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
