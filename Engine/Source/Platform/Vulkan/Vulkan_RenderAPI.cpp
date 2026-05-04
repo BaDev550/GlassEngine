@@ -5,6 +5,7 @@
 #include "GlassEngine/Renderer/Renderer.h"
 #include "GlassEngine/Renderer/Swapchain.h"
 #include "GlassEngine/Renderer/Types.h"
+#include "GlassEngine/Utilities/Counter.h"
 #include "Platform/Vulkan/Vulkan_RenderContext.h"
 #include "Platform/Vulkan/Vulkan_Types.h"
 #include "gepch.h"
@@ -520,22 +521,31 @@ namespace ge::renderer {
 
 		std::memcpy(buffer->GetMappedPtr(), data, dataSize);
 
-		VkBufferImageCopy region{};
-		region.imageExtent = {texture.GetWidth(), texture.GetHeight(), 1};
-		region.imageSubresource = VkImageSubresourceLayers{
-			vk_image->GetAspectFlags(),
-			texture.GetSubresource().baseMipmap,
-			texture.GetSubresource().baseLayer,
-			1
-		};
+		const auto pixelSize = utility::GetPixelSize(texture.GetImageFormat());
+		uint32_t bufferOffset{}; 
+		for (const auto i : Counter(texture.GetSubresource().mipmapCount)) {
+			VkBufferImageCopy region{};
+			region.imageExtent = {texture.GetWidth() >> i, texture.GetHeight() >> i, 1};
+			region.imageSubresource = VkImageSubresourceLayers{
+				vk_image->GetAspectFlags(),
+				static_cast<uint32_t>(i),
+				texture.GetSubresource().baseLayer,
+				1
+			};
+			region.bufferOffset = bufferOffset;
+			bufferOffset += region.imageExtent.width * region.imageExtent.height * pixelSize;
+	
+			vkCmdCopyBufferToImage(
+				GetCurrentCommandBuffer(), 
+				buffer->GetVkBuffer(), 
+				vk_image->GetImage(),
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+				1, 
+				&region);
 
-		vkCmdCopyBufferToImage(
-			GetCurrentCommandBuffer(), 
-			buffer->GetVkBuffer(), 
-			vk_image->GetImage(),
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
-			1, 
-			&region);
+			if (dataSize < bufferOffset / 4)
+				break;
+		}
 
 		vk_image->_imageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		_barriersForImages.emplace(vk_image.Get());

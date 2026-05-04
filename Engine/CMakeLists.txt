@@ -29,8 +29,8 @@ target_link_libraries(Engine PRIVATE nfd)
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
 target_sources(Engine PRIVATE ${ENGINE_SOURCES})
-target_include_directories(Engine 
-	PUBLIC 
+target_include_directories(Engine
+	PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/Source
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/include
@@ -72,10 +72,11 @@ target_link_libraries(Engine
         slang::slang
         yaml-cpp::yaml-cpp
         GPUOpen::VulkanMemoryAllocator
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Compressonator.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core_AVX.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core_AVX512.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/libCMP_Core_SSE.a
+        ${CMAKE_SOURCE_DIR}/Engine/vendor/compressonator/lib/libCMP_Compressonator.a
+        ${CMAKE_SOURCE_DIR}/Engine/vendor/compressonator/lib/libCMP_Framework.a
+        ${CMAKE_SOURCE_DIR}/Engine/vendor/compressonator/lib/libCMP_Core.a
+        ${CMAKE_SOURCE_DIR}/Engine/vendor/compressonator/lib/libCMP_Core_SSE.a
+        ${CMAKE_SOURCE_DIR}/Engine/vendor/compressonator/lib/libCMP_Core_AVX.a
+        ${CMAKE_SOURCE_DIR}/Engine/vendor/compressonator/lib/libCMP_Core_AVX512.a
 )
 endif()

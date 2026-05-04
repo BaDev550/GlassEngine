@@ -10,6 +10,7 @@ namespace ge::renderer {
 	struct TextureSpec {
 		uint32_t width = 1;
 		uint32_t height = 1;
+		uint8_t mipmapCount = 1;
 		ImageFilter filter = ImageFilter::Linear;
 		ImageFormat format = ImageFormat::RGBA8;
 		bool attachment = false;

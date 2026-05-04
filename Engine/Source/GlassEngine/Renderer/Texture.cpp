@@ -5,6 +5,18 @@
 #include "stb_image.h"
 
 namespace ge::renderer {
+	namespace utility {
+		size_t calculateMipmapTotalSize(int width, int height, int mipLevels, int bytesPerPixel) {
+			size_t total = 0;
+			for (int i = 0; i < mipLevels; i++) {
+				int w = std::max(1, width  >> i);  // width  / 2^i
+				int h = std::max(1, height >> i);  // height / 2^i
+				total += (size_t)w * h * bytesPerPixel;
+			}
+			return total;
+		}
+	}
+
 	uint32_t Texture::GetHandle() {
 		if (_handle == static_cast<uint32_t>(-1)) {
 			_handle = _renderContext.GetReadonlyImageHandle(*_image, _subresource);
@@ -32,18 +44,25 @@ namespace ge::renderer {
 
 	ge::mem::Ref<Texture2D> Texture2D::Create(const TextureSpec& spec, const void* data) {
 		const auto* dataPtr = reinterpret_cast<const uint8_t*>(data);
-		const auto dataSize = spec.width * spec.height * utility::GetPixelSize(spec.format);
+		const auto dataSize = utility::calculateMipmapTotalSize(
+			spec.width, 
+			spec.height, 
+			spec.mipmapCount,
+			utility::GetPixelSize(spec.format));
 
 		ImageSpec createDesc{};
 		createDesc.imageFormat = spec.format;
 		createDesc.extent = { spec.width, spec.height, 1 };
 		createDesc.usageFlags |= ImageUsageFlagsBits::Readonly;
 		createDesc.usageFlags |= ImageUsageFlagsBits::TransferDst;
+		createDesc.mipmapCount = spec.mipmapCount;
 		if (spec.attachment)
 			createDesc.usageFlags |= utility::IsColorFormat(spec.format) ?
 				ImageUsageFlagsBits::ColorAttachment : ImageUsageFlagsBits::DepthStencilAttachment;
 
-		auto texture = ge::mem::Ref<Texture2D>::Create(Image::Create(createDesc), ImageSubresource{}, spec);
+		auto texture = ge::mem::Ref<Texture2D>::Create(
+			Image::Create(createDesc), 
+			ImageSubresource{.mipmapCount = spec.mipmapCount}, spec);
 		texture->_data = std::vector<uint8_t>(dataPtr, dataPtr + dataSize);
 
 		renderer::Renderer3D::Submit([texture]() mutable {
