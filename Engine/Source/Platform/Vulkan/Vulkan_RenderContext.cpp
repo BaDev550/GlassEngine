@@ -153,6 +153,7 @@ namespace ge::renderer {
 			VK_SET_EXT_FUNC(vkDestroyDebugUtilsMessengerEXT);
 			VK_SET_EXT_FUNC(vkCmdBeginDebugUtilsLabelEXT);
 			VK_SET_EXT_FUNC(vkCmdEndDebugUtilsLabelEXT);
+			VK_SET_EXT_FUNC(vkGetDeviceFaultInfoEXT);
 		}
 
 		if (_useValidationLayer) {
@@ -209,6 +210,15 @@ namespace ge::renderer {
 
 		// TODO (dnm): change with pipeline robustness
 #ifdef _DEBUG
+		VkPhysicalDeviceFaultFeaturesEXT deviceFault{};
+		deviceFault.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
+		deviceFault.deviceFault = true;
+		deviceFault.deviceFaultVendorBinary = true;
+
+		_deviceExtensions.emplace_back(VK_EXT_DEVICE_FAULT_EXTENSION_NAME);
+		deviceFault.pNext = pNext;
+		pNext = &deviceFault;		
+
 		VkPhysicalDeviceRobustness2FeaturesEXT robustness2{};
 		robustness2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
 		robustness2.nullDescriptor = true;
@@ -291,6 +301,7 @@ namespace ge::renderer {
 		features12.hostQueryReset = true;
 		features12.drawIndirectCount = true;
 		features12.vulkanMemoryModel = true;
+		features12.vulkanMemoryModelDeviceScope = true;
 		features12.scalarBlockLayout = true;
 		features12.separateDepthStencilLayouts = true;
 		features11.shaderDrawParameters = true;
@@ -447,6 +458,7 @@ namespace ge::renderer {
 			FEATURE_MUST_BE_SUPPORTED(features12.uniformBufferStandardLayout)
 			FEATURE_MUST_BE_SUPPORTED(features12.drawIndirectCount)
 			FEATURE_MUST_BE_SUPPORTED(features12.vulkanMemoryModel)
+			FEATURE_MUST_BE_SUPPORTED(features12.vulkanMemoryModelDeviceScope)
 			FEATURE_MUST_BE_SUPPORTED(features12.scalarBlockLayout)
 			FEATURE_MUST_BE_SUPPORTED(features12.separateDepthStencilLayouts)
 			FEATURE_MUST_BE_SUPPORTED(features11.shaderDrawParameters)
