@@ -7,6 +7,7 @@ namespace ge::renderer {
 		uint32_t albedoTextureIndex = 0;
 		uint32_t roughnessTextureIndex = 0;
 		uint32_t normalTextureIndex = 0;
+		uint32_t emissiveTextureIndex = 0;
 	};
 
 	struct MaterialData {

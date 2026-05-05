@@ -52,6 +52,7 @@ namespace ge::renderer {
 			uint32_t enviromentMapIndex;
 			
 			uint32_t gBufferNormal;
+			uint32_t gBufferPosition; //temp
 			uint32_t gBufferAlbedoMetallic;
 			uint32_t gBufferEmissive;
 			uint32_t gBufferRoughness;

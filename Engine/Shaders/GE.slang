@@ -1,3 +1,6 @@
+#pragma once
+static const constexpr float PI = 3.14159265359;
+
 static const constexpr uint __GE_Scene_Data_Index__ = 0;
 static const constexpr uint __GE_Engine_Global_Data_Index__ = 1;
 
@@ -8,26 +11,40 @@ struct CameraData {
 }
 
 struct PointLight {
-
+    float4 position;
+    uint color; // uint8_t4
+    float intensity;
+    float radius;
+    float _pad0;
 }
 
 struct SpotLight {
+    float4 position;
+    float4 direction;
+    uint color; // uint8_t4
+    float intensity;
+    float radius;
+    float _pad0;
 }
 
 struct DirectionalLight {
+    float4 direction;
+    uint color; // uint8_t4
+    float intensity;
 }
 
 struct SceneData {
     CameraData cameraData;
 
-    Ptr<PointLight> pointLightBuffer;
-    Ptr<SpotLight> spotLightBuffer;
-    Ptr<DirectionalLight> directionalLightBuffer;
+    Ptr<PointLight, Access::Read> pointLightBuffer;
+    Ptr<SpotLight, Access::Read> spotLightBuffer;
+    Ptr<DirectionalLight, Access::Read> directionalLightBuffer;
     
     uint lutIndex;
     uint enviromentMapIndex;
 
     uint gBufferNormal;
+    uint gBufferPosition; //temp
     uint gBufferAlbedoMetallic;
     uint gBufferEmissive;
     uint gBufferRoughness;
@@ -55,53 +72,83 @@ typealias ReadonlyBuffer = StructuredBuffer<T, L>;
 __generic<T, L : IBufferDataLayout = Std430DataLayout>
 typealias WritableBuffer = RWStructuredBuffer<T, L>;
 
-typealias ReadonlyImage1D = Texture1D;
-typealias WritableImage1D = RWTexture1D;
-typealias WriteonlyImage1D = WTexture1D;
+__generic<T : ITexelElement = float4>
+typealias ReadonlyImage1D = Texture1D<T>;
+__generic<T : ITexelElement = float4>
+typealias WritableImage1D = RWTexture1D<T>;
+__generic<T : ITexelElement = float4>
+typealias WriteonlyImage1D = WTexture1D<T>;
 
-typealias ReadonlyImage1DArray = Texture1DArray;
-typealias WritableImage1DArray = RWTexture1DArray;
-typealias WriteonlyImage1DArray = WTexture1DArray;
+__generic<T : ITexelElement = float4>
+typealias ReadonlyImage1DArray = Texture1DArray<T>;
+__generic<T : ITexelElement = float4>
+typealias WritableImage1DArray = RWTexture1DArray<T>;
+__generic<T : ITexelElement = float4>
+typealias WriteonlyImage1DArray = WTexture1DArray<T>;
 
 __generic<T : ITexelElement = float4>
 typealias ReadonlyImage2D = Texture2D<T>;
-typealias WritableImage2D = RWTexture2D;
-typealias WriteonlyImage2D = WTexture2D;
+__generic<T : ITexelElement = float4>
+typealias WritableImage2D = RWTexture2D<T>;
+__generic<T : ITexelElement = float4>
+typealias WriteonlyImage2D = WTexture2D<T>;
 
-typealias ReadonlyImage2DArray = Texture2DArray;
-typealias WritableImage2DArray = RWTexture2DArray;
-typealias WriteonlyImage2DArray = WTexture2DArray;
+__generic<T : ITexelElement = float4>
+typealias ReadonlyImage2DArray = Texture2DArray<T>;
+__generic<T : ITexelElement = float4>
+typealias WritableImage2DArray = RWTexture2DArray<T>;
+__generic<T : ITexelElement = float4>
+typealias WriteonlyImage2DArray = WTexture2DArray<T>;
 
-typealias ReadonlyImage3D = Texture3D;
-typealias WritableImage3D = RWTexture3D;
-typealias WriteonlyImage3D = WTexture3D;
+__generic<T : ITexelElement = float4>
+typealias ReadonlyImage3D = Texture3D<T>;
+__generic<T : ITexelElement = float4>
+typealias WritableImage3D = RWTexture3D<T>;
+__generic<T : ITexelElement = float4>
+typealias WriteonlyImage3D = WTexture3D<T>;
 
-typealias ReadonlyImageCube = TextureCube;
+__generic<T : ITexelElement = float4>
+typealias ReadonlyImageCube = TextureCube<T>;
 
 typealias Sampler = SamplerState;
 
-extension ReadonlyImage1D : IBindlessDescriptor {}
-extension WritableImage1D : IBindlessDescriptor {}
-extension WriteonlyImage1D : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension ReadonlyImage1D<T> : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WritableImage1D<T> : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WriteonlyImage1D<T> : IBindlessDescriptor {}
 
-extension ReadonlyImage1DArray : IBindlessDescriptor {}
-extension WritableImage1DArray : IBindlessDescriptor {}
-extension WriteonlyImage1DArray : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension ReadonlyImage1DArray<T> : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WritableImage1DArray<T> : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WriteonlyImage1DArray<T> : IBindlessDescriptor {}
 
 __generic<T : ITexelElement = float4>
 extension ReadonlyImage2D<T> : IBindlessDescriptor {}
-extension WritableImage2D : IBindlessDescriptor {}
-extension WriteonlyImage2D : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WritableImage2D<T> : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WriteonlyImage2D<T> : IBindlessDescriptor {}
 
-extension ReadonlyImage2DArray : IBindlessDescriptor {}
-extension WritableImage2DArray : IBindlessDescriptor {}
-extension WriteonlyImage2DArray : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension ReadonlyImage2DArray<T> : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WritableImage2DArray<T> : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WriteonlyImage2DArray<T> : IBindlessDescriptor {}
 
-extension ReadonlyImage3D : IBindlessDescriptor {}
-extension WritableImage3D : IBindlessDescriptor {}
-extension WriteonlyImage3D : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension ReadonlyImage3D<T> : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WritableImage3D<T> : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension WriteonlyImage3D<T> : IBindlessDescriptor {}
 
-extension ReadonlyImageCube : IBindlessDescriptor {}
+__generic<T : ITexelElement = float4>
+extension ReadonlyImageCube<T> : IBindlessDescriptor {}
 
 extension Sampler : IBindlessDescriptor {}
 
@@ -211,10 +258,43 @@ ReadonlyImage2D GetGBufferAlbedoMetallic() {
     return GetBindless<ReadonlyImage2D>(GetSceneData().gBufferAlbedoMetallic);
 }
 
-// ReadonlyImage2D GetGBufferAlbedo() {
-//     return GetBindless<ReadonlyImage2D>(GetEngineGlobalData().blackTexture);
-// }
+ReadonlyImage2D<float3> GetGBufferNormal() {
+    return GetBindless<ReadonlyImage2D<float3>>(GetSceneData().gBufferNormal);
+}
 
-// ReadonlyImage2D GetGBufferAlbedo() {
-//     return GetBindless<ReadonlyImage2D>(GetEngineGlobalData().blackTexture);
-// }
+ReadonlyImage2D<float3> GetGBufferPosition() {
+    return GetBindless<ReadonlyImage2D<float3>>(GetSceneData().gBufferPosition);
+}
+
+ReadonlyImage2D<float> GetGBufferRoughness() {
+    return GetBindless<ReadonlyImage2D<float>>(GetSceneData().gBufferRoughness);
+}
+
+ReadonlyImage2D GetGBufferEmissive() {
+    return GetBindless<ReadonlyImage2D>(GetSceneData().gBufferEmissive);
+}
+
+ReadonlyImage2D<uint> GetGBufferEntityId() {
+    return GetBindless<ReadonlyImage2D<uint>>(GetSceneData().gBufferEntityId);
+}
+
+// github.com/KhronosGroup/ToneMapping/blob/main/PBR_Neutral/pbrNeutral.glsl
+constexpr float3 PBRNeutralToneMapping(float3 color) {
+    const float startCompression = 0.8 - 0.04;
+    const float desaturation = 0.15;
+
+    let x = min(color.r, min(color.g, color.b));
+    let offset = x < 0.08 ? x - 6.25 * x * x : 0.04;
+    color -= offset;
+
+    let peak = max(color.r, max(color.g, color.b));
+    if (peak < startCompression)
+        return color;
+
+    let d = 1.0 - startCompression;
+    let newPeak = 1.0 - d * d / (peak + d - startCompression);
+    color *= newPeak / peak;
+
+    let g = 1.0 - 1.0 / (desaturation * (peak - newPeak) + 1.0);
+    return lerp(color, newPeak * float3(1, 1, 1), g);
+}

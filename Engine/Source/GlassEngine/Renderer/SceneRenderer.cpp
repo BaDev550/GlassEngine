@@ -1,6 +1,7 @@
 #include "SceneRenderer.h"
 #include "GlassEngine/Core/Application.h"
 #include "GlassEngine/Core/Engine.h"
+#include "GlassEngine/Renderer/Light.h"
 #include "GlassEngine/Renderer/Pipeline.h"
 #include "GlassEngine/Renderer/Types.h"
 #include "GlassEngine/Scene/Scene.h"
@@ -15,14 +16,15 @@ namespace ge::renderer {
 			{
 				FramebufferSpec fspec{};
 				fspec.attachments = { 
+					FramebufferAttachment{ImageFormat::D32S8},
 					FramebufferAttachment{ImageFormat::R10G10B10A2Unorm}, // surface 
+					FramebufferAttachment{ImageFormat::RGBA16Float}, // position temp 
 					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // albedo, metallic
 					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // emissive, instensity
 					FramebufferAttachment{ImageFormat::R8Unorm}, // roughness
 					FramebufferAttachment{ImageFormat::R32Uint}, // entityId
-					FramebufferAttachment{ImageFormat::D32S8} 
 				};
-				fspec.attachments[5].clearValue = { 1.f, 0 };
+				fspec.attachments[0].clearValue = { 1.f, 0 };
 				fspec.width = Engine::Get().GetApplicationWindow().GetWidth();
 				fspec.height = Engine::Get().GetApplicationWindow().GetHeight();
 				_gBuffer = Framebuffer::Create(fspec);
@@ -118,14 +120,20 @@ namespace ge::renderer {
 			{
 				auto &renderContext = Engine::Get().GetApplicationWindow().GetRenderContext();
 				_data->gBufferNormal = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(0), {});
-				_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
-				_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
-				_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
-				_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
+				_data->gBufferPosition = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
+				_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
+				_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
+				_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
+				_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(5), {});
 			}
 		}
 
 		_endlessGrid = mem::Ref<EndlessGrid>::Create(_viewportFramebuffer);
+
+		auto *dirLight = _directionalLightBuffer->GetMappedPtr<DirectionalLight>();
+		dirLight->color = {255, 255, 255, 255};
+		dirLight->direction = {1, 3, 3, 0};
+		dirLight->intensity = {5};
 	}
 
 	void SceneRenderer::Resize(uint32_t width, uint32_t height) {
@@ -134,16 +142,18 @@ namespace ge::renderer {
 		{
 			auto &renderContext = Engine::Get().GetApplicationWindow().GetRenderContext();
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferNormal);
+			renderContext.RemoveReadonlyImageHandle(_data->gBufferPosition);
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferAlbedoMetallic);
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferEmissive);
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferRoughness);
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferEntityId);
 
 			_data->gBufferNormal = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(0), {});
-			_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
-			_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
-			_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
-			_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
+			_data->gBufferPosition = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
+			_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
+			_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
+			_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
+			_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(5), {});
 		}
 	}
 
