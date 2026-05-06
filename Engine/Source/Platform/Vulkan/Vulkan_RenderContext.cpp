@@ -115,15 +115,15 @@ namespace ge::renderer {
 			throw std::runtime_error("Layer is enabled but not available!");
 		}
 
-		constexpr VkValidationFeatureEnableEXT enabledValidationFeatures[2] = {
+		constexpr auto enabledValidationFeatures = std::array{
 			VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
 			VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT
 		};
 
 		VkValidationFeaturesEXT validationFeatures{};
 		validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
-		validationFeatures.enabledValidationFeatureCount = 2;
-		validationFeatures.pEnabledValidationFeatures = enabledValidationFeatures;
+		validationFeatures.enabledValidationFeatureCount = enabledValidationFeatures.size();
+		validationFeatures.pEnabledValidationFeatures = enabledValidationFeatures.data();
 
 		VkDebugUtilsMessengerCreateInfoEXT debugcreateInfo{};
 		debugcreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;

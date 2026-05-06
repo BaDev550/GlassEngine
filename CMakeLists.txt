@@ -33,4 +33,7 @@ endfunction()
 
 if(WIN32)
     copy_file_to_bin(Editor ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/binary/Compressonator_MT_DLL.dll)
+    copy_file_to_bin(Editor ${CMAKE_CURRENT_SOURCE_DIR}/vendor/aftermath/lib/GFSDK_Aftermath_Lib.x64.dll)
+else()
+    copy_file_to_bin(Editor ${CMAKE_CURRENT_SOURCE_DIR}/vendor/aftermath/lib/libGFSDK_Aftermath_Lib.x64.so)
 endif(WIN32)

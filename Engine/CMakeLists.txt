@@ -34,6 +34,7 @@ target_include_directories(Engine
 		${CMAKE_CURRENT_SOURCE_DIR}/Source
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/aftermath/include
 )
 target_precompile_headers(Engine PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Source/gepch.h>")
 target_compile_definitions(
@@ -57,6 +58,7 @@ target_link_libraries(Engine
         GPUOpen::VulkanMemoryAllocator
         DbgHelp
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/compressonator_MT_DLL.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/aftermath/lib/GFSDK_Aftermath_Lib.x64.lib
 )
 else()
 target_link_libraries(Engine
