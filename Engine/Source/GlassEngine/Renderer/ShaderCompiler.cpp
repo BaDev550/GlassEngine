@@ -151,7 +151,24 @@ namespace ge::renderer {
         targetDesc[DxilTargetIndex].format = SLANG_DXIL;
         targetDesc[DxilTargetIndex].profile = globalSession->findProfile("sm_6_6");
 
-        std::array<slang::CompilerOptionEntry, 4> options;
+#ifdef _DEBUG
+        std::array<slang::CompilerOptionEntry, 7> options;
+        options[0].name = slang::CompilerOptionName::Optimization;
+        options[0].value = { slang::CompilerOptionValueKind::Int, 0 };
+        options[1].name = slang::CompilerOptionName::EmitSpirvDirectly;
+        options[1].value = { slang::CompilerOptionValueKind::Int, 1 };
+        options[2].name = slang::CompilerOptionName::MatrixLayoutColumn;
+        options[2].value = { slang::CompilerOptionValueKind::Int, 1 };
+        options[3].name = slang::CompilerOptionName::Capability;
+        options[3].value = { slang::CompilerOptionValueKind::Int, globalSession->findCapability("vk_mem_model") };
+        options[4].name = slang::CompilerOptionName::DebugInformation;
+        options[4].value = { slang::CompilerOptionValueKind::Int, SLANG_DEBUG_INFO_LEVEL_MAXIMAL };
+        options[5].name = slang::CompilerOptionName::LineDirectiveMode;
+        options[5].value = { slang::CompilerOptionValueKind::Int, SLANG_LINE_DIRECTIVE_MODE_NONE };
+        options[6].name = slang::CompilerOptionName::GLSLForceScalarLayout;
+        options[6].value = { slang::CompilerOptionValueKind::Int, 0 };
+#else 
+        std::array<slang::CompilerOptionEntry, 6> options;
         options[0].name = slang::CompilerOptionName::Optimization;
         options[0].value = { slang::CompilerOptionValueKind::Int, 3 };
         options[1].name = slang::CompilerOptionName::EmitSpirvDirectly;
@@ -160,7 +177,12 @@ namespace ge::renderer {
         options[2].value = { slang::CompilerOptionValueKind::Int, 1 };
         options[3].name = slang::CompilerOptionName::Capability;
         options[3].value = { slang::CompilerOptionValueKind::Int, globalSession->findCapability("vk_mem_model") };
-
+        options[4].name = slang::CompilerOptionName::DebugInformation;
+        options[4].value = { slang::CompilerOptionValueKind::Int, 0 };
+        options[5].name = slang::CompilerOptionName::LineDirectiveMode;
+        options[5].value = { slang::CompilerOptionValueKind::Int, 0 };
+#endif
+        
         sessionDesc.targets = targetDesc.data();
         sessionDesc.targetCount = targetDesc.size();
 
@@ -236,6 +258,19 @@ namespace ge::renderer {
             shaderData.reflection = {};// GetReflection(linkedProgram->getLayout());
             shaderData.spirvByteCode = GetSpirvCode(linkedProgram);
             //shaderData.dxilByteCodes = GetSpirvCode(linkedProgram);
+
+#ifdef _DEBUG
+            std::filesystem::path debugDir = std::filesystem::current_path() / "ShaderDebugTemp";
+            std::filesystem::create_directories(debugDir);
+
+            std::filesystem::path dumpPath = debugDir / (GEString(shaderName) + ".spv");
+            std::ofstream dumpFile(dumpPath, std::ios::binary);
+            if (dumpFile.is_open()) {
+                dumpFile.write(shaderData.spirvByteCode.data(), shaderData.spirvByteCode.size());
+                dumpFile.close();
+            }
+#endif
+
             GE_CORE_INFO("Shader compiled: {}", shaderName);
             return true;
         }

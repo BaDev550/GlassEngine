@@ -31,6 +31,7 @@ struct DirectionalLight {
     float4 direction;
     uint color; // uint8_t4
     float intensity;
+    float _pad0;
 }
 
 struct SceneData {

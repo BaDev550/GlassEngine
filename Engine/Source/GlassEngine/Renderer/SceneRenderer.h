@@ -43,14 +43,14 @@ namespace ge::renderer {
 				glm::mat4 view;
 				glm::vec3 pos;
 			} cameraData;
-			
+
 			uint64_t pointLightBufferGPUAddress;
 			uint64_t spotLightBufferGPUAddress;
 			uint64_t directionalLightBufferGPUAddress;
 
-			uint32_t lutIndex;
-			uint32_t enviromentMapIndex;
-			
+			uint32_t lutIndex{};
+			uint32_t enviromentMapIndex{};
+
 			uint32_t gBufferNormal;
 			uint32_t gBufferPosition; //temp
 			uint32_t gBufferAlbedoMetallic;
@@ -58,8 +58,8 @@ namespace ge::renderer {
 			uint32_t gBufferRoughness;
 			uint32_t gBufferEntityId;
 
-			uint32_t pointLightCount;
-			uint32_t spotLightCount;
+			uint32_t pointLightCount{};
+			uint32_t spotLightCount{};
 		} *_data;
 		ge::mem::Ref<Buffer> _sceneDataBuffer;
 		ge::mem::Ref<Buffer> _pointLightsBuffer;

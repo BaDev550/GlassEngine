@@ -86,7 +86,7 @@ namespace ge::editor {
 		ImGui::Begin("GBuffer");
 		ImGui::Image(_gBufferNormalTextureId, ImVec2(300,300));
 		ImGui::Image(_gBufferAlbedoTextureId, ImVec2(300, 300));
-		ImGui::End();
+		ImGui::End(); 
 		EndDockspace();
 	}
 

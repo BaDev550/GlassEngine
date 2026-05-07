@@ -21,9 +21,10 @@ namespace ge {
 		float _pad0;
 	};
 
-	struct DirectionalLight {
+	struct alignas(16) DirectionalLight {
 		glm::vec4 direction;
 		glm::u8vec4 color;
 		float intensity;
+		float _pad0;
 	};
 }

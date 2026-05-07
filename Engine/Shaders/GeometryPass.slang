@@ -19,7 +19,6 @@ struct Material {
     uint roughnessTextureIndex;
     uint normalTextureIndex;
     uint emissiveTextureIndex;
-    uint entityId;
 };
 
 [[vk::push_constant]] Material pc;
@@ -30,7 +29,12 @@ VertexOut VertMain(VertexIn in) {
     out.uv = in.uv;
     out.normal = in.normal.xyz;
     out.vertPos = mul(pc.model, in.position);
-    out.position = mul(GetCamaraData().proj, mul(GetCamaraData().view, out.vertPos));
+
+    let proj = GetSceneData().cameraData.proj;
+    let view = GetSceneData().cameraData.view;
+    let projView = mul(proj, view);
+
+    out.position = mul(projView, out.vertPos);
     return out;
 };
 
@@ -53,6 +57,6 @@ FragOut FragMain(VertexOut vertOut) : SV_Target {
     out.albedoMetallic.w = 0.5; // GetBindless<ReadonlyImage2D>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.roughness = GetBindless<ReadonlyImage2D<float>>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.emissive = GetBindless<ReadonlyImage2D>(pc.emissiveTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
-    out.entityId = pc.entityId;
+    out.entityId = 0;
     return out;
 }

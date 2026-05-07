@@ -114,7 +114,9 @@ namespace ge::renderer {
 				spec.memoryType = BufferMemoryType::DeviceMemory;
 				spec.usageFlags = BufferUsageFlagsBits::Readonly;
 				_directionalLightBuffer = Buffer::Create(spec);
+				_directionalLightBuffer->SetDebugName("DIR_LIGHT_B");
 				_data->directionalLightBufferGPUAddress = _directionalLightBuffer->GetGPUAddress();
+
 			}
 
 			{
@@ -164,7 +166,7 @@ namespace ge::renderer {
 		_data->cameraData.view = camera->GetView();
 		_data->cameraData.proj = camera->GetProjection();
 		_data->cameraData.pos = camera->GetPosition();
-		
+
 		_geometryPass->Begin();
 		auto view = _scene->GetRegistry().view<const TransformComponent, StaticMeshComponent>();
 		view.each([&](const TransformComponent& tc, StaticMeshComponent& smc) {
@@ -183,7 +185,6 @@ namespace ge::renderer {
 					if (lodIndex >= lods.size()) {
 						lodIndex = lods.empty() ? 0 : lods.size() - 1;
 					}
-					
 					Renderer3D::DrawStaticMesh(_geometryPassPipeline, staticMesh, lodIndex, smc.materialTable, tc.Mat4());
 				}
 			}
