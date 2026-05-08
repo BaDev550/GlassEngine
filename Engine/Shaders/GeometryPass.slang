@@ -63,7 +63,7 @@ FragOut FragMain(VertexOut vertOut) : SV_Target {
         normalize(mul(vertOut.tbn,
             (GetBindless<ReadonlyImage2D<float3>>(pc.normalTextureIndex).Sample(GetDefaultSampler(), vertOut.uv) * 2) - 1)
             );
-    // out.normal.xyz = (out.normal.xyz * 0.5) + 0.5;
+    out.normal.xyz = (out.normal.xyz * 0.5) + 0.5;
     out.albedoMetallic.xyz = GetBindless<ReadonlyImage2D<float3>>(pc.albedoTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.albedoMetallic.w = 0.5; // GetBindless<ReadonlyImage2D>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.roughness = 0.5;// GetBindless<ReadonlyImage2D<float>>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);

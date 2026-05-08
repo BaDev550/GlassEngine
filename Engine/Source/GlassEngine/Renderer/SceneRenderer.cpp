@@ -17,8 +17,7 @@ namespace ge::renderer {
 				FramebufferSpec fspec{};
 				fspec.attachments = { 
 					FramebufferAttachment{ImageFormat::D32S8},
-					// FramebufferAttachment{ImageFormat::R10G10B10A2Unorm}, // surface normal 
-					FramebufferAttachment{ImageFormat::RGBA16Float}, // surface normal temp 
+					FramebufferAttachment{ImageFormat::R10G10B10A2Unorm}, // surface normal 
 					FramebufferAttachment{ImageFormat::RGBA16Float}, // position temp 
 					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // albedo, metallic
 					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // emissive, instensity
