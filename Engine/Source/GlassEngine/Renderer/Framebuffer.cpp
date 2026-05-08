@@ -9,7 +9,8 @@ namespace ge::renderer {
 	void Framebuffer::Invalidate(const FramebufferSpec& spec) {
 		_specs = spec;
 		_colorAttachments.clear();
-		
+		_hasSwapchainImage = false;
+
 		for (auto& attachment : _specs.attachments) {
 			if (attachment.isSwapchain) {
 				_hasSwapchainImage = true;

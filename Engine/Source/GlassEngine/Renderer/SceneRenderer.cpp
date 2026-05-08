@@ -17,7 +17,8 @@ namespace ge::renderer {
 				FramebufferSpec fspec{};
 				fspec.attachments = { 
 					FramebufferAttachment{ImageFormat::D32S8},
-					FramebufferAttachment{ImageFormat::R10G10B10A2Unorm}, // surface 
+					// FramebufferAttachment{ImageFormat::R10G10B10A2Unorm}, // surface normal 
+					FramebufferAttachment{ImageFormat::RGBA16Float}, // surface normal temp 
 					FramebufferAttachment{ImageFormat::RGBA16Float}, // position temp 
 					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // albedo, metallic
 					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // emissive, instensity
@@ -34,10 +35,12 @@ namespace ge::renderer {
 				spec.inputAssemblySpec.vertexAttributes = {
 					VertexAttribute{VertexFormat::RGBA32Float, 0, 0, 0, },
 					VertexAttribute{VertexFormat::RGBA32Float, 16, 1, 0, },
-					VertexAttribute{VertexFormat::RG32Float, 32, 2, 0, }
+					VertexAttribute{VertexFormat::RGBA32Float, 32, 2, 0, },
+					VertexAttribute{VertexFormat::RG32Float, 48, 3, 0, }
 				};
 				spec.inputAssemblySpec.vertexBindings = {
-					VertexBinding{40, 0, VertexInputRate::Vertex}
+					// TODO(dnm): maybe align 16? (need test for performance)
+					VertexBinding{56, 0, VertexInputRate::Vertex}
 				};
 				spec.depthStencilSpec.depthTestEnable = true;
 				spec.depthStencilSpec.depthWriteEnable = true;
@@ -137,8 +140,10 @@ namespace ge::renderer {
 		spotLights[0].radius = 190.0f;
 		spotLights[0].intensity = 15.0f;
 
-		_data->pointLightCount++;
-		_data->spotLightCount++;
+		// _data->pointLightCount++;
+		// _data->spotLightCount++;
+
+		// _lightEnviromentData.directionalLight = &_data->directionalLight;
 	}
 
 	void SceneRenderer::Resize(uint32_t width, uint32_t height) {

@@ -2,6 +2,7 @@
 
 struct VertexIn {
     float4 position;
+    float4 tangent;
     float4 normal;
     float2 uv;
 };
@@ -9,7 +10,7 @@ struct VertexIn {
 struct VertexOut {
     float4 position : SV_Position;
     float4 vertPos;
-    float3 normal;
+    float3x3 tbn;
     float2 uv;
 };
 
@@ -27,8 +28,14 @@ struct Material {
 VertexOut VertMain(VertexIn in) {
     VertexOut out;
     out.uv = in.uv;
-    out.normal = in.normal.xyz;
     out.vertPos = mul(pc.model, in.position);
+
+    var T = normalize(mul(pc.model, float4(in.tangent.xyz, 0)).xyz);
+    let N = normalize(mul(pc.model, float4(in.normal.xyz, 0)).xyz);
+    T = normalize(T - dot(T, N) * N);
+    let B = cross(T, N);
+
+    out.tbn = transpose(float3x3(T, B, N));
 
     let proj = GetSceneData().cameraData.proj;
     let view = GetSceneData().cameraData.view;
@@ -52,10 +59,14 @@ struct FragOut {
 FragOut FragMain(VertexOut vertOut) : SV_Target {
     FragOut out;
     out.position = vertOut.vertPos;
-    out.normal.xyz = (normalize(vertOut.normal) * 0.5) + 0.5; // GetBindless<ReadonlyImage2D>(pc.normalTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
+    out.normal.xyz = 
+        normalize(mul(vertOut.tbn,
+            (GetBindless<ReadonlyImage2D<float3>>(pc.normalTextureIndex).Sample(GetDefaultSampler(), vertOut.uv) * 2) - 1)
+            );
+    // out.normal.xyz = (out.normal.xyz * 0.5) + 0.5;
     out.albedoMetallic.xyz = GetBindless<ReadonlyImage2D<float3>>(pc.albedoTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.albedoMetallic.w = 0.5; // GetBindless<ReadonlyImage2D>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
-    out.roughness = GetBindless<ReadonlyImage2D<float>>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
+    out.roughness = 0.5;// GetBindless<ReadonlyImage2D<float>>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.emissive = GetBindless<ReadonlyImage2D>(pc.emissiveTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.entityId = 0;
     return out;

@@ -15,7 +15,7 @@ float4 VertMain(uint vertIndex: SV_VertexID) : SV_Position {
 [earlydepthstencil]
 float4 FragMain(const int2 pixelCoord: SV_Position) : SV_Target {
     let pos = GetGBufferPosition().Load(int3(pixelCoord, 0));
-    let normal = (GetGBufferNormal().Load(int3(pixelCoord, 0)) * 2.0) - 1.0;
+    let normal = GetGBufferNormal().Load(int3(pixelCoord, 0));
     let albedoMetallic = GetGBufferAlbedoMetallic().Load(int3(pixelCoord, 0));
     let roughness = GetGBufferRoughness().Load(int3(pixelCoord, 0));
     let emissive = GetGBufferEmissive().Load(int3(pixelCoord, 0));

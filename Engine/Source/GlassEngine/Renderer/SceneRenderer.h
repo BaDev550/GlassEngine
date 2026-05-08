@@ -34,7 +34,7 @@ namespace ge::renderer {
 			mem::Ref<Texture2D> LUTtexture;
 			GEVector<PointLight> pointLights;
 			GEVector<SpotLight> spotLights;
-			DirectionalLight directionalLight;
+			DirectionalLight *directionalLight;
 		} _lightEnviromentData;
 
 		struct SceneData {

@@ -9,9 +9,9 @@ namespace ge::renderer {
 	class Camera;
 	struct Vertex {
 		glm::vec4 position;
+		glm::vec4 tangent;
 		glm::vec4 normal;
 		glm::vec2 texCoords;
-		glm::vec4 tangents;
 	};
 
 	struct Submesh {
