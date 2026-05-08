@@ -105,20 +105,7 @@ namespace ge::renderer {
 				_spotLightBuffer = Buffer::Create(spec);
 				_data->spotLightBufferGPUAddress = _spotLightBuffer->GetGPUAddress();
 			}
-			// Directional light buffer
-			{
-				BufferSpec spec{};
-				spec.cpuAccess = BufferCpuAccess::Write;
-				spec.elementSize = sizeof(DirectionalLight);
-				spec.elementCount = 1;
-				spec.memoryType = BufferMemoryType::DeviceMemory;
-				spec.usageFlags = BufferUsageFlagsBits::Readonly;
-				_directionalLightBuffer = Buffer::Create(spec);
-				_directionalLightBuffer->SetDebugName("DIR_LIGHT_B");
-				_data->directionalLightBufferGPUAddress = _directionalLightBuffer->GetGPUAddress();
-
-			}
-
+			
 			{
 				auto &renderContext = Engine::Get().GetApplicationWindow().GetRenderContext();
 				_data->gBufferNormal = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(0), {});
@@ -132,10 +119,26 @@ namespace ge::renderer {
 
 		_endlessGrid = mem::Ref<EndlessGrid>::Create(_viewportFramebuffer);
 
-		auto *dirLight = _directionalLightBuffer->GetMappedPtr<DirectionalLight>();
-		dirLight->color = {255, 255, 255, 255};
-		dirLight->direction = {1, 3, 3, 0};
-		dirLight->intensity = {5};
+		auto& dirLight = _data->directionalLight;
+		dirLight.color = {255, 255, 255, 255};
+		dirLight.direction = {1.0f, 3.0f, 3.0f, 1.0f};
+		dirLight.intensity = 5.0f;
+		
+		auto* pointLights = _pointLightsBuffer->GetMappedPtr<PointLight>();
+		pointLights[0].position = { 0.0f, 6.5f, 0.0f, 1.0f };
+		pointLights[0].color = { 255, 255, 255, 255 };
+		pointLights[0].radius = 190.0f;
+		pointLights[0].intensity = 15.0f;
+
+		auto* spotLights = _spotLightBuffer->GetMappedPtr<SpotLight>();
+		spotLights[0].position = { 0.0f, 6.5f, 0.0f, 1.0f };
+		spotLights[0].direction = { 0.0f, 0.0f, 0.0f, 1.0f };
+		spotLights[0].color = { 255, 255, 255, 255 };
+		spotLights[0].radius = 190.0f;
+		spotLights[0].intensity = 15.0f;
+
+		_data->pointLightCount++;
+		_data->spotLightCount++;
 	}
 
 	void SceneRenderer::Resize(uint32_t width, uint32_t height) {

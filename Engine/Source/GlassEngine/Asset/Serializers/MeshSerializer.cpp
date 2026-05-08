@@ -56,6 +56,8 @@ namespace ge {
 						vertex.normal = { aimesh->mNormals[v].x, aimesh->mNormals[v].y, aimesh->mNormals[v].z, 1.0f };
 					if (aimesh->HasTextureCoords(0))
 						vertex.texCoords = { aimesh->mTextureCoords[0][v].x, aimesh->mTextureCoords[0][v].y };
+					if (aimesh->mTangents)
+						vertex.tangents = { aimesh->mTangents[0].x, aimesh->mTangents[0].y, aimesh->mTangents[0].z, 1.0f };
 					lod0.vertices.push_back(vertex);
 				}
 				for (uint32_t f = 0; f < aimesh->mNumFaces; f++) {

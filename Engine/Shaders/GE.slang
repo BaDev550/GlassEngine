@@ -32,14 +32,15 @@ struct DirectionalLight {
     uint color; // uint8_t4
     float intensity;
     float _pad0;
+    float _pad1;
 }
 
 struct SceneData {
     CameraData cameraData;
 
+    DirectionalLight directionalLight;
     Ptr<PointLight, Access::Read> pointLightBuffer;
     Ptr<SpotLight, Access::Read> spotLightBuffer;
-    Ptr<DirectionalLight, Access::Read> directionalLightBuffer;
     
     uint lutIndex;
     uint enviromentMapIndex;

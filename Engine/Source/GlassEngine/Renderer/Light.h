@@ -26,5 +26,6 @@ namespace ge {
 		glm::u8vec4 color;
 		float intensity;
 		float _pad0;
+		float _pad1;
 	};
 }

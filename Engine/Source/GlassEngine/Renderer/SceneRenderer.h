@@ -44,9 +44,9 @@ namespace ge::renderer {
 				glm::vec3 pos;
 			} cameraData;
 
+			DirectionalLight directionalLight;
 			uint64_t pointLightBufferGPUAddress;
 			uint64_t spotLightBufferGPUAddress;
-			uint64_t directionalLightBufferGPUAddress;
 
 			uint32_t lutIndex{};
 			uint32_t enviromentMapIndex{};
@@ -64,6 +64,5 @@ namespace ge::renderer {
 		ge::mem::Ref<Buffer> _sceneDataBuffer;
 		ge::mem::Ref<Buffer> _pointLightsBuffer;
 		ge::mem::Ref<Buffer> _spotLightBuffer;
-		ge::mem::Ref<Buffer> _directionalLightBuffer;
 	};
 }

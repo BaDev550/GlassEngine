@@ -194,7 +194,6 @@ namespace ge::renderer {
 		if (_deviceFeatures.partiallyBoundForSampledImage) GE_GRAPHICS_INFO("GPU supported partiallyBoundForSampledImage feature");
 		if (_deviceFeatures.partiallyBoundForStorageImage) GE_GRAPHICS_INFO("GPU supported partiallyBoundForStorageImage feature");
 		if (_deviceFeatures.umaOrRebar) GE_GRAPHICS_INFO("GPU supported umaOrRebar feature");
-
 		_deviceFeatures.descriptorHeap = false;
 	}
 
