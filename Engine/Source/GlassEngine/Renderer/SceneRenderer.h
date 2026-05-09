@@ -21,6 +21,8 @@ namespace ge::renderer {
 	private:
 		Scene* _scene;
 
+		void CollectLightDataFromScene();
+
 		ge::mem::Ref<Framebuffer> _gBuffer;
 		ge::mem::Ref<Pipeline> _geometryPassPipeline;
 		ge::mem::Ref<RenderPass> _geometryPass;
@@ -35,7 +37,7 @@ namespace ge::renderer {
 			mem::Ref<Texture2D> LUTtexture;
 			GEVector<PointLight> pointLights;
 			GEVector<SpotLight> spotLights;
-			DirectionalLight *directionalLight;
+			DirectionalLight directionalLight;
 		} _lightEnviromentData;
 
 		struct SceneData {

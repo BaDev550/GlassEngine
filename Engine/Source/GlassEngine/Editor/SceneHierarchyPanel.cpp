@@ -110,6 +110,9 @@ namespace ge::editor {
 		if (ImGui::BeginPopup("AddComponent"))
 		{
 			DisplayAddComponentEntry<StaticMeshComponent>("Mesh");
+			DisplayAddComponentEntry<PointLightComponent>("Point Light");
+			DisplayAddComponentEntry<SpotLightComponent>("Spot Light");
+			DisplayAddComponentEntry<DirectionalLightComponent>("Directional Light");
 
 			ImGui::EndPopup();
 		}

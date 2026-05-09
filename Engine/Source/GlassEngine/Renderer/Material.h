@@ -13,9 +13,9 @@ namespace ge::renderer {
 	struct MaterialData {
 		glm::u8vec4 albedoColor;
 		glm::u8vec4 emissiveColor;
-		uint8_t metallic;
-		uint8_t roughness;
-		uint8_t emissiveIntensity;
+		float metallic;
+		float roughness;
+		float emissiveIntensity;
 	};
 
 	class Material : public RenderObject {

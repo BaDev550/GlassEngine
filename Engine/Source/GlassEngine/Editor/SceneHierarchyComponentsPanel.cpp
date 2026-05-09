@@ -58,6 +58,11 @@ namespace ge::editor {
 				ImGui::DragFloat3("Scale", glm::value_ptr(component.scale), 0.1f);
 			});
 
+        DrawComponent<PointLightComponent>("Point Light", entity, [](PointLightComponent& component)
+            {
+
+            });
+
 		DrawComponent<StaticMeshComponent>("Mesh", entity, [](StaticMeshComponent& component)
 			{
                 auto Handles = AssetManager::Editor_GetLoadedAssetsWithType(AssetType::StaticMesh);

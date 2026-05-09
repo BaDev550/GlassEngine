@@ -138,29 +138,6 @@ namespace ge::renderer {
 		}
 
 		_endlessGrid = mem::Ref<EndlessGrid>::Create(_viewportFramebuffer);
-
-		auto& dirLight = _data->directionalLight;
-		dirLight.color = {255, 255, 255, 255};
-		dirLight.direction = {1.0f, 3.0f, 3.0f, 1.0f};
-		dirLight.intensity = 5.0f;
-		
-		auto* pointLights = _pointLightsBuffer->GetMappedPtr<PointLight>();
-		pointLights[0].position = { 0.0f, 6.5f, 0.0f, 1.0f };
-		pointLights[0].color = { 255, 255, 255, 255 };
-		pointLights[0].radius = 190.0f;
-		pointLights[0].intensity = 15.0f;
-
-		auto* spotLights = _spotLightBuffer->GetMappedPtr<SpotLight>();
-		spotLights[0].position = { 0.0f, 6.5f, 0.0f, 1.0f };
-		spotLights[0].direction = { 0.0f, 0.0f, 0.0f, 1.0f };
-		spotLights[0].color = { 255, 255, 255, 255 };
-		spotLights[0].radius = 190.0f;
-		spotLights[0].intensity = 15.0f;
-
-		_data->pointLightCount++;
-		// _data->spotLightCount++;
-
-		// _lightEnviromentData.directionalLight = &_data->directionalLight;
 	}
 
 	void SceneRenderer::Resize(uint32_t width, uint32_t height) {
@@ -185,6 +162,41 @@ namespace ge::renderer {
 		}
 	}
 
+	void SceneRenderer::CollectLightDataFromScene()
+	{
+		{
+			auto group = _scene->GetRegistry().group<PointLightComponent>(entt::get<TransformComponent>);
+			auto& pointLights = _lightEnviromentData.pointLights;
+			uint32_t pointLightCount = 0;
+
+			pointLights.resize(group.size());
+			for (auto entity : group) {
+				TransformComponent& t = group.get<TransformComponent>(entity);
+				PointLightComponent& p = group.get<PointLightComponent>(entity);
+
+				p.handle.position = glm::vec4(t.position, 1.0f);
+				pointLights[pointLightCount] = p.handle;
+				pointLightCount++;
+			}
+
+			auto pointLightData = _pointLightsBuffer->GetMappedPtr<PointLight>();
+			std::memcpy(pointLightData, pointLights.data(), pointLightCount * sizeof(PointLight));
+			_data->pointLightCount = pointLightCount;
+		}
+		{
+			auto group = _scene->GetRegistry().group<DirectionalLightComponent>(entt::get<TransformComponent>);
+			auto& directionalLight = _lightEnviromentData.directionalLight;
+
+			for (auto entity : group) {
+				auto& t = group.get<TransformComponent>(entity);
+				auto& d = group.get<DirectionalLightComponent>(entity);
+				d.handle.direction = glm::vec4(t.rotation, 1.0f);
+				directionalLight = d.handle;
+			}
+			_data->directionalLight = directionalLight;
+		}
+	}
+
 	SceneRenderer::~SceneRenderer() {}
 
 	void SceneRenderer::DrawScene(const ge::mem::Ref<Camera>& camera)
@@ -199,6 +211,8 @@ namespace ge::renderer {
 			_data->cameraData.invViewProj = glm::inverse(viewProj);
 			_data->cameraData.pos = camera->GetPosition();
 		}
+
+		CollectLightDataFromScene();
 
 		_geometryPass->Begin();
 		auto view = _scene->GetRegistry().view<const TransformComponent, StaticMeshComponent>();

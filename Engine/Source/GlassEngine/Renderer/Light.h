@@ -6,8 +6,8 @@ namespace ge {
 #define GE_MAX_SPOT_LIGHT_COUNT 1024
 	struct alignas(16) PointLight {
 		glm::vec4 position;
-		glm::u8vec4 color;
-		float intensity;
+		glm::u8vec4 color = { 255, 255, 255, 255 };
+		float intensity = 5.0f;
 		float radius;
 		float _pad0;
 	};
@@ -23,8 +23,8 @@ namespace ge {
 
 	struct alignas(16) DirectionalLight {
 		glm::vec4 direction;
-		glm::u8vec4 color;
-		float intensity;
+		glm::u8vec4 color = { 255, 255, 255, 255 };
+		float intensity = 1.0f;
 		float _pad0;
 		float _pad1;
 	};
