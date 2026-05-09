@@ -29,10 +29,10 @@ float4 FragMain(const int2 pixelCoord: SV_Position) : SV_Target {
     float3 color = {0,0,0};
     for (uint i = 0; i < GetSceneData().pointLightCount; i++) {
         let light = GetSceneData().pointLightBuffer[i];
-    
+
         let distance = length(light.position.xyz - pos);
-        let attenuation = 1.0 / (distance * distance);
-        let radiance = unpackUnorm4x8ToFloat(light.color).xyz * attenuation * light.intensity * 100;
+        let attenuation = max(min(1.0 - pow((distance / light.radius), 4), 1), 0) / pow(distance, 2);
+        let radiance = unpackUnorm4x8ToFloat(light.color).xyz * attenuation * light.intensity;
     
         color += CalcLight(
             albedoMetallic.xyz,
@@ -47,36 +47,43 @@ float4 FragMain(const int2 pixelCoord: SV_Position) : SV_Target {
     
     for (uint i = 0; i < GetSceneData().spotLightCount; i++) {
         let light = GetSceneData().spotLightBuffer[i];
-    
+
+        let L = normalize(light.position.xyz - pos);
+
+        let theta = dot(L, normalize(-light.direction).xyz);
+        let epsilon = (light.color - light.outerConeAngle);
+        let intensity = clamp((theta - light.outerConeAngle) / epsilon, 0.0, 1.0);
+
         let distance = length(light.position.xyz - pos);
-        let attenuation = 1.0 / (distance * distance);
+        let attenuation = max(min(1.0 - pow((distance / light.radius), 4), 1), 0) / pow(distance, 2);
+
         let radiance = unpackUnorm4x8ToFloat(light.color).xyz * attenuation * light.intensity;
-    
+
         color += CalcLight(
-            albedoMetallic.xyz, 
-            F0, 
-            alphaRoughnessSq, 
-            albedoMetallic.w, 
-            N, 
-            V, 
-            normalize(light.position.xyz - pos), 
+            albedoMetallic.xyz,
+            F0,
+            alphaRoughnessSq,
+            albedoMetallic.w,
+            N,
+            V,
+            L, 
             radiance);
     }
 
     { // directional light
-        // let light = GetSceneData().directionalLight;
+        let light = GetSceneData().directionalLight;
     
-        // let radiance = unpackUnorm4x8ToFloat(light.color).xyz * light.intensity;
+        let radiance = unpackUnorm4x8ToFloat(light.color).xyz * light.intensity;
 
-        // color += CalcLight(
-        //     albedoMetallic.xyz,
-        //     F0,
-        //     alphaRoughnessSq,
-        //     albedoMetallic.w,
-        //     N,
-        //     V,
-        //     normalize(light.direction.xyz),
-        //     radiance);
+        color += CalcLight(
+            albedoMetallic.xyz,
+            F0,
+            alphaRoughnessSq,
+            albedoMetallic.w,
+            N,
+            V,
+            normalize(light.direction.xyz),
+            radiance);
     }
 
     return float4(PBRNeutralToneMapping(color), 1);

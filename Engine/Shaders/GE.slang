@@ -25,6 +25,8 @@ struct PointLight {
 struct SpotLight {
     float4 position;
     float4 direction;
+    float outerConeAngle;
+    float innerConeAngle;
     uint color; // uint8_t4
     float intensity;
     float radius;
