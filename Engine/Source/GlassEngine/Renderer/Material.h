@@ -11,11 +11,11 @@ namespace ge::renderer {
 	};
 
 	struct MaterialData {
-		glm::u8vec4 albedoColor;
-		glm::u8vec4 emissiveColor;
-		float metallic;
-		float roughness;
-		float emissiveIntensity;
+		glm::u8vec4 albedoColor = { 255, 255, 255, 255 };
+		glm::u8vec4 emissiveColor = { 255, 255, 255, 255 };
+		float roughness{ 0.4f };
+		float metallic{ 0.5f };
+		float emissiveIntensity{ 1.0f };
 	};
 
 	class Material : public RenderObject {
@@ -35,6 +35,13 @@ namespace ge::renderer {
 		void SetAlbedoTexture(const AssetHandle& textureHandle);
 		void SetRoughnessTexture(const AssetHandle& textureHandle);
 		void SetNormalTexture(const AssetHandle& textureHandle);
+
+		void SetAlbedoColor(glm::u8vec4 color) { _materialData.albedoColor = color; }
+		void SetEmissiveColor(glm::u8vec4 color) { _materialData.emissiveColor = color; }
+		void SetRoughness(float roughness) { _materialData.roughness = roughness; }
+		void SetMetallic(float metallic) { _materialData.metallic = metallic; }
+		void SetEmissiveIntensity(float intensity) { _materialData.emissiveIntensity = intensity; }
+
 		ge::mem::Ref<Material>& GetMaterial();
 		static AssetType GetStaticAssetType() { return AssetType::Material; }
 		virtual AssetType GetAssetType() const override { return GetStaticAssetType(); }
@@ -49,6 +56,7 @@ namespace ge::renderer {
 		ge::mem::Ref<Material> _material;
 	public:
 		TextureHandles& GetTextureHandles() { return _textureHandles; }
+		MaterialData& GetMaterialData() { return _materialData; }
 	};
 
 	class MaterialTable : public ge::mem::RefCounted {

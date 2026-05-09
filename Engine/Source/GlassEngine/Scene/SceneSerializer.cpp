@@ -16,7 +16,7 @@ namespace YAML {
 		}
 
 		static bool decode(const Node& node, glm::vec2& rhs) {
-			if (!node.IsSequence() || node.size() != 3)
+			if (!node.IsSequence() || node.size() != 2)
 				return false;
 			rhs.x = node[0].as<float>();
 			rhs.y = node[1].as<float>();
@@ -56,12 +56,35 @@ namespace YAML {
 		}
 
 		static bool decode(const Node& node, glm::vec4& rhs) {
-			if (!node.IsSequence() || node.size() != 3)
+			if (!node.IsSequence() || node.size() != 4)
 				return false;
 			rhs.x = node[0].as<float>();
 			rhs.y = node[1].as<float>();
 			rhs.z = node[2].as<float>();
 			rhs.w = node[3].as<float>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<glm::u8vec4> {
+		static Node encode(const glm::u8vec4& rhs) {
+			Node node;
+			node.push_back(static_cast<int>(rhs.x));
+			node.push_back(static_cast<int>(rhs.y));
+			node.push_back(static_cast<int>(rhs.z));
+			node.push_back(static_cast<int>(rhs.w));
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::u8vec4& rhs) {
+			if (!node.IsSequence() || node.size() != 4)
+				return false;
+
+			rhs.x = static_cast<uint8_t>(node[0].as<int>());
+			rhs.y = static_cast<uint8_t>(node[1].as<int>());
+			rhs.z = static_cast<uint8_t>(node[2].as<int>());
+			rhs.w = static_cast<uint8_t>(node[3].as<int>());
 			return true;
 		}
 	};
@@ -111,6 +134,17 @@ namespace ge {
 		return out;
 	}
 
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::u8vec4& vec) {
+		out << YAML::Flow;
+		out << YAML::BeginSeq
+			<< static_cast<int>(vec.x)
+			<< static_cast<int>(vec.y)
+			<< static_cast<int>(vec.z)
+			<< static_cast<int>(vec.w)
+			<< YAML::EndSeq;
+		return out;
+	}
+
 	YAML::Emitter& operator<<(YAML::Emitter& out, const GEString& string) {
 		out << (std::string)string;
 		return out;
@@ -143,6 +177,17 @@ namespace ge {
 			out << YAML::Key << "MeshHandle" << YAML::Value << comp_StaticMeshComponent.meshHandle;
 			out << YAML::Key << "IsVisible" << YAML::Value << comp_StaticMeshComponent.isVisible;
 			out << YAML::Key << "LODLevel" << YAML::Value << comp_StaticMeshComponent.lodLevel;
+			SERIALIZE_COMPONENT_END
+
+		SERIALIZE_COMPONENT_START(PointLightComponent)
+			out << YAML::Key << "Color" << YAML::Value << comp_PointLightComponent.handle.color;
+			out << YAML::Key << "Intensity" << YAML::Value << comp_PointLightComponent.handle.intensity;
+			out << YAML::Key << "Radius" << YAML::Value << comp_PointLightComponent.handle.radius;
+		SERIALIZE_COMPONENT_END
+
+		SERIALIZE_COMPONENT_START(DirectionalLightComponent)
+			out << YAML::Key << "Color" << YAML::Value << comp_DirectionalLightComponent.handle.color;
+			out << YAML::Key << "Intensity" << YAML::Value << comp_DirectionalLightComponent.handle.intensity;
 		SERIALIZE_COMPONENT_END
 
 		out << YAML::EndMap;
@@ -159,6 +204,17 @@ namespace ge {
 			comp_StaticMeshComponent.meshHandle = node_StaticMeshComponent["MeshHandle"].as<uint64_t>();
 			comp_StaticMeshComponent.isVisible = node_StaticMeshComponent["IsVisible"].as<bool>();
 			comp_StaticMeshComponent.lodLevel = node_StaticMeshComponent["LODLevel"].as<uint32_t>();
+		DESERIALIZE_COMPONENT_END
+
+		DESERIALIZE_COMPONENT_START(PointLightComponent)
+			comp_PointLightComponent.handle.color = node_PointLightComponent["Color"].as<glm::u8vec4>();
+			comp_PointLightComponent.handle.intensity = node_PointLightComponent["Intensity"].as<float>();
+			comp_PointLightComponent.handle.radius = node_PointLightComponent["Radius"].as<float>();
+		DESERIALIZE_COMPONENT_END
+
+		DESERIALIZE_COMPONENT_START(DirectionalLightComponent)
+			comp_DirectionalLightComponent.handle.color = node_DirectionalLightComponent["Color"].as<glm::u8vec4>();
+			comp_DirectionalLightComponent.handle.intensity = node_DirectionalLightComponent["Intensity"].as<float>();
 		DESERIALIZE_COMPONENT_END
 	}
 

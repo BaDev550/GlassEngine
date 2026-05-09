@@ -152,6 +152,14 @@ namespace ge::editor {
                                 else {
                                     currentMatName = "Material " + std::to_string(i);
                                 }
+                                if (ImGui::CollapsingHeader(currentMatName.c_str())) {
+                                    float roughness = currentMat->GetMaterialData().roughness;
+                                    if (ImGui::DragFloat("Roughness", &roughness, 0.1f))
+                                        currentMat->SetRoughness(roughness);
+                                    float metallic = currentMat->GetMaterialData().metallic;
+                                    if (ImGui::DragFloat("Metallic", &metallic, 0.1f))
+                                        currentMat->SetMetallic(metallic);
+                                }
                             }
 
                             ImGui::PushID(static_cast<int>(i));

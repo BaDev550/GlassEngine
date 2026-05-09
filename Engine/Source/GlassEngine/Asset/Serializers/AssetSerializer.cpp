@@ -17,10 +17,16 @@ namespace ge {
 		out.WriteData(reinterpret_cast<const char*>(&header), sizeof(GAssetHeader));
 
 		auto& handles = materialAsset->GetTextureHandles();
+		auto& matData = materialAsset->GetMaterialData();
 		out.WriteData(reinterpret_cast<const char*>(&handles.albedoTextureHandle), sizeof(AssetHandle));
 		out.WriteData(reinterpret_cast<const char*>(&handles.roughnessTextureHandle), sizeof(AssetHandle));
 		out.WriteData(reinterpret_cast<const char*>(&handles.normalTextureHandle), sizeof(AssetHandle));
-    }
+		out.WriteData(reinterpret_cast<const char*>(&matData.albedoColor), sizeof(glm::u8vec4));
+		out.WriteData(reinterpret_cast<const char*>(&matData.emissiveColor), sizeof(glm::u8vec4));
+		out.WriteData(reinterpret_cast<const char*>(&matData.roughness), sizeof(float));
+		out.WriteData(reinterpret_cast<const char*>(&matData.metallic), sizeof(float));
+		out.WriteData(reinterpret_cast<const char*>(&matData.emissiveIntensity), sizeof(float));
+    }																			  
 
     mem::Ref<Asset> MaterialSerializer::DeserializeFromFile(const AssetMetadata& mtd)
     {
@@ -34,14 +40,26 @@ namespace ge {
 		mem::Ref<renderer::Material> mat = mem::Ref<renderer::Material>::Create();
 		mem::Ref<renderer::MaterialAsset> matAsset = mem::Ref<renderer::MaterialAsset>::Create(mat);
 
-		AssetHandle albedo, roughness, normal;
+		AssetHandle albedo, roughnessT, normal;
+		glm::u8vec4 albedoColor, emissiveColor;
+		float roughness, metallic, emissiveIntensity;
 		in.ReadData(reinterpret_cast<char*>(&albedo), sizeof(AssetHandle));
-		in.ReadData(reinterpret_cast<char*>(&roughness), sizeof(AssetHandle));
+		in.ReadData(reinterpret_cast<char*>(&roughnessT), sizeof(AssetHandle));
 		in.ReadData(reinterpret_cast<char*>(&normal), sizeof(AssetHandle));
+		in.ReadData(reinterpret_cast<char*>(&albedoColor), sizeof(glm::u8vec4));
+		in.ReadData(reinterpret_cast<char*>(&emissiveColor), sizeof(glm::u8vec4));
+		in.ReadData(reinterpret_cast<char*>(&roughness), sizeof(float));
+		in.ReadData(reinterpret_cast<char*>(&metallic), sizeof(float));
+		in.ReadData(reinterpret_cast<char*>(&emissiveIntensity), sizeof(float));
 
 		matAsset->SetAlbedoTexture(albedo);
-		matAsset->SetRoughnessTexture(roughness);
+		matAsset->SetRoughnessTexture(roughnessT);
 		matAsset->SetNormalTexture(normal);
+		matAsset->SetAlbedoColor(albedoColor);
+		matAsset->SetEmissiveColor(emissiveColor);
+		matAsset->SetRoughness(roughness);
+		matAsset->SetMetallic(metallic);
+		matAsset->SetEmissiveIntensity(emissiveIntensity);
 
 		return matAsset;
     }
@@ -58,14 +76,26 @@ namespace ge {
 		mem::Ref<renderer::Material> mat = mem::Ref<renderer::Material>::Create();
 		mem::Ref<renderer::MaterialAsset> matAsset = mem::Ref<renderer::MaterialAsset>::Create(mat);
 
-		AssetHandle albedo, roughness, normal;
+		AssetHandle albedo, roughnessT, normal;
+		glm::u8vec4 albedoColor, emissiveColor;
+		float roughness, metallic, emissiveIntensity;
 		in.ReadData(reinterpret_cast<char*>(&albedo), sizeof(AssetHandle));
-		in.ReadData(reinterpret_cast<char*>(&roughness), sizeof(AssetHandle));
+		in.ReadData(reinterpret_cast<char*>(&roughnessT), sizeof(AssetHandle));
 		in.ReadData(reinterpret_cast<char*>(&normal), sizeof(AssetHandle));
+		in.ReadData(reinterpret_cast<char*>(&albedoColor), sizeof(glm::u8vec4));
+		in.ReadData(reinterpret_cast<char*>(&emissiveColor), sizeof(glm::u8vec4));
+		in.ReadData(reinterpret_cast<char*>(&roughness), sizeof(float));
+		in.ReadData(reinterpret_cast<char*>(&metallic), sizeof(float));
+		in.ReadData(reinterpret_cast<char*>(&emissiveIntensity), sizeof(float));
 
 		matAsset->SetAlbedoTexture(albedo);
-		matAsset->SetRoughnessTexture(roughness);
+		matAsset->SetRoughnessTexture(roughnessT);
 		matAsset->SetNormalTexture(normal);
+		matAsset->SetAlbedoColor(albedoColor);
+		matAsset->SetEmissiveColor(emissiveColor);
+		matAsset->SetRoughness(roughness);
+		matAsset->SetMetallic(metallic);
+		matAsset->SetEmissiveIntensity(emissiveIntensity);
 
 		return matAsset;
     }

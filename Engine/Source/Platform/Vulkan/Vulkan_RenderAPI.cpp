@@ -320,6 +320,7 @@ namespace ge::renderer {
 			if (materialAsset) {
 				auto material = materialAsset->GetMaterial();
 				PushConstant(&material->GetBindlessData(), sizeof(MaterialBindlessData), sizeof(glm::mat4));
+				PushConstant(&materialAsset->GetMaterialData(), sizeof(MaterialData), (sizeof(glm::mat4) + sizeof(MaterialBindlessData)));
 			}
 
 			vkCmdDrawIndexed(GetCurrentCommandBuffer(), submesh.indexCount, 1, submesh.indexOffset, 0, 0);

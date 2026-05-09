@@ -11,28 +11,17 @@ Entities:
       MeshHandle: 6216381201776050449
       IsVisible: true
       LODLevel: 0
-  - Entity: 11561377806070761793
+  - Entity: 3334528435500679402
     IdentityComponent:
-      Name: waWW
+      Name: PointLight2
     TransformComponent:
-      Position: [0, 3.2, 0]
-      Rotation: [0, 2.8, 0]
-      Scale: [2, 2, 2]
-    StaticMeshComponent:
-      MeshHandle: 13328485924950516671
-      IsVisible: true
-      LODLevel: 0
-  - Entity: 4969705447260390750
-    IdentityComponent:
-      Name: a
-    TransformComponent:
-      Position: [3.2, 2.9, -0.2]
+      Position: [4.5, 4.3, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    StaticMeshComponent:
-      MeshHandle: 13328485924950516671
-      IsVisible: true
-      LODLevel: 0
+    PointLightComponent:
+      Color: [255, 255, 255, 255]
+      Intensity: 100
+      Radius: 100
   - Entity: 15396958150873027299
     IdentityComponent:
       Name: DamagedHelmet
@@ -44,3 +33,24 @@ Entities:
       MeshHandle: 8920419502527190666
       IsVisible: true
       LODLevel: 0
+  - Entity: 4248288632769271790
+    IdentityComponent:
+      Name: SunLight
+    TransformComponent:
+      Position: [0, 0, 0]
+      Rotation: [4.5, 3.4, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Color: [255, 255, 255, 255]
+      Intensity: 1
+  - Entity: 7137714804564139267
+    IdentityComponent:
+      Name: PointLight1
+    TransformComponent:
+      Position: [-5.1, 2.1, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    PointLightComponent:
+      Color: [255, 255, 255, 255]
+      Intensity: 100
+      Radius: 100

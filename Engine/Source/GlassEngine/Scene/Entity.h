@@ -27,6 +27,7 @@ namespace ge {
 		const entt::entity GetEntityHandle() const { return _handle; }
 		const EntityID GetEntityID() const { return GetComponent<IdentityComponent>().id; }
 		const GEString& GetName() const { return GetComponent<IdentityComponent>().name; }
+		const Scene* GetRegisteredScene() const { return _scene; }
 
 		operator entt::entity() const { return _handle; }
 		operator bool() const { return _handle != entt::null; }

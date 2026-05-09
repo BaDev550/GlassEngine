@@ -28,8 +28,9 @@ namespace ge {
 	void Scene::DestroyEntity(Entity* entity)
 	{
 		if (!entity) return;
+		EntityID id = entity->GetEntityID();
 		_registry.destroy(*entity);
-		_entities.erase(entity->GetEntityID());
+		_entities.erase(id);
 	}
 
 	Entity* Scene::GetEntityByID(EntityID id)

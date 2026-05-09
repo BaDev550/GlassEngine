@@ -15,10 +15,17 @@ struct VertexOut {
 
 struct Material {
     float4x4 model;
+
     uint albedoTextureIndex;
     uint roughnessTextureIndex;
     uint normalTextureIndex;
     uint emissiveTextureIndex;
+
+    uint albedoColor;
+    uint emissiveColor;
+    float roughness;
+    float metallic;
+    float emissiveIntensity;
 };
 
 [[vk::push_constant]] Material pc;
@@ -56,8 +63,8 @@ FragOut FragMain(VertexOut vertOut) : SV_Target {
             );
     out.normal.xyz = (out.normal.xyz * 0.5) + 0.5;
     out.albedoMetallic.xyz = GetBindless<ReadonlyImage2D<float3>>(pc.albedoTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
-    out.albedoMetallic.w = 0.5; // GetBindless<ReadonlyImage2D>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
-    out.roughness = 0.5;// GetBindless<ReadonlyImage2D<float>>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
+    out.albedoMetallic.w = pc.metallic; // GetBindless<ReadonlyImage2D>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
+    out.roughness = pc.roughness;// GetBindless<ReadonlyImage2D<float>>(pc.roughnessTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.emissive = GetBindless<ReadonlyImage2D>(pc.emissiveTextureIndex).Sample(GetDefaultSampler(), vertOut.uv);
     out.entityId = 0;
     return out;

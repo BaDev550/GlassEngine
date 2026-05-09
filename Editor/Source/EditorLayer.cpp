@@ -17,6 +17,7 @@ namespace ge::editor {
 		_viewportTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_VIEWPORT_ID", _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
 		_gBufferNormalTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_NORM_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(0));
 		_gBufferAlbedoTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_ALB_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(1));
+		_gBufferRoughnessTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_R_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(3));
 		_contentBrowserPanel = CastChecked<editor::ContentBrowserPanel>(GetPanelManager().ShowPanel("contentBrowser"));
 		_contentBrowserPanel->Init();
 		_sceneHierarchyPanel = CastChecked<editor::SceneHierarchyPanel>(GetPanelManager().ShowPanel("sceneHierarchy"));
@@ -36,6 +37,7 @@ namespace ge::editor {
 			_viewportTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_VIEWPORT_ID", _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetColorAttachmentTexture(0));
 			_gBufferNormalTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_NORM_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(0));
 			_gBufferAlbedoTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_ALB_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(1));
+			_gBufferRoughnessTextureId = renderer::Renderer3D::GetImGuiTexture("EDITOR_GBUFF_R_ID", _activeScene->GetSceneRenderer()->GetGBufferFramebuffer()->GetColorAttachmentTexture(3));
 		}
 
 		_activeScene->OnEditorUpdate(deltaTime, _camera);
@@ -86,6 +88,7 @@ namespace ge::editor {
 		ImGui::Begin("GBuffer");
 		ImGui::Image(_gBufferNormalTextureId, ImVec2(300,300));
 		ImGui::Image(_gBufferAlbedoTextureId, ImVec2(300, 300));
+		ImGui::Image(_gBufferRoughnessTextureId, ImVec2(300, 300));
 		ImGui::End(); 
 		EndDockspace();
 	}

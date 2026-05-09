@@ -10,6 +10,19 @@
 #include "GlassEngine/Renderer/Renderer.h"
 
 namespace ge {
+	static std::pair<std::filesystem::path, std::filesystem::path> GetSourceAndTargetTexturePathFromDirectory(std::filesystem::path& meshDir, const std::filesystem::path& meshTargetPath, const std::filesystem::path& aiTexturePath) {
+		std::string rawStrPath = aiTexturePath.string();
+		std::replace(rawStrPath.begin(), rawStrPath.end(), '\\', '/');
+		auto texturePath = meshDir / rawStrPath;
+		std::filesystem::path textureSourcePath = meshDir / rawStrPath;
+		std::filesystem::path targetTexturePath;
+		if (!meshTargetPath.empty()) {
+			std::filesystem::path textureFilename = textureSourcePath.filename();
+			textureFilename.replace_extension(GE_ASSET_EXTENSION);
+			targetTexturePath = meshTargetPath.parent_path() / textureFilename;
+		}
+		return { texturePath, targetTexturePath };
+	}
 
 	AssetType MeshSourceSerializer::ImportFromSource(const ImportAssetData& asset, const std::filesystem::path& source, const std::filesystem::path& targetPath)
 	{
@@ -168,6 +181,29 @@ namespace ge {
 					mem::Ref<renderer::MaterialAsset> matAsset = mem::Ref<renderer::MaterialAsset>::Create(mat);
 					matAsset->_assetHandle = AssetHandle(TEXT(matTargetPath.string()));
 
+					glm::u8vec4 albedoColor = glm::vec4(1.0f);
+					aiColor3D aiDifColor;
+					if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, aiDifColor) == AI_SUCCESS)
+						albedoColor = { (aiDifColor.r * 255), (aiDifColor.g * 255), (aiDifColor.b * 255), 1.0f };
+					matAsset->SetAlbedoColor(albedoColor);
+
+					glm::u8vec4 emissiveColor = glm::vec4(1.0f);
+					aiColor3D aiEmiColor;
+					if (aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, aiEmiColor) == AI_SUCCESS)
+						emissiveColor = { (aiEmiColor.r * 255), (aiEmiColor.g * 255), (aiEmiColor.b * 255), 1.0f };
+					matAsset->SetEmissiveColor(emissiveColor);
+					
+					float roughness, metalness, emissiveIntensity;
+					if (aiMat->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness) != AI_SUCCESS)
+						roughness = 0.4f;
+					if (aiMat->Get(AI_MATKEY_METALLIC_FACTOR, metalness) != AI_SUCCESS)
+						metalness = 0.0f;
+					if (aiMat->Get(AI_MATKEY_EMISSIVE_INTENSITY, emissiveIntensity) != AI_SUCCESS)
+						emissiveIntensity = 0.0f;
+					matAsset->SetRoughness(roughness);
+					matAsset->SetMetallic(metalness);
+					matAsset->SetEmissiveIntensity(emissiveIntensity);
+
 					bool hasAlbedo = aiMat->GetTexture(AI_MATKEY_BASE_COLOR_TEXTURE, &aiTexturePath) == AI_SUCCESS;
 					if (!hasAlbedo)
 						hasAlbedo = aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexturePath) == AI_SUCCESS;
@@ -181,17 +217,8 @@ namespace ge {
 						textureSpec.filter = renderer::ImageFilter::Linear;
 						textureSpec.format = renderer::ImageFormat::BC3Srgb;
 						importData.textureSpecs = &textureSpec;
-						std::string rawPath = TEXT(aiTexturePath.C_Str());
-						std::replace(rawPath.begin(), rawPath.end(), '\\', '/');
-						auto texturePath = meshDirectory / rawPath;
-						std::filesystem::path textureSourcePath = meshDirectory / aiTexturePath.C_Str();
-						std::filesystem::path targetTexturePath;
-						if (!targetPath.empty()) {
-							std::filesystem::path textureFilename = textureSourcePath.filename();
-							textureFilename.replace_extension(GE_ASSET_EXTENSION);
-							targetTexturePath = targetMeshDirectory / textureFilename;
-						}
-						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, targetTexturePath, importData);
+						auto tsTexturePaths = GetSourceAndTargetTexturePathFromDirectory(meshDirectory, targetPath, TEXT(aiTexturePath.C_Str()).ToPath());
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(tsTexturePaths.first, tsTexturePaths.second, importData);
 						matAsset->SetAlbedoTexture(texture ? texture->_assetHandle : whiteTexture->_assetHandle);
 					}
 					else {
@@ -208,21 +235,33 @@ namespace ge {
 						textureSpec.filter = renderer::ImageFilter::Linear;
 						textureSpec.format = renderer::ImageFormat::BC3Unorm;
 						importData.textureSpecs = &textureSpec;
-						std::string rawPath = TEXT(aiTexturePath.C_Str());
-						std::replace(rawPath.begin(), rawPath.end(), '\\', '/');
-						auto texturePath = meshDirectory / rawPath;
-						std::filesystem::path textureSourcePath = meshDirectory / aiTexturePath.C_Str();
-						std::filesystem::path targetTexturePath;
-						if (!targetPath.empty()) {
-							std::filesystem::path textureFilename = textureSourcePath.filename();
-							textureFilename.replace_extension(GE_ASSET_EXTENSION);
-							targetTexturePath = targetMeshDirectory / textureFilename;
-						}
-						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(texturePath, targetTexturePath, importData);
+						auto tsTexturePaths = GetSourceAndTargetTexturePathFromDirectory(meshDirectory, targetPath, TEXT(aiTexturePath.C_Str()).ToPath());
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(tsTexturePaths.first, tsTexturePaths.second, importData);
 						matAsset->SetNormalTexture(texture ? texture->_assetHandle : whiteTexture->_assetHandle);
 					}
 					else {
 						matAsset->SetNormalTexture(whiteTexture->_assetHandle);
+					}
+
+					bool hasRoughness = aiMat->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &aiTexturePath) == AI_SUCCESS;
+					if (!hasRoughness)
+						hasRoughness = aiMat->GetTexture(aiTextureType_GLTF_METALLIC_ROUGHNESS, 0, &aiTexturePath) == AI_SUCCESS;
+
+					if (hasRoughness) {
+						ImportAssetData importData;
+						renderer::TextureSpec textureSpec{};
+						textureSpec.attachment = false;
+						textureSpec.flipV = true;
+						textureSpec.compress = true;
+						textureSpec.filter = renderer::ImageFilter::Linear;
+						textureSpec.format = renderer::ImageFormat::BC3Unorm;
+						importData.textureSpecs = &textureSpec;
+						auto tsTexturePaths = GetSourceAndTargetTexturePathFromDirectory(meshDirectory, targetPath, TEXT(aiTexturePath.C_Str()).ToPath());
+						auto texture = AssetManager::GetOrImportAsset<renderer::Texture2D>(tsTexturePaths.first, tsTexturePaths.second, importData);
+						matAsset->SetRoughnessTexture(texture ? texture->_assetHandle : whiteTexture->_assetHandle);
+					}
+					else {
+						matAsset->SetRoughnessTexture(whiteTexture->_assetHandle);
 					}
 
 					if (matTargetPath.stem() == targetPath.stem())

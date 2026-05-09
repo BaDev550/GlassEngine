@@ -38,7 +38,7 @@ namespace ge::editor {
 
 
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				_selectionContext = {};
+				_selectionContext = nullptr;
 
 			if (ImGui::BeginPopupContextWindow(0, 1))
 			{
@@ -100,6 +100,7 @@ namespace ge::editor {
 				_context->DestroyEntity(entity);
 			}
 		}
+		if (!_selectionContext || !entity || !entity->GetRegisteredScene()) return;
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(-1);

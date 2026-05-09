@@ -39,6 +39,7 @@ namespace ge::editor {
 		ImTextureID _viewportTextureId;
 		ImTextureID _gBufferNormalTextureId;
 		ImTextureID _gBufferAlbedoTextureId;
+		ImTextureID _gBufferRoughnessTextureId;
 		ImVec2 _viewportSize;
 
 		bool _consoleEnabled = false;
