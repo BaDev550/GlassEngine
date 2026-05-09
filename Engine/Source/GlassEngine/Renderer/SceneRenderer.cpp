@@ -7,6 +7,7 @@
 #include "GlassEngine/Scene/Scene.h"
 #include "ShaderLibrary.h"
 #include "Renderer.h"
+#include <glm/matrix.hpp>
 
 namespace ge::renderer {
 	SceneRenderer::SceneRenderer(Scene* scene) : _scene(scene) {
@@ -16,9 +17,8 @@ namespace ge::renderer {
 			{
 				FramebufferSpec fspec{};
 				fspec.attachments = { 
-					FramebufferAttachment{ImageFormat::D32S8},
+					FramebufferAttachment{ImageFormat::D32},
 					FramebufferAttachment{ImageFormat::R10G10B10A2Unorm}, // surface normal 
-					FramebufferAttachment{ImageFormat::RGBA16Float}, // position temp 
 					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // albedo, metallic
 					FramebufferAttachment{ImageFormat::RGBA8Unorm}, // emissive, instensity
 					FramebufferAttachment{ImageFormat::R8Unorm}, // roughness
@@ -41,6 +41,23 @@ namespace ge::renderer {
 					// TODO(dnm): maybe align 16? (need test for performance)
 					VertexBinding{56, 0, VertexInputRate::Vertex}
 				};
+
+				// PipelineSpec spec{};
+				// spec.inputAssemblySpec.vertexAttributes = {
+				// 	VertexAttribute{VertexFormat::RGBA32Float /*r10g10b10a2Unorm*/, 0, 0, 0, }, // normal, size 4 bayt
+				// 	VertexAttribute{VertexFormat::RGBA32Float /*r10g10b10a2Unorm*/, 4, 1, 0, }, // tangent, size 4 bayt
+				// 	VertexAttribute{VertexFormat::RGBA32Float /*rgba8Unorm*/, 8, 2, 0, }, // color, size 4 bayt
+				// 	VertexAttribute{VertexFormat::RG32Float /*rg16Unorm*/, 12, 3, 0, }, // uv, size 4 bayt
+
+				// 	VertexAttribute{VertexFormat::RGBA32Float /*rgba16f*/, 0, 0, 1, }, // pos, 8 bayt
+				// 	VertexAttribute{VertexFormat::RGBA32Float /*rgba8Unorm*/, 8, 1, 1, }, // weight, 4 bayt
+				// 	VertexAttribute{VertexFormat::RGBA32Float /*rgba8uint*/, 12, 2, 1, }, // joints, 4 bayt
+				// };
+				// spec.inputAssemblySpec.vertexBindings = {
+				// 	// TODO(dnm): maybe align 16? (need test for performance)
+				// 	VertexBinding{16, 0, VertexInputRate::Vertex},
+				// 	VertexBinding{16, 1, VertexInputRate::Vertex},
+				// };
 				spec.depthStencilSpec.depthTestEnable = true;
 				spec.depthStencilSpec.depthWriteEnable = true;
 				spec.depthStencilSpec.depthTestCompareOp = CompareOp::Less;
@@ -110,12 +127,13 @@ namespace ge::renderer {
 			
 			{
 				auto &renderContext = Engine::Get().GetApplicationWindow().GetRenderContext();
+
+				_data->gBufferDepth = renderContext.GetReadonlyImageHandle(*_gBuffer->GetDepthStencilAttachmentTexture(), {});
 				_data->gBufferNormal = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(0), {});
-				_data->gBufferPosition = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
-				_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
-				_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
-				_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
-				_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(5), {});
+				_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
+				_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
+				_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
+				_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
 			}
 		}
 
@@ -139,7 +157,7 @@ namespace ge::renderer {
 		spotLights[0].radius = 190.0f;
 		spotLights[0].intensity = 15.0f;
 
-		// _data->pointLightCount++;
+		_data->pointLightCount++;
 		// _data->spotLightCount++;
 
 		// _lightEnviromentData.directionalLight = &_data->directionalLight;
@@ -148,21 +166,22 @@ namespace ge::renderer {
 	void SceneRenderer::Resize(uint32_t width, uint32_t height) {
 		_viewportFramebuffer->Resize(width, height);
 		_gBuffer->Resize(width, height);
+		_data->cameraData.extent = {width, height};
 		{
 			auto &renderContext = Engine::Get().GetApplicationWindow().GetRenderContext();
+			renderContext.RemoveReadonlyImageHandle(_data->gBufferDepth);
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferNormal);
-			renderContext.RemoveReadonlyImageHandle(_data->gBufferPosition);
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferAlbedoMetallic);
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferEmissive);
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferRoughness);
 			renderContext.RemoveReadonlyImageHandle(_data->gBufferEntityId);
 
+			_data->gBufferDepth = renderContext.GetReadonlyImageHandle(*_gBuffer->GetDepthStencilAttachmentTexture(), {});
 			_data->gBufferNormal = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(0), {});
-			_data->gBufferPosition = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
-			_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
-			_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
-			_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
-			_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(5), {});
+			_data->gBufferAlbedoMetallic = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(1), {});
+			_data->gBufferEmissive = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(2), {});
+			_data->gBufferRoughness = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(3), {});
+			_data->gBufferEntityId = renderContext.GetReadonlyImageHandle(*_gBuffer->GetColorAttachmentTexture(4), {});
 		}
 	}
 
@@ -170,9 +189,16 @@ namespace ge::renderer {
 
 	void SceneRenderer::DrawScene(const ge::mem::Ref<Camera>& camera)
 	{
-		_data->cameraData.view = camera->GetView();
-		_data->cameraData.proj = camera->GetProjection();
-		_data->cameraData.pos = camera->GetPosition();
+		{
+			const auto view = camera->GetView();
+			const auto proj = camera->GetProjection();
+			const auto viewProj = camera->GetProjection() * camera->GetView();
+			_data->cameraData.view = view;
+			_data->cameraData.proj = proj;
+			_data->cameraData.viewProj = viewProj;
+			_data->cameraData.invViewProj = glm::inverse(viewProj);
+			_data->cameraData.pos = camera->GetPosition();
+		}
 
 		_geometryPass->Begin();
 		auto view = _scene->GetRegistry().view<const TransformComponent, StaticMeshComponent>();

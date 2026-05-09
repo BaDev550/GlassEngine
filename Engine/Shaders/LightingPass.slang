@@ -14,7 +14,7 @@ float4 VertMain(uint vertIndex: SV_VertexID) : SV_Position {
 [shader("fragment")]
 [earlydepthstencil]
 float4 FragMain(const int2 pixelCoord: SV_Position) : SV_Target {
-    let pos = GetGBufferPosition().Load(int3(pixelCoord, 0));
+    let pos = CalcPositionFromDepth(GetGBufferDepth().Load(int3(pixelCoord, 0)), float2(pixelCoord) / float2(GetCamaraData().extent));
     let normal = (GetGBufferNormal().Load(int3(pixelCoord, 0)) * 2) - 1;
     let albedoMetallic = GetGBufferAlbedoMetallic().Load(int3(pixelCoord, 0));
     let roughness = GetGBufferRoughness().Load(int3(pixelCoord, 0));
@@ -32,7 +32,7 @@ float4 FragMain(const int2 pixelCoord: SV_Position) : SV_Target {
     
         let distance = length(light.position.xyz - pos);
         let attenuation = 1.0 / (distance * distance);
-        let radiance = unpackUnorm4x8ToFloat(light.color).xyz * attenuation;
+        let radiance = unpackUnorm4x8ToFloat(light.color).xyz * attenuation * light.intensity * 100;
     
         color += CalcLight(
             albedoMetallic.xyz,
@@ -50,7 +50,7 @@ float4 FragMain(const int2 pixelCoord: SV_Position) : SV_Target {
     
         let distance = length(light.position.xyz - pos);
         let attenuation = 1.0 / (distance * distance);
-        let radiance = unpackUnorm4x8ToFloat(light.color).xyz * attenuation;
+        let radiance = unpackUnorm4x8ToFloat(light.color).xyz * attenuation * light.intensity;
     
         color += CalcLight(
             albedoMetallic.xyz, 
@@ -64,19 +64,19 @@ float4 FragMain(const int2 pixelCoord: SV_Position) : SV_Target {
     }
 
     { // directional light
-        let light = GetSceneData().directionalLight;
+        // let light = GetSceneData().directionalLight;
     
-        let radiance = unpackUnorm4x8ToFloat(light.color).xyz * light.intensity;
+        // let radiance = unpackUnorm4x8ToFloat(light.color).xyz * light.intensity;
 
-        color += CalcLight(
-            albedoMetallic.xyz,
-            F0,
-            alphaRoughnessSq,
-            albedoMetallic.w,
-            N,
-            V,
-            normalize(light.direction.xyz),
-            radiance);
+        // color += CalcLight(
+        //     albedoMetallic.xyz,
+        //     F0,
+        //     alphaRoughnessSq,
+        //     albedoMetallic.w,
+        //     N,
+        //     V,
+        //     normalize(light.direction.xyz),
+        //     radiance);
     }
 
     return float4(PBRNeutralToneMapping(color), 1);

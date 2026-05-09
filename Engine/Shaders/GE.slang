@@ -7,7 +7,11 @@ static const constexpr uint __GE_Engine_Global_Data_Index__ = 1;
 struct CameraData {
     float4x4 proj;
     float4x4 view;
+    float4x4 viewProj;
+    float4x4 invViewProj;
     float4 pos;
+    float2 extent;
+    float2 _pad0;
 }
 
 struct PointLight {
@@ -45,8 +49,8 @@ struct SceneData {
     uint lutIndex;
     uint enviromentMapIndex;
 
+    uint gBufferDepth;
     uint gBufferNormal;
-    uint gBufferPosition; //temp
     uint gBufferAlbedoMetallic;
     uint gBufferEmissive;
     uint gBufferRoughness;
@@ -219,16 +223,7 @@ SceneData GetSceneData() {
 }
 
 CameraData GetCamaraData() {
-    __target_switch
-    {
-    case spirv:
-        return __GE_Scene_Data__.cameraData;
-    case hlsl: {
-        return __loadResourceDescriptorFromHeap<UniformBuffer<SceneData, DefaultDataLayout>>(__GE_Scene_Data_Index__).cameraData;
-    }
-    default: static_assert(false, "unsupported shader target");
-        return {};
-    }
+    return GetSceneData().cameraData;
 }
 
 EngineGlobalData GetEngineGlobalData() {
@@ -264,8 +259,13 @@ ReadonlyImage2D<float3> GetGBufferNormal() {
     return GetBindless<ReadonlyImage2D<float3>>(GetSceneData().gBufferNormal);
 }
 
-ReadonlyImage2D<float3> GetGBufferPosition() {
-    return GetBindless<ReadonlyImage2D<float3>>(GetSceneData().gBufferPosition);
+ReadonlyImage2D<float> GetGBufferDepth() {
+    return GetBindless<ReadonlyImage2D<float>>(GetSceneData().gBufferDepth);
+}
+
+// TODO(0x): write
+ReadonlyImage2D<uint> GetGBufferStencil() {
+    return GetBindless<ReadonlyImage2D<uint>>(GetSceneData().gBufferDepth);
 }
 
 ReadonlyImage2D<float> GetGBufferRoughness() {
@@ -278,6 +278,13 @@ ReadonlyImage2D GetGBufferEmissive() {
 
 ReadonlyImage2D<uint> GetGBufferEntityId() {
     return GetBindless<ReadonlyImage2D<uint>>(GetSceneData().gBufferEntityId);
+}
+
+float3 CalcPositionFromDepth(float depth, float2 uv) {
+    float4 clipPos = float4(uv * 2.0 - 1.0, depth, 1.0);
+    float4 worldPos = mul(GetCamaraData().invViewProj, clipPos);
+
+    return worldPos.xyz / worldPos.w;
 }
 
 // github.com/KhronosGroup/ToneMapping/blob/main/PBR_Neutral/pbrNeutral.glsl

@@ -27,7 +27,7 @@ namespace ge::editor {
 	{
 		_camera->Update(deltaTime);
 
-		auto spec = _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetSpecification();
+		auto spec = _activeScene->GetSceneRenderer()->GetOffscreenFramebuffer()->GetSpec();
 		if (_viewportSize.x > 0.0f && _viewportSize.y > 0.0f && (spec.width != _viewportSize.x || spec.height != _viewportSize.y)) {
 			Engine::Get().GetApplicationWindow().GetRenderContext().Wait();
 

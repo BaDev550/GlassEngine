@@ -20,7 +20,7 @@ namespace ge::renderer {
 		GEVector<Attachment> colorAttachments;
 		colorAttachments.reserve(_framebuffer->GetAttachmentCount());
 	
-		beginSpec.extent = {_framebuffer->GetSpecification().width, _framebuffer->GetSpecification().height};
+		beginSpec.extent = {_framebuffer->GetSpecRef().width, _framebuffer->GetSpecRef().height};
 		for (const auto &attachment : _framebuffer->GetAttachments()) {
 			if (attachment.isSwapchain) {
 				colorAttachments.emplace_back(
@@ -54,7 +54,8 @@ namespace ge::renderer {
 			}
 		}
 		beginSpec.colorAttachments = colorAttachments;
-
+		beginSpec.depthWrite = _framebuffer->GetSpecRef().depthWrite;
+		beginSpec.stencilWrite = _framebuffer->GetSpecRef().stencilWrite;
 		Renderer3D::GetRenderAPI()->BeginRenderPass(beginSpec);
 	}
 

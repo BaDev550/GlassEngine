@@ -31,6 +31,8 @@ namespace ge::renderer {
 		uint32_t height = 0;
 		uint32_t layers = 0;
 		GEVector<FramebufferAttachment> attachments;
+		bool depthWrite = true;
+		bool stencilWrite = true;
 	};
 
 	class Framebuffer : public ge::mem::RefCounted {
@@ -46,7 +48,8 @@ namespace ge::renderer {
 		ge::mem::Ref<Image>& GetDepthStencilAttachmentTexture() { return _depthStencilAttachment; };
 		bool HasDepthStencilAttachment() const { return _depthStencilAttachment; }
 		bool HasSwapchainImage() const { return _hasSwapchainImage; }
-		const FramebufferSpec& GetSpecification() const { return _specs; }
+		const FramebufferSpec& GetSpecRef() const { return _specs; }
+		FramebufferSpec GetSpec() const { return _specs; }
 
 		static ge::mem::Ref<Framebuffer> Create(const FramebufferSpec& spec) {
 			return ge::mem::Ref<Framebuffer>::Create(spec);

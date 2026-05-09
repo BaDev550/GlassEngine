@@ -38,6 +38,7 @@ namespace ge::renderer {
 			if (utility::IsDepthFormat(attachment.format) 
 			|| utility::IsDepthStencilFormat(attachment.format)) {
 				imageSpec.usageFlags |= ImageUsageFlagsBits::DepthStencilAttachment;
+				imageSpec.usageFlags |= ImageUsageFlagsBits::Readonly;
 				_depthStencilAttachment = Image::Create(imageSpec);
 				attachment.existingImage = _depthStencilAttachment;
 				attachment.existingImage->SetDebugName("framebuffer depth stencil attachment");

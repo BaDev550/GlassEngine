@@ -48,6 +48,8 @@ namespace ge::renderer {
 		Attachment depthStencilAttachment;
 		glm::uvec2 extent;
 		ImageSampleCount sampleCount = ImageSampleCount::e1;
+		bool depthWrite = true; // for sync
+		bool stencilWrite = true; // for sync
 	};
 
 	struct ImageSubresourceLayers {

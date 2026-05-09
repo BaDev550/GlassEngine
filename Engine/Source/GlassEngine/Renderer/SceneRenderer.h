@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Light.h"
 #include "EndlessGrid.h"
+#include <glm/ext/vector_float2.hpp>
 
 namespace ge { class Scene; }
 namespace ge::renderer {
@@ -41,7 +42,10 @@ namespace ge::renderer {
 			struct alignas(16) CameraData {
 				glm::mat4 proj;
 				glm::mat4 view;
-				glm::vec3 pos;
+				glm::mat4 viewProj;
+				glm::mat4 invViewProj;
+				alignas(16) glm::vec3 pos;
+				alignas(16) glm::vec2 extent;
 			} cameraData;
 
 			DirectionalLight directionalLight;
@@ -51,8 +55,8 @@ namespace ge::renderer {
 			uint32_t lutIndex{};
 			uint32_t enviromentMapIndex{};
 
+			uint32_t gBufferDepth;
 			uint32_t gBufferNormal;
-			uint32_t gBufferPosition; //temp
 			uint32_t gBufferAlbedoMetallic;
 			uint32_t gBufferEmissive;
 			uint32_t gBufferRoughness;

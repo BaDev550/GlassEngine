@@ -206,20 +206,27 @@ namespace ge::renderer::utility {
 		}
 	}
 
-	[[nodiscard]] constexpr VkImageLayout Vulkan_OptimalImageLayout(ImageUsageFlags flags) noexcept {
-		if (flags.Has(ImageUsageFlagsBits::Readonly)) {
+	[[nodiscard]] constexpr VkImageLayout Vulkan_OptimalImageLayout(ImageUsageFlags flags, bool depthWrite = false, bool stencilWrite = false) noexcept {
+		if (flags.Has(ImageUsageFlagsBits::Readonly) && !flags.Has(ImageUsageFlagsBits::DepthStencilAttachment)) {
 			if (flags.Has(ImageUsageFlagsBits::Writable))
 				return VK_IMAGE_LAYOUT_GENERAL;
 			else
 				return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
-		if (!flags.Has(ImageUsageFlagsBits::Writable))
-		{
+		if (!flags.Has(ImageUsageFlagsBits::Writable)) {
 			// ordering is neccesery
 			if (flags.Has(ImageUsageFlagsBits::ColorAttachment))
 				return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			else if (flags.Has(ImageUsageFlagsBits::DepthStencilAttachment))
-				return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			else if (flags.Has(ImageUsageFlagsBits::DepthStencilAttachment)) {
+				if (depthWrite && stencilWrite)
+					return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				else if (depthWrite)
+					return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
+				else if (stencilWrite)
+					return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
+				else
+					return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			}
 
 			else if (flags.Has(ImageUsageFlagsBits::TransferDst))
 				return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;

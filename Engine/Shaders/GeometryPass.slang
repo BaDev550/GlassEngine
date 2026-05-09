@@ -9,7 +9,6 @@ struct VertexIn {
 
 struct VertexOut {
     float4 position : SV_Position;
-    float4 vertPos;
     float3x3 tbn;
     float2 uv;
 };
@@ -28,38 +27,30 @@ struct Material {
 VertexOut VertMain(VertexIn in) {
     VertexOut out;
     out.uv = in.uv;
-    out.vertPos = mul(pc.model, in.position);
-
     var T = normalize(mul(pc.model, float4(in.tangent.xyz, 0)).xyz);
     let N = normalize(mul(pc.model, float4(in.normal.xyz, 0)).xyz);
     T = normalize(T - dot(T, N) * N);
-    let B = cross(T, N);
+    let B = cross(N, T);
 
     out.tbn = transpose(float3x3(T, B, N));
 
-    let proj = GetSceneData().cameraData.proj;
-    let view = GetSceneData().cameraData.view;
-    let projView = mul(proj, view);
-
-    out.position = mul(projView, out.vertPos);
+    out.position = mul(GetCamaraData().viewProj, mul(pc.model, in.position));
     return out;
 };
 
 struct FragOut {
     float4 normal : SV_Target0; // r10g10b10a2
-    float4 position : SV_Target1; // r16g16b16a16 is temp
-    float4 albedoMetallic : SV_Target2;
-    float4 emissive : SV_Target3; // a is intensive
-    float roughness : SV_Target4;
-    uint entityId : SV_Target5;
+    float4 albedoMetallic : SV_Target1;
+    float4 emissive : SV_Target2; // a is intensive
+    float roughness : SV_Target3;
+    uint entityId : SV_Target4;
 }
 
 [shader("fragment")]
 [earlydepthstencil]
 FragOut FragMain(VertexOut vertOut) : SV_Target {
     FragOut out;
-    out.position = vertOut.vertPos;
-    out.normal.xyz = 
+    out.normal.xyz =
         normalize(mul(vertOut.tbn,
             (GetBindless<ReadonlyImage2D<float3>>(pc.normalTextureIndex).Sample(GetDefaultSampler(), vertOut.uv) * 2) - 1)
             );
