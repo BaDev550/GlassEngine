@@ -165,34 +165,34 @@ namespace ge::renderer {
 	void SceneRenderer::CollectLightDataFromScene()
 	{
 		{
-			auto group = _scene->GetRegistry().group<PointLightComponent>(entt::get<TransformComponent>);
+			auto group = _scene->GetRegistry().group<PointLightComponent, TransformComponent>();
+
 			auto& pointLights = _lightEnviromentData.pointLights;
 			uint32_t pointLightCount = 0;
 
 			pointLights.resize(group.size());
-			for (auto entity : group) {
-				TransformComponent& t = group.get<TransformComponent>(entity);
-				PointLightComponent& p = group.get<PointLightComponent>(entity);
-
+			group.each([&](PointLightComponent& p, const TransformComponent t) {
 				p.handle.position = glm::vec4(t.position, 1.0f);
 				pointLights[pointLightCount] = p.handle;
 				pointLightCount++;
-			}
+				});
 
-			auto pointLightData = _pointLightsBuffer->GetMappedPtr<PointLight>();
-			std::memcpy(pointLightData, pointLights.data(), pointLightCount * sizeof(PointLight));
-			_data->pointLightCount = pointLightCount;
+			if (_lightEnviromentData.pointLightCount != group.size() && pointLightCount > 0)
+				_data->pointLightCount = pointLightCount;
+
+			_pointLightsBuffer->Write<PointLight>(pointLights.data(), pointLightCount * sizeof(PointLight));
+			_lightEnviromentData.pointLightCount = pointLightCount;
 		}
 		{
-			auto group = _scene->GetRegistry().group<DirectionalLightComponent>(entt::get<TransformComponent>);
+			auto view = _scene->GetRegistry().view<DirectionalLightComponent, TransformComponent>();
 			auto& directionalLight = _lightEnviromentData.directionalLight;
 
-			for (auto entity : group) {
-				auto& t = group.get<TransformComponent>(entity);
-				auto& d = group.get<DirectionalLightComponent>(entity);
+			view.each([&](DirectionalLightComponent& d, const TransformComponent t) {
 				d.handle.direction = glm::vec4(t.rotation, 1.0f);
 				directionalLight = d.handle;
-			}
+				return;
+			});
+
 			_data->directionalLight = directionalLight;
 		}
 	}

@@ -7,8 +7,8 @@ namespace ge {
 	struct alignas(16) PointLight {
 		glm::vec4 position;
 		glm::u8vec4 color = { 255, 255, 255, 255 };
-		float intensity = 5.0f;
-		float radius;
+		float intensity = 100.0f;
+		float radius = 100.0f;
 		float _pad0;
 	};
 

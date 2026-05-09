@@ -38,6 +38,9 @@ namespace ge::renderer {
 			GEVector<PointLight> pointLights;
 			GEVector<SpotLight> spotLights;
 			DirectionalLight directionalLight;
+
+			uint32_t pointLightCount{0};
+			uint32_t spotLightCount{0};
 		} _lightEnviromentData;
 
 		struct SceneData {

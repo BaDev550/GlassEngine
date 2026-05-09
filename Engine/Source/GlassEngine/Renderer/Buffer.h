@@ -46,6 +46,13 @@ namespace ge::renderer {
 		[[nodiscard]] uint32_t GetAlighnedElementSize() const noexcept { return _alighened_element_size; }
 		[[nodiscard]] const auto& GetSpecRef() const noexcept { return _desc; }
 		[[nodiscard]] auto GetSpec() const noexcept { return _desc; }
+
+		template <typename T = uint8_t>
+		void Write(const T* data, size_t size) {
+			if (data && (_desc.elementCount * _desc.elementSize) >= size) {
+				std::memcpy(_mappedPtr, data, size);
+			}
+		}
 	protected:
 		BufferSpec _desc;
 		uint32_t _alighened_element_size;
