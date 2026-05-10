@@ -88,7 +88,7 @@ namespace ge::mem {
 
 		template<typename... Args>
 		static Ref<T> Create(Args&&... args) {
-			T* memory = GEAlloc(sizeof(T));
+			T* memory = static_cast<T*>(GEAlloc(sizeof(T)));
 			T* instance = new(memory) T(std::forward<Args>(args)...);
 			return instance;
 		}

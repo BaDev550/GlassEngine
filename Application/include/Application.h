@@ -1,5 +1,6 @@
 #pragma once
 #include <Core.h>
+#include <Logger.h>
 #include <Memory/Memory.h>
 
 #include "Window.h"
@@ -23,14 +24,21 @@ namespace ge {
 		Application(const ApplicationSpecification& specs);
 		virtual ~Application() = default;
 
+		virtual void OnStart() = 0;
+
 		void Update(float deltaTime);
 		void Close();
+		bool Running() const { return !_forceClose; }
 
+		mem::Ref<Sink>& GetGlobalSink() { return _globalSink; }
 		Window& GetWindow() { return *_window; }
-		ApplicationSpecification& GetSpecs() { return _specs; }
+		ApplicationSpecification GetSpecs() const { return _specs; }
 	private:
 		ApplicationSpecification _specs;
 		mem::Scope<Window> _window;
+		mem::Ref<Sink> _globalSink;
+
+		bool _forceClose = false;
 	};
 	Application* CreateApplication(const ApplicationCommandLineArgs& args);
 }
