@@ -43,8 +43,10 @@ namespace ge::renderer {
 		IBuffer(BufferSpec specs) : _specs(specs) {}
 		virtual ~IBuffer() = default;
 
-		void Write(void* data, size_t size, size_t offset) {
-
+		void Write(void* data, size_t size, size_t offset = SIZE_MAX) {
+			if (data && _mappedPtr && size <= (_specs.elementSize * _specs.elementCount)) {
+				std::memcpy(_mappedPtr, data, size);
+			}
 		}
 	private:
 		void* _mappedPtr = nullptr;
