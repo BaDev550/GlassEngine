@@ -10,7 +10,8 @@ namespace ge {
 		bool resized = false;
 	};
 
-	class Window {
+	class GE_API Window {
+	public:
 		Window(const WindowSpec& specs);
 		Window(const Window&) = delete;
 		Window& operator=(const Window&) = delete;

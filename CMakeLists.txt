@@ -5,3 +5,4 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(Tools)
 add_subdirectory(Application)
+add_subdirectory(Editor)

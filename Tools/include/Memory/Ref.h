@@ -13,7 +13,7 @@ namespace ge::mem {
 			_refCount--;
 			if (_refCount == 0) {
 				this->~RefCounted();
-				GEFree((void*)this);
+				GEFree((void*)this, 1);
 			}
 		}
 		uint32_t GetRefCount() const { return _refCount; }

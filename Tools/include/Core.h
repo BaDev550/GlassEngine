@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <format>
 #include <vector>
 #include <unordered_map>
 
@@ -16,6 +17,8 @@ namespace ge {
     using GEMap = ::std::map<T, U, std::less<T>, ge::mem::GE_Allocator<std::pair<const T, U>>>;
 
     using GEString = ::std::basic_string<char, std::char_traits<char>, ge::mem::GE_Allocator<char>>;
+
+#define STRING(msg, ...) GEString(std::format(msg, __VA_ARGS__))
 }
 
 #ifdef _WIN32
