@@ -1,5 +1,9 @@
 #pragma once
 
+#include <Core.h>
+#include <Flags.h>
+#include <Memory/Memory.h>
+
 namespace ge::renderer {
 	enum class BufferUsageFlagsBits : uint16_t {
 		None = 0,
@@ -36,7 +40,7 @@ namespace ge::renderer {
 
 	class GE_API IBuffer : public mem::RefCounted {
 	public:
-		IBuffer(BufferSpec spec) : _specs(specs) {}
+		IBuffer(BufferSpec specs) : _specs(specs) {}
 		virtual ~IBuffer() = default;
 
 		void Write(void* data, size_t size, size_t offset) {
