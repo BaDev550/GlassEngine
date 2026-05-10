@@ -4,9 +4,19 @@
 #include <Application.h>
 
 namespace ge {
+#define GE_CORE_TRACE(msg, ...) ::ge::Engine::Get().GetLogger().trace(msg, __VA_ARGS__)
+#define GE_CORE_INFO(msg, ...) ::ge::Engine::Get().GetLogger().info(msg, __VA_ARGS__)
+#define GE_CORE_WARN(msg, ...) ::ge::Engine::Get().GetLogger().warn(msg, __VA_ARGS__)
+#define GE_CORE_ERROR(msg, ...) ::ge::Engine::Get().GetLogger().error(msg, __VA_ARGS__)
+#define GE_CORE_CRITICAL(msg, ...) ::ge::Engine::Get().GetLogger().critical(msg, __VA_ARGS__)
+	enum class EngineMode : uint8_t {
+		Editor = 0,
+		Runtime
+	};
+
 	struct EngineSpec {
 		Application* application = nullptr;
-
+		EngineMode mode = EngineMode::Editor;
 		GEString name = "Glass Engine v1";
 	};
 

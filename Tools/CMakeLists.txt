@@ -6,8 +6,10 @@ add_library(Tools STATIC
     include/Memory/PlatformMemoryAlloc.h
     include/Memory/Ref.h
     include/Memory/Memory.h
+    include/Filesystem.h
+    include/Logger.h
     src/Memory/Allocator.cpp
- "include/Logger.h")
+)
 
 set_target_properties(Tools PROPERTIES 
     CXX_STANDARD 20 

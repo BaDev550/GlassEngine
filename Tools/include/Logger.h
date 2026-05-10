@@ -36,7 +36,6 @@ namespace ge {
 #define GE_LOG_MESSAGE_FORMAT(msg, type, name) std::format("[{}][{}]: {}", name, LogTypeToString(type), msg)
 #define GE_LOG_TO_CONSOLE(msg, type, name) std::cout << GE_LOG_MESSAGE_FORMAT(msg, type, name) << '\n';
 #define GE_LOG_TO_SINK(msg, type, name, sink) if(sink) sink->Log(GE_LOG_MESSAGE_FORMAT(msg, type, name), type);
-#define GE_LOG(type, msg, ...) auto Fmsg = FormatMessage(msg, __VA_ARGS__); GE_LOG_TO_CONSOLE(Fmsg, type, "DEFAULT_CONSOLE_LOGGER");
 
     class Sink : public mem::RefCounted {
     public:
