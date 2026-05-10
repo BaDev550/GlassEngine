@@ -8,8 +8,11 @@
 #include <direct.h>
 #include <Windows.h>
 #else
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <cstring>
 #endif
 
 namespace ge::filesystem {

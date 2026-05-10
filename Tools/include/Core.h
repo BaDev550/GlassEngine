@@ -30,11 +30,21 @@ namespace ge {
 #define GE_ASSERT(condition, msg) do { if (!(condition)) { GE_DEBUGBREAK(); std::cerr << msg << std::endl; } } while(0)	
 #define BIT(x) 1 << x
 
-#ifdef GE_EXPORT
-#define GE_API __declspec(dllexport)
+#ifdef _WIN32
+    #ifdef GE_EXPORT
+        #define GE_API __declspec(dllexport)
+    #else
+        #define GE_API __declspec(dllimport)
+    #endif
 #else
-#define GE_API __declspec(dllimport)
+    #ifdef GE_EXPORT
+        #define GE_API __attribute__((visibility("default")))
+    #else
+        #define GE_API
+    #endif
 #endif
+
+#define GE_DIR std::getenv("GLASS_ENGINE_DIR");
 
 template<typename T>
 static T* CastChecked(void* ptr) {

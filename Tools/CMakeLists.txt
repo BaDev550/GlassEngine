@@ -16,12 +16,18 @@ set_target_properties(Tools PROPERTIES
     CXX_STANDARD_REQUIRED ON
 )
 
+if(NOT WIN32)
+    target_compile_options(Tools PRIVATE -fPIC)
+endif()
+
 find_package(glm CONFIG REQUIRED)
 
-if(DEFINED ENV{GLASS_ENGINE_DIR})
-    target_compile_definitions(Tools PUBLIC GE_DIR="$ENV{GLASS_ENGINE_DIR}")
-    message(STATUS "Glass Engine Directory: $ENV{GLASS_ENGINE_DIR}")
-endif()
+# if(DEFINED ENV{GLASS_ENGINE_DIR})
+#     target_compile_definitions(Tools PUBLIC GE_DIR="$ENV{GLASS_ENGINE_DIR}")
+#     message(STATUS "Glass Engine Directory: $ENV{GLASS_ENGINE_DIR}")
+# else()
+#     message(STATUS error)
+# endif()
 
 target_include_directories(Tools PUBLIC 
 	${CMAKE_CURRENT_SOURCE_DIR}/include

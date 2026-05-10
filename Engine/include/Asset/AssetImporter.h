@@ -37,6 +37,7 @@ namespace ge {
 			}
 			else {
 				GE_CORE_ERROR("Failed to find serializer for type: {}", AssetTypeToString(mtd.type));
+				return {};
 			}
 		}
 		mem::Ref<Asset> DeserializeFromFile(const AssetMetadata& mtd, const GEVector<uint8_t>& buffer) {
@@ -45,6 +46,7 @@ namespace ge {
 			}
 			else {
 				GE_CORE_ERROR("Failed to find serializer for type: {}", AssetTypeToString(mtd.type));
+				return {};
 			}
 		}
 
@@ -56,6 +58,7 @@ namespace ge {
 			}
 			else {
 				GE_CORE_ERROR("Failed to find serializer for type: {}", AssetTypeToString(sourceType));
+				return {};
 			}
 		}
 	private:

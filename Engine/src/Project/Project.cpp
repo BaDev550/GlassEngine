@@ -28,6 +28,7 @@ namespace ge {
 
 			return _activeProject;
 		}
+		return {};
 	}
 
 	bool Project::SaveActive()

@@ -11,6 +11,7 @@
 
 #elif defined(__linux__) || defined(__gnu_linux__)
 #include <malloc.h>
+#include <cstring>
 
 #define GE_PLATFORM_ALLOC(size)                  malloc(size)
 #define GE_PLATFORM_FREE(block)                  free(block)

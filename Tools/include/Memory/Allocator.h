@@ -8,7 +8,8 @@ namespace ge::mem {
 		size_t totalAllocated = 0;
 		size_t totalFreed = 0;
 		size_t GetCurrentUsage() const { return (totalAllocated - totalFreed); }
-	} inline _allocationMetrices;
+	};
+	inline AllocationMetrices _allocationMetrices;
 
 	[[nodiscard]] void* GEAlloc(size_t n);
 	void GEFree(void* block, size_t n);
