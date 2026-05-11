@@ -6,9 +6,9 @@ namespace ge {
 	class IEngineSystem : public mem::RefCounted {
 	public:
 		virtual ~IEngineSystem() = default;
-		virtual void OnCreate() = 0;
-		virtual void OnDestroy() = 0;
-		virtual void OnUpdate(float deltaTime) {}
-		virtual const char* GetDebugName() = 0;
+		virtual void OnCreate() {};
+		virtual void OnDestroy() {};
+		virtual void OnTick(float deltaTime) {}
+		virtual const char* GetDebugName() { return "Interface_Engine_default_system_name"; };
 	};
 }

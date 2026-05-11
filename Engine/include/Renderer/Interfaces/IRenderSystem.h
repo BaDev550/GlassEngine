@@ -15,6 +15,7 @@ namespace ge::renderer {
 
 	class GE_API IRenderSystem : public IEngineSystem {
 	public:
+		virtual ~IRenderSystem() = default;
 		virtual void DrawVertex(uint32_t vertexCount, const mem::Ref<IBuffer>& vertexBuffer) = 0;
 		virtual void DrawIndex(uint32_t indexCount, const mem::Ref<IBuffer>& vertexBuffer, const mem::Ref<IBuffer>& indexBuffer) = 0;
 
@@ -22,8 +23,6 @@ namespace ge::renderer {
 
 		virtual void BeginCopyPass() = 0;
 		virtual void EndCopyPass() = 0;
-		//virtual void BeginRenderPass(const BeginRenderPassSpec&) = 0;
-		//virtual void EndRenderPass() = 0;
 
 		RenderStats GetRenderStats() { return _renderStats; }
 		GraphicsAPI GetAPI() { return _api; }
@@ -31,8 +30,11 @@ namespace ge::renderer {
 		
 		virtual void BeginDebugLabel(std::string_view label) = 0;
 		virtual void EndDebugLabel() = 0;
+
+		virtual const char* GetDebugName() override { return "Interface_Render_system"; };
 	private:
-		RenderStats _renderStats;
 		GraphicsAPI _api;
+		RenderStats _renderStats;
 	};
+	extern "C" { typedef IRenderSystem* (*CreateRenderSystemFunc)(); }
 }

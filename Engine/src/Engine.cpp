@@ -10,8 +10,6 @@ namespace ge {
 		_logger_engine = mem::Ref<Logger>::Create("ENGINE", GetApplication().GetGlobalSink());
 
 		_specs.application->OnStart();
-
-		AddSystem<renderer::IRenderSystem>("");
 	}
 
 	Engine::~Engine()

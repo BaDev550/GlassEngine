@@ -35,19 +35,6 @@ namespace ge {
 		void Run();
 		void Destroy();
 
-		template<typename T, typename... Args>
-		void AddSystem(Args&&... args) {
-			static_assert(std::is_base_of<IEngineSystem, T>()::value, "System needs to inherit from IEngineSystem");
-			mem::Ref<T> system = mem::Ref<T>::Create(std::forward<Args>(args)...);
-			_systems[typeid(T).hash_code()] = system;
-			system->OnAttach();
-		}
-
-		template<typename T>
-		mem::Ref<T> GetSystem() {
-			return _systems[typeid(T).hash_code()].Cast<T>();
-		}
-
 		Application& GetApplication() { return *_specs.application; }
 		Window& GetApplicationWindow() { return GetApplication().GetWindow(); }
 		Logger& GetLogger() { return *_logger_engine; }
@@ -58,6 +45,5 @@ namespace ge {
 		EngineSpec _specs;
 
 		mem::Ref<Logger> _logger_engine;
-		GEUnorderedMap<size_t, mem::Ref<IEngineSystem>> _systems;
 	};
 }
