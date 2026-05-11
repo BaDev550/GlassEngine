@@ -7,6 +7,9 @@ set_target_properties(GlassRenderer PROPERTIES
 find_package(glm CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 
+find_package(Vulkan)
+find_package(VulkanMemoryAllocator CONFIG REQUIRED)
+
 target_include_directories(GlassRenderer PUBLIC 
 	${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/Application/include
@@ -20,5 +23,7 @@ target_link_libraries(GlassRenderer
     PUBLIC
         Tools
         Engine
+        Vulkan::Vulkan
+        GPUOpen::VulkanMemoryAllocator
         glm::glm-header-only
 )

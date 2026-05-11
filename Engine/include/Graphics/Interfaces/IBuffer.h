@@ -4,7 +4,7 @@
 #include <Flags.h>
 #include <Memory/Memory.h>
 
-namespace ge::renderer {
+namespace ge::graphics {
 	enum class BufferUsageFlagsBits : uint16_t {
 		None = 0,
 		Uniform = BIT(0),
@@ -16,7 +16,7 @@ namespace ge::renderer {
 		Index = BIT(6),
 		Indirect = BIT(7),
 	};
-	using BufferUsageFlags = ge::Flags<BufferUsageFlagsBits>;
+	using BufferUsageFlags = Flags<BufferUsageFlagsBits>;
 
 	enum class BufferCpuAccess : uint8_t {
 		None = 0,
@@ -40,7 +40,6 @@ namespace ge::renderer {
 
 	class GE_API IBuffer : public mem::RefCounted {
 	public:
-		IBuffer(BufferSpec specs) : _specs(specs) {}
 		virtual ~IBuffer() = default;
 
 		void Write(void* data, size_t size, size_t offset = SIZE_MAX) {
@@ -48,12 +47,12 @@ namespace ge::renderer {
 				std::memcpy(_mappedPtr, data, size);
 			}
 		}
-	private:
+	protected:
 		void* _mappedPtr = nullptr;
 		BufferSpec _specs;
 	};
 }
 template <>
-struct ge::FlagTraits<ge::renderer::BufferUsageFlagsBits> {
+struct ge::FlagTraits<ge::graphics::BufferUsageFlagsBits> {
 	static constexpr bool is_bitmask = true;
 };
