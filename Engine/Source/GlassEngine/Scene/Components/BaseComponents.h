@@ -1,8 +1,10 @@
 #pragma once
+#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "GlassEngine/Core/Core.h"
 #include "GlassEngine/Renderer/Light.h"
+#include <PxPhysicsAPI.h>
 
 namespace ge {
 #define GE_INVALID_ENTITY_ID 0
@@ -63,5 +65,37 @@ namespace ge {
 
 		DirectionalLightComponent() = default;
 		DirectionalLightComponent(const DirectionalLightComponent&) = default;
+	};
+
+	enum class RigidBodyType : uint8_t { Static, Dynamic };
+	enum class ColliderShape : uint8_t { Box, Sphere, Capsule };
+
+	struct RigidBodyComponent {
+		physx::PxRigidActor* actor = nullptr;
+		RigidBodyType bodyType = RigidBodyType::Dynamic;
+		float mass = 1.0f;
+		bool useGravity = true;
+		float linearDamping = 0.1f;
+		float angularDamping = 0.5f;
+
+		bool lockAngularX = false;
+		bool lockAngularY = false;
+		bool lockAngularZ = false;
+	};
+
+	struct BoxColliderComponent {
+		glm::vec3 halfExtents = { 0.5f, 0.5f, 0.5f };
+		glm::vec3 offset = { 0.0f, 0.0f, 0.0f };
+	};
+
+	struct SphereColliderComponent {
+		float     radius = 0.5f;
+		glm::vec3 offset = { 0.0f, 0.0f, 0.0f };
+	};
+
+	struct CapsuleColliderComponent {
+		float     radius = 0.5f;
+		float     halfHeight = 1.0f;
+		glm::vec3 offset = { 0.0f, 0.0f, 0.0f };
 	};
 }

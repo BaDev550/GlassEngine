@@ -41,6 +41,13 @@ namespace ge {
 		if (source.extension() != ".gltf")
 			importFlags |= aiProcess_PreTransformVertices;
 
+		if (spec.smoothNormals) {
+			importFlags |= aiProcess_GenSmoothNormals;
+		}
+		else {
+			importFlags |= aiProcess_GenNormals;
+		}
+
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(source.string(), importFlags);
 		if (!scene) {
@@ -64,13 +71,13 @@ namespace ge {
 
 				for (uint32_t v = 0; v < aimesh->mNumVertices; v++) {
 					renderer::Vertex vertex{};
-					vertex.position = { aimesh->mVertices[v].x, aimesh->mVertices[v].y, aimesh->mVertices[v].z, 1.0f }; // TODO(0x): write a math util for conversations
+					vertex.position = glm::vec4(math::AssimpVec3ToGLMVec3(aimesh->mVertices[v]), 1.0f);
 					if (aimesh->HasNormals())
-						vertex.normal = { aimesh->mNormals[v].x, aimesh->mNormals[v].y, aimesh->mNormals[v].z, 1.0f };
+						vertex.normal = glm::vec4(math::AssimpVec3ToGLMVec3(aimesh->mNormals[v]), 1.0f);
 					if (aimesh->HasTextureCoords(0))
-						vertex.texCoords = { aimesh->mTextureCoords[0][v].x, aimesh->mTextureCoords[0][v].y };
+						vertex.texCoords = math::AssimpVec3ToGLMVec3(aimesh->mTextureCoords[0][v]);
 					if (aimesh->HasTangentsAndBitangents()) {
-						vertex.tangent = { aimesh->mTangents[v].x, aimesh->mTangents[v].y, aimesh->mTangents[v].z, 0.f };
+						vertex.tangent = glm::vec4(math::AssimpVec3ToGLMVec3(aimesh->mTangents[v]), 1.0f);
 					}
 					lod0.vertices.push_back(vertex);
 				}
@@ -114,7 +121,7 @@ namespace ge {
 						const auto& prevSubmesh = prevLod.submesh[s];
 						auto& newSubmesh = newLod.submesh[s];
 
-						size_t target_index_count = (size_t)(prevSubmesh.indexCount * 0.5f); // Reduce by 50%
+						size_t target_index_count = (size_t)(prevSubmesh.indexCount * 0.75f); // Reduce by 75%
 						GEVector<uint32_t> submeshIndices(prevSubmesh.indexCount);
 						const float target_error = 0.01f + (level * 0.03f);
 						const float attribute_weights[] = { 1.0f, 1.0f };

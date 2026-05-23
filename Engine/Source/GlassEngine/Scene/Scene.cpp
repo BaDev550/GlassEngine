@@ -53,10 +53,24 @@ namespace ge {
 
 	void Scene::OnRuntimeStart()
 	{
+		Engine::Get().GetPhysicsSystem()->Scene_SetEffectedScene(this);
+
+		auto view = _registry.view<RigidBodyComponent>();
+		for (auto handle : view) {
+			Entity* entity = GetEntityByID(_registry.get<IdentityComponent>(handle).id);
+			Engine::Get().GetPhysicsSystem()->CreateBody(entity);
+		}
 	}
 
 	void Scene::OnRuntimeStop()
 	{
+		auto view = _registry.view<RigidBodyComponent>();
+		Engine::Get().GetPhysicsSystem()->Scene_DropAllBodiesFromEffectedScene();
+		Engine::Get().GetPhysicsSystem()->Scene_SetEffectedScene(nullptr);
+		for (auto handle : view) {
+			auto& rbc = _registry.get<RigidBodyComponent>(handle);
+			rbc.actor = nullptr;
+		}
 	}
 
 	void Scene::OnRuntimeUpdate(float DeltaTime)
@@ -65,10 +79,16 @@ namespace ge {
 
 	void Scene::OnEditorUpdate(float DeltaTime, const mem::Ref<renderer::Camera>& cam)
 	{
+		Engine::Get().GetPhysicsSystem()->Step(DeltaTime);
+		Engine::Get().GetPhysicsSystem()->Scene_SyncECSTransformToPhysicsSystem();
 		_sceneRenderer->DrawScene(cam);
 	}
 
 	void Scene::CreateSceneRenderer() {
 		_sceneRenderer = mem::Ref<renderer::SceneRenderer>::Create(this);
+	}
+
+	void Scene::RegisterSceneToPhysicsSystem() {
+		Engine::Get().GetPhysicsSystem()->Scene_SetEffectedScene(this);
 	}
 }

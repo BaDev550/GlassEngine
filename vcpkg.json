@@ -20,6 +20,7 @@
       ],
       "platform": "windows"
     },
+    "physx",
     "shader-slang",
     "vulkan-memory-allocator",
     "yaml-cpp"

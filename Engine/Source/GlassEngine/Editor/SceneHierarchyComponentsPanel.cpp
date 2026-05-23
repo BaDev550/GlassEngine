@@ -63,6 +63,59 @@ namespace ge::editor {
 
             });
 
+        DrawComponent<RigidBodyComponent>("Rigid Body", entity, [](RigidBodyComponent& component)
+            {
+                const char* bodyTypes[] = { "Static", "Dynamic" };
+                int currentType = (int)component.bodyType;
+                if (ImGui::Combo("Body Type", &currentType, bodyTypes, 2))
+                    component.bodyType = (RigidBodyType)currentType;
+
+                if (component.bodyType == RigidBodyType::Dynamic)
+                {
+                    ImGui::DragFloat("Mass", &component.mass, 0.1f, 0.001f, 10000.0f);
+                    ImGui::Checkbox("Use Gravity", &component.useGravity);
+                    ImGui::DragFloat("Linear Damping", &component.linearDamping, 0.01f, 0.0f, 1.0f);
+                    ImGui::DragFloat("Angular Damping", &component.angularDamping, 0.01f, 0.0f, 1.0f);
+                    ImGui::Separator();
+                    ImGui::Text("Lock Rotation");
+                    ImGui::Checkbox("X", &component.lockAngularX);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Y", &component.lockAngularY);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Z", &component.lockAngularZ);
+                }
+
+                if (component.actor)
+                {
+                    ImGui::Separator();
+                    ImGui::TextDisabled("Actor: active");
+                }
+                else
+                {
+                    ImGui::Separator();
+                    ImGui::TextDisabled("Actor: not spawned");
+                }
+            });
+
+        DrawComponent<BoxColliderComponent>("Box Collider", entity, [](BoxColliderComponent& component)
+            {
+                ImGui::DragFloat3("Half Extents", glm::value_ptr(component.halfExtents), 0.05f, 0.001f, 1000.0f);
+                ImGui::DragFloat3("Offset", glm::value_ptr(component.offset), 0.05f);
+            });
+
+        DrawComponent<SphereColliderComponent>("Sphere Collider", entity, [](SphereColliderComponent& component)
+            {
+                ImGui::DragFloat("Radius", &component.radius, 0.05f, 0.001f, 1000.0f);
+                ImGui::DragFloat3("Offset", glm::value_ptr(component.offset), 0.05f);
+            });
+
+        DrawComponent<CapsuleColliderComponent>("Capsule Collider", entity, [](CapsuleColliderComponent& component)
+            {
+                ImGui::DragFloat("Radius", &component.radius, 0.05f, 0.001f, 1000.0f);
+                ImGui::DragFloat("Half Height", &component.halfHeight, 0.05f, 0.001f, 1000.0f);
+                ImGui::DragFloat3("Offset", glm::value_ptr(component.offset), 0.05f);
+            });
+
 		DrawComponent<StaticMeshComponent>("Mesh", entity, [](StaticMeshComponent& component)
 			{
                 auto Handles = AssetManager::Editor_GetLoadedAssetsWithType(AssetType::StaticMesh);

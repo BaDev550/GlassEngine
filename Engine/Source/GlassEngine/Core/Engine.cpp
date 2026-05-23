@@ -25,10 +25,12 @@ namespace ge {
 		auto i = GE_ENGINE_DIR.parent_path();
 
 		renderer::Renderer3D::Init(); //def move this into engine
+		_physicsSystem = mem::CreateScope<physics::PhysicsSystem>();
 		_window->SetCursor(true);
 		_window->SetIcon((GE_ENGINE_DIR.parent_path() / "Brand/icon-512.png").string());
 		_specs.application->Init();
 		NFD::Init();
+
 
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "close", [this](const GEVector<GEString>& args) { GetApplication()->Close(); });
 		GE_ADD_CONSOLE_COMMAND(GE_CONSOLE_ENGINE_CATAGORY, "writeProfile", [](const GEVector<GEString>& args) { profile::utils::WriteEventsToFile(profile::Profiler::Get().GetEvents(), args[0].ToPath()); }, "writeProfile <filePath>");

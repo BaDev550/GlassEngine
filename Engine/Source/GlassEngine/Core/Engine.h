@@ -9,6 +9,7 @@
 #include "GlassEngine/Utilities/Console.h"
 #include "GlassEngine/Utilities/Profiler.h"
 #include "GlassEngine/Asset/AssetManager.h"
+#include "GlassEngine/Physics/Physics.h"
 
 namespace ge {
 	enum class EngineIDE : uint8_t {
@@ -49,6 +50,7 @@ namespace ge {
 		ApplicationSpecification GetApplicationSpecs() { return GetApplication()->GetSpecs(); }
 		const float GetDeltaTime() const { return _deltaTime; }
 
+		physics::PhysicsSystem* GetPhysicsSystem() { return _physicsSystem.get(); }
 		InputManager& GetInputManager() { return *_inputManager; }
 		EngineSpecification GetSpecs() { return _specs; }
 	private:
@@ -63,5 +65,6 @@ namespace ge {
 
 		mem::Scope<Window> _window;
 		mem::Scope<InputManager> _inputManager;
+		mem::Scope<physics::PhysicsSystem> _physicsSystem;
 	};
 }

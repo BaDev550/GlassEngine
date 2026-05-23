@@ -25,6 +25,7 @@ namespace ge {
 		void OnRuntimeUpdate(float DeltaTime);
 		void OnEditorUpdate(float DeltaTime, const mem::Ref<renderer::Camera>& cam);
 		void CreateSceneRenderer();
+		void RegisterSceneToPhysicsSystem();
 
 		const GEString& GetName() const { return _name; }
 		entt::registry& GetRegistry() { return _registry; }

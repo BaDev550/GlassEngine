@@ -24,6 +24,7 @@ namespace ge::renderer {
 
 	struct SourceMeshSpec {
 		bool flipUVs = false;
+		bool smoothNormals = true;
 		bool loadMaterials = true;
 		uint32_t maxLODlevel = 4;
 	};

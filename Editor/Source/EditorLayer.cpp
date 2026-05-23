@@ -85,11 +85,6 @@ namespace ge::editor {
 		}
 		ImGui::End();
 
-		ImGui::Begin("GBuffer");
-		ImGui::Image(_gBufferNormalTextureId, ImVec2(300,300));
-		ImGui::Image(_gBufferAlbedoTextureId, ImVec2(300, 300));
-		ImGui::Image(_gBufferRoughnessTextureId, ImVec2(300, 300));
-		ImGui::End(); 
 		EndDockspace();
 	}
 
@@ -106,6 +101,7 @@ namespace ge::editor {
 			_activeScene->Clear();
 			_activeScene = std::move(tempScene);
 			_activeScene->CreateSceneRenderer();
+			_activeScene->RegisterSceneToPhysicsSystem();
 			_sceneHierarchyPanel->SetContext(_activeScene);
 		}
 	}
@@ -138,6 +134,8 @@ namespace ge::editor {
 		GE_ADD_CONSOLE_COMMAND("editor", "create_project", [this](const GEVector<GEString>& args) { NewProject(args[0], args[1].ToPath()); }, "editor.create_project <name> <directory>");
 		GE_ADD_CONSOLE_COMMAND("editor", "open_project", [this](const GEVector<GEString>& args) { OpenProject(args[0].ToPath()); }, "editor.open_project <directory>");
 		GE_ADD_CONSOLE_COMMAND("editor", "save_project", [this](const GEVector<GEString>& args) { SaveProject(); });
+		GE_ADD_CONSOLE_COMMAND("editor", "startruntime", [this](const GEVector<GEString>& args) { _activeScene->OnRuntimeStart(); });
+		GE_ADD_CONSOLE_COMMAND("editor", "stopruntime", [this](const GEVector<GEString>& args) { _activeScene->OnRuntimeStop(); });
 	}
 
 	void EditorLayer::RegisterLayerPanels() {

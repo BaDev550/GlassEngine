@@ -21,7 +21,6 @@
 #include <GlassEngine/Editor/AssetPanels/ContentBrowserPanel.h>
 #include <GlassEngine/Editor/DebugPanels/EditorRendererDebugPanel.h>
 #include <GlassEngine/Editor/DebugPanels/EditorMemoryDebugPanel.h>
-#include <GlassEngine/Editor/AssetPanels/ContentBrowserPanel.h>
 #include <GlassEngine/Editor/AssetPanels/ModelImportPanel.h>
 #include <GlassEngine/Editor/SceneHierarchyPanel.h>
 

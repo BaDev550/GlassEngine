@@ -13,6 +13,7 @@ find_package(EnTT CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
+find_package(unofficial-omniverse-physx-sdk CONFIG REQUIRED)
 
 # meshoptimizer
 FetchContent_Declare(
@@ -56,6 +57,7 @@ target_link_libraries(Engine
         slang::slang
         yaml-cpp::yaml-cpp
         GPUOpen::VulkanMemoryAllocator
+        unofficial::omniverse-physx-sdk::sdk
         DbgHelp
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/compressonator/lib/compressonator_MT_DLL.lib
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/aftermath/lib/GFSDK_Aftermath_Lib.x64.lib
@@ -74,6 +76,7 @@ target_link_libraries(Engine
         slang::slang
         yaml-cpp::yaml-cpp
         GPUOpen::VulkanMemoryAllocator
+        unofficial::omniverse-physx-sdk::sdk
         ${CMAKE_SOURCE_DIR}/Engine/vendor/compressonator/lib/libCMP_Compressonator.a
         ${CMAKE_SOURCE_DIR}/Engine/vendor/compressonator/lib/libCMP_Framework.a
         ${CMAKE_SOURCE_DIR}/Engine/vendor/compressonator/lib/libCMP_Core.a

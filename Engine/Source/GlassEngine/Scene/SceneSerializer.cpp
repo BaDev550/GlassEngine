@@ -190,6 +190,33 @@ namespace ge {
 			out << YAML::Key << "Intensity" << YAML::Value << comp_DirectionalLightComponent.handle.intensity;
 		SERIALIZE_COMPONENT_END
 
+		SERIALIZE_COMPONENT_START(RigidBodyComponent)
+			out << YAML::Key << "Mass" << YAML::Value << comp_RigidBodyComponent.mass;
+			out << YAML::Key << "BodyType" << YAML::Value << static_cast<uint8_t>(comp_RigidBodyComponent.bodyType);
+			out << YAML::Key << "UseGravity" << YAML::Value << comp_RigidBodyComponent.useGravity;
+			out << YAML::Key << "AngularDamping" << YAML::Value << comp_RigidBodyComponent.angularDamping;
+			out << YAML::Key << "LinearDamping" << YAML::Value << comp_RigidBodyComponent.linearDamping;
+			out << YAML::Key << "LockAngularX" << YAML::Value << comp_RigidBodyComponent.lockAngularX;
+			out << YAML::Key << "LockAngularY" << YAML::Value << comp_RigidBodyComponent.lockAngularY;
+			out << YAML::Key << "LockAngularZ" << YAML::Value << comp_RigidBodyComponent.lockAngularZ;
+		SERIALIZE_COMPONENT_END
+
+		SERIALIZE_COMPONENT_START(BoxColliderComponent)
+			out << YAML::Key << "HalfExtent" << YAML::Value << comp_BoxColliderComponent.halfExtents;
+			out << YAML::Key << "Offset" << YAML::Value << comp_BoxColliderComponent.offset;
+		SERIALIZE_COMPONENT_END
+
+		SERIALIZE_COMPONENT_START(SphereColliderComponent)
+			out << YAML::Key << "Radius" << YAML::Value << comp_SphereColliderComponent.radius;
+			out << YAML::Key << "Offset" << YAML::Value << comp_SphereColliderComponent.offset;
+		SERIALIZE_COMPONENT_END
+
+		SERIALIZE_COMPONENT_START(CapsuleColliderComponent)
+			out << YAML::Key << "HalfHeight" << YAML::Value << comp_CapsuleColliderComponent.halfHeight;
+			out << YAML::Key << "Radius" << YAML::Value << comp_CapsuleColliderComponent.radius;
+			out << YAML::Key << "Offset" << YAML::Value << comp_CapsuleColliderComponent.offset;
+		SERIALIZE_COMPONENT_END
+
 		out << YAML::EndMap;
 	}
 	
@@ -215,6 +242,34 @@ namespace ge {
 		DESERIALIZE_COMPONENT_START(DirectionalLightComponent)
 			comp_DirectionalLightComponent.handle.color = node_DirectionalLightComponent["Color"].as<glm::u8vec4>();
 			comp_DirectionalLightComponent.handle.intensity = node_DirectionalLightComponent["Intensity"].as<float>();
+		DESERIALIZE_COMPONENT_END
+
+
+		DESERIALIZE_COMPONENT_START(RigidBodyComponent)
+			comp_RigidBodyComponent.mass = node_RigidBodyComponent["Mass"].as<float>();
+			comp_RigidBodyComponent.bodyType = static_cast<RigidBodyType>(node_RigidBodyComponent["BodyType"].as<uint8_t>());
+			comp_RigidBodyComponent.useGravity = node_RigidBodyComponent["UseGravity"].as<bool>();
+			comp_RigidBodyComponent.angularDamping = node_RigidBodyComponent["AngularDamping"].as<float>();
+			comp_RigidBodyComponent.linearDamping = node_RigidBodyComponent["LinearDamping"].as<float>();
+			comp_RigidBodyComponent.lockAngularX = node_RigidBodyComponent["LockAngularX"].as<bool>();
+			comp_RigidBodyComponent.lockAngularY = node_RigidBodyComponent["LockAngularY"].as<bool>();
+			comp_RigidBodyComponent.lockAngularZ = node_RigidBodyComponent["LockAngularZ"].as<bool>();
+		DESERIALIZE_COMPONENT_END
+
+		DESERIALIZE_COMPONENT_START(BoxColliderComponent)
+			comp_BoxColliderComponent.halfExtents = node_BoxColliderComponent["HalfExtent"].as<glm::vec3>();
+			comp_BoxColliderComponent.offset = node_BoxColliderComponent["Offset"].as<glm::vec3>();
+		DESERIALIZE_COMPONENT_END
+
+		DESERIALIZE_COMPONENT_START(SphereColliderComponent)
+			comp_SphereColliderComponent.radius = node_SphereColliderComponent["Radius"].as<float>();
+			comp_SphereColliderComponent.offset = node_SphereColliderComponent["Offset"].as<glm::vec3>();
+		DESERIALIZE_COMPONENT_END
+
+		DESERIALIZE_COMPONENT_START(CapsuleColliderComponent)
+			comp_CapsuleColliderComponent.halfHeight = node_CapsuleColliderComponent["HalfHeight"].as<float>();
+			comp_CapsuleColliderComponent.radius = node_CapsuleColliderComponent["Radius"].as<float>();
+			comp_CapsuleColliderComponent.offset = node_CapsuleColliderComponent["Offset"].as<glm::vec3>();
 		DESERIALIZE_COMPONENT_END
 	}
 

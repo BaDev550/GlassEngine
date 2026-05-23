@@ -28,7 +28,7 @@ namespace ge::editor {
                 ImGui::SameLine();
                 if (ImGui::Button("Browse##Source")) {
                     nfdchar_t* outPath = nullptr;
-                    nfdfilteritem_t filterItem[1] = { { "GLTF Models", "gltf,glb" } };
+                    nfdfilteritem_t filterItem[1] = { { "GLTF Models", "gltf,glb,obj" } };
 
                     if (NFD::OpenDialog(outPath, filterItem, 1) == NFD_OKAY) {
                         snprintf(sourcePathBuffer, sizeof(sourcePathBuffer), "%s", outPath);
@@ -56,6 +56,7 @@ namespace ge::editor {
                 if (!srcPath.empty()) {
                     ImGui::Text("Import Settings");
                     ImGui::Checkbox("Flip UVs", &meshSpec.flipUVs);
+                    ImGui::Checkbox("Smooth Normals", &meshSpec.smoothNormals);
                     ImGui::Checkbox("Import Materials", &meshSpec.loadMaterials);
 
                     ImGui::Separator();
