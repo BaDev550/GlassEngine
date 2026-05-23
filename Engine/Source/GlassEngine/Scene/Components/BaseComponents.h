@@ -71,7 +71,7 @@ namespace ge {
 	enum class ColliderShape : uint8_t { Box, Sphere, Capsule };
 
 	struct RigidBodyComponent {
-		physx::PxRigidActor* actor = nullptr;
+		physics::PhysicsActorID actorID = 0;
 		RigidBodyType bodyType = RigidBodyType::Dynamic;
 		float mass = 1.0f;
 		bool useGravity = true;
@@ -89,13 +89,13 @@ namespace ge {
 	};
 
 	struct SphereColliderComponent {
-		float     radius = 0.5f;
+		float radius = 0.5f;
 		glm::vec3 offset = { 0.0f, 0.0f, 0.0f };
 	};
 
 	struct CapsuleColliderComponent {
-		float     radius = 0.5f;
-		float     halfHeight = 1.0f;
+		float radius = 0.5f;
+		float halfHeight = 1.0f;
 		glm::vec3 offset = { 0.0f, 0.0f, 0.0f };
 	};
 }

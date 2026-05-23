@@ -1,11 +1,13 @@
 #pragma once
 
 #include <PxPhysicsAPI.h>
+#include "GlassEngine/Utilities/UUID.h"
 
 namespace ge { class Scene; class Entity; }
 
+
 namespace ge::physics {
-    using PhysicsBodyID = physx::PxRigidActor*;
+    using PhysicsActorID = UUID;
 
     class PhysicsSystem final {
     public:
@@ -31,6 +33,8 @@ namespace ge::physics {
         physx::PxScene* _pxScene = nullptr;
         physx::PxDefaultCpuDispatcher* _dispatcher = nullptr;
         physx::PxPvd* _pvd = nullptr;
+
+        GEUnorderedMap<uint64_t, physx::PxRigidActor*> _cachedActors;
 
         Scene* _effectedScene = nullptr;
     };

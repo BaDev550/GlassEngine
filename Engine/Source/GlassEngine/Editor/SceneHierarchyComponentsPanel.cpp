@@ -85,7 +85,7 @@ namespace ge::editor {
                     ImGui::Checkbox("Z", &component.lockAngularZ);
                 }
 
-                if (component.actor)
+                if (component.actorID)
                 {
                     ImGui::Separator();
                     ImGui::TextDisabled("Actor: active");

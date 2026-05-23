@@ -65,12 +65,12 @@ namespace ge {
 	void Scene::OnRuntimeStop()
 	{
 		auto view = _registry.view<RigidBodyComponent>();
-		Engine::Get().GetPhysicsSystem()->Scene_DropAllBodiesFromEffectedScene();
 		Engine::Get().GetPhysicsSystem()->Scene_SetEffectedScene(nullptr);
 		for (auto handle : view) {
-			auto& rbc = _registry.get<RigidBodyComponent>(handle);
-			rbc.actor = nullptr;
+			Entity* entity = GetEntityByID(_registry.get<IdentityComponent>(handle).id);
+			Engine::Get().GetPhysicsSystem()->DestroyBody(entity);
 		}
+		Engine::Get().GetPhysicsSystem()->Scene_DropAllBodiesFromEffectedScene();
 	}
 
 	void Scene::OnRuntimeUpdate(float DeltaTime)

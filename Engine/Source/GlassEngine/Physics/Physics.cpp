@@ -67,18 +67,19 @@ namespace ge::physics {
 
         for (auto [handle, rbc, tc] : view.each()) {
             auto& rb = registry.get<RigidBodyComponent>(handle);
+            auto actor = _cachedActors.at(rb.actorID);
 
-            if (!rb.actor) continue;
+            if (!rb.actorID && !actor) continue;
             if (rb.bodyType == RigidBodyType::Static) continue;
 
-            PxRigidDynamic* dynamic = rb.actor->is<PxRigidDynamic>();
+            PxRigidDynamic* dynamic = actor->is<PxRigidDynamic>();
             if (!dynamic) continue;
             if (dynamic->isSleeping()) continue;
 
             PxTransform t = dynamic->getGlobalPose();
             auto& transform = registry.get<TransformComponent>(handle);
 
-            transform.position = { t.p.x, t.p.y, t.p.z };
+            transform.position = math::PxVec3ToGLMVec3(t.p);
             transform.rotation = math::PxQuatToGLMEuler(t.q);
         }
     }
@@ -161,7 +162,9 @@ namespace ge::physics {
         EntityID id = entity->GetComponent<IdentityComponent>().id;
         actor->userData = reinterpret_cast<void*>(static_cast<uint64_t>(id));
 
-        rb.actor = actor;
+        PhysicsActorID actorID = PhysicsActorID();
+        _cachedActors[actorID] = actor;
+        rb.actorID = actorID;
         _pxScene->addActor(*actor);
 
         if (rb.bodyType == RigidBodyType::Dynamic) {
@@ -177,10 +180,12 @@ namespace ge::physics {
         if (!entity->HasComponent<RigidBodyComponent>()) return;
 
         auto& rb = entity->GetComponent<RigidBodyComponent>();
-        if (!rb.actor) return;
+        if (!_cachedActors.contains(rb.actorID)) return;
 
-        _pxScene->removeActor(*rb.actor);
-        rb.actor->release();
-        rb.actor = nullptr;
+        auto body = _cachedActors.at(rb.actorID);
+        _pxScene->removeActor(*body);
+        body->release();
+        body = nullptr;
+        rb.actorID = 0;
     }
 }
